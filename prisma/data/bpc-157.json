@@ -1,0 +1,87 @@
+{
+  "slug": "bpc-157",
+  "name": "BPC-157 (Body Protection Compound-157)",
+  "aliases": [
+    "Body Protection Compound 157",
+    "Pentadecapeptide BPC 157",
+    "PL 14736",
+    "Bepecin"
+  ],
+  "category": "HEALING_REPAIR",
+  "summary": "BPC-157 is a stable pentadecapeptide (15 amino acids) derived from a protective protein found in human gastric juice. It is studied for accelerating healing of tendons, ligaments, muscle, bone, and gut tissue, with strong anti-inflammatory and angiogenic effects in animal models.",
+  "mechanism": "BPC-157 is a partial sequence of body protection compound, a peptide isolated from human gastric juice, and is notably stable in gastric acid. It promotes tendon fibroblast outgrowth, cell survival under stress, and cell migration, effects linked to activation of the FAK-paxillin signaling pathway. It increases collagen formation and supports fibroblast activity, and dose-dependently boosts in vitro migration of tendon fibroblasts.\n\nA central mechanism is the promotion of angiogenesis, partly through upregulation of VEGF and modulation of the nitric oxide (NO) system, improving blood supply to injured tissue. BPC-157 also enhances growth hormone receptor expression in tendon fibroblasts, reduces inflammatory cytokines, and exerts cytoprotective effects across the GI tract, blood vessels, and nervous system. Together these actions accelerate healing of wounds, tendons, ligaments, muscle, and bone in preclinical models.",
+  "benefits": [
+    "Accelerates healing of tendon, ligament, muscle, and bone injuries (animal models)",
+    "Promotes angiogenesis and improves blood flow to damaged tissue",
+    "Gut-protective; studied as an adjunct for GI and IBD-related healing",
+    "Enhances collagen formation and fibroblast activity",
+    "Anti-inflammatory: reduces inflammatory cytokines",
+    "Upregulates growth hormone receptor expression in tendon fibroblasts"
+  ],
+  "risks": [
+    "Not FDA-approved; no human clinical safety or efficacy data established",
+    "Banned by WADA and prohibited in professional sport",
+    "Most evidence is from rodent studies; human dosing and effects are extrapolated",
+    "Long-term safety and angiogenic effects in humans are unknown"
+  ],
+  "sideEffects": [
+    "Injection-site irritation, redness, or soreness",
+    "Mild nausea or GI upset (more common with oral dosing)",
+    "Occasional headache, dizziness, or fatigue",
+    "Transient hot/flushing sensation after injection"
+  ],
+  "dosage": {
+    "low": "250",
+    "standard": "250-500",
+    "high": "500",
+    "unit": "mcg",
+    "notes": "Common educational protocol is 250-500 mcg per day; e.g. 250 mcg twice daily = 500 mcg/day to maintain stable levels. Subcutaneous injection near the injury site is often used for localized effect; oral forms also exist for gut-focused use."
+  },
+  "route": "SUBQ",
+  "frequency": "daily (often split 1-2x daily)",
+  "halfLife": "Short; metabolized in the liver with a half-life under ~30 minutes, cleared by the kidneys",
+  "cycleLength": "Typically 4-8 weeks per cycle, often run alongside the injury-recovery period",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 2,
+    "notes": "5 mg vial + 2 mL bacteriostatic water = 2.5 mg/mL (2500 mcg/mL), so 250 mcg = 0.1 mL (10 units on a U-100 insulin syringe). Swirl gently to dissolve."
+  },
+  "storage": "Store lyophilized vials frozen or refrigerated. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. Protect from light.",
+  "contraindications": [
+    "Active or history of cancer (caution due to angiogenic activity)",
+    "Pregnancy and breastfeeding",
+    "Competitive athletes subject to anti-doping testing",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "tb-500",
+      "kind": "synergy",
+      "note": "Core of the 'Wolverine stack.' BPC-157 builds repair infrastructure (angiogenesis, growth factors, collagen) while TB-500 mobilizes and migrates repair cells into position; the two target overlapping but distinct healing pathways for enhanced tissue repair."
+    }
+  ],
+  "references": [
+    {
+      "title": "The promoting effect of pentadecapeptide BPC 157 on tendon healing (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21030672/"
+    },
+    {
+      "title": "Stable Gastric Pentadecapeptide BPC 157 and Wound Healing (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8275860/"
+    },
+    {
+      "title": "Pentadecapeptide BPC 157 Enhances Growth Hormone Receptor Expression in Tendon Fibroblasts (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6271067/"
+    },
+    {
+      "title": "Regeneration or Risk? A Narrative Review of BPC-157 for Musculoskeletal Healing (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12446177/"
+    },
+    {
+      "title": "BPC 157: Science-Backed Uses, Benefits, Dosage, and Safety (Rupa Health)",
+      "url": "https://www.rupahealth.com/post/bpc-157-science-backed-uses-benefits-dosage-and-safety"
+    }
+  ],
+  "tags": ["recovery-injury", "muscle-growth", "metabolic"],
+  "status": "research"
+}

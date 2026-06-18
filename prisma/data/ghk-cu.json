@@ -1,0 +1,86 @@
+{
+  "slug": "ghk-cu",
+  "name": "GHK-Cu (Copper Peptide)",
+  "aliases": [
+    "GHK-Copper",
+    "Copper Tripeptide-1",
+    "Glycyl-L-Histidyl-L-Lysine Copper",
+    "Copper Peptide GHK"
+  ],
+  "category": "COSMETIC",
+  "summary": "GHK-Cu is a naturally occurring copper-binding tripeptide that declines with age and is widely used to support skin remodeling, collagen synthesis, and wound healing. It is best known as a cosmetic anti-aging agent but also has regenerative and tissue-repair properties.",
+  "mechanism": "GHK (glycyl-L-histidyl-L-lysine) is a tripeptide present in human plasma, saliva, and urine that has a high affinity for copper(II), forming the GHK-Cu complex. Plasma levels are roughly 200 ng/mL at age 20 and fall to about 80 ng/mL by age 60, paralleling the age-related decline in regenerative capacity. The complex acts as a copper carrier and signaling molecule that stimulates dermal fibroblasts to increase synthesis of collagen, elastin, glycosaminoglycans, and proteoglycans such as decorin, while remodeling the extracellular matrix.\n\nGHK-Cu modulates matrix metalloproteinases and their inhibitors (TIMPs) to clear damaged ECM proteins, promotes angiogenesis and nerve outgrowth, and exerts antioxidant and anti-inflammatory effects. Gene-expression studies show it can reset thousands of genes toward a younger, healthier state, downregulating pro-fibrotic TGF-beta signaling to favor scar-free healing and upregulating tissue-repair pathways. These actions underlie its use in skin rejuvenation, hair follicle stimulation, and wound repair.",
+  "benefits": [
+    "Stimulates collagen, elastin, and glycosaminoglycan synthesis for firmer, smoother skin",
+    "Reduces appearance of fine lines, wrinkles, and skin sagging",
+    "Accelerates wound closure (reported ~40-50% faster in models) with reduced scarring",
+    "Improves skin elasticity, texture, and pigmentation",
+    "Promotes angiogenesis and supports hair follicle health/regrowth",
+    "Antioxidant and anti-inflammatory protection against environmental damage"
+  ],
+  "risks": [
+    "Contraindicated in active malignancy; copper-driven angiogenesis could theoretically support tumor growth",
+    "Injectable use is not FDA-approved and lacks human clinical safety data",
+    "Excess copper exposure risk with high systemic dosing; avoid in copper metabolism disorders (e.g. Wilson's disease)"
+  ],
+  "sideEffects": [
+    "Mild injection-site redness, irritation, or stinging",
+    "Temporary skin irritation or contact dermatitis with topical use",
+    "Transient headache or lightheadedness with systemic dosing"
+  ],
+  "dosage": {
+    "low": "1",
+    "standard": "1-2",
+    "high": "2-3",
+    "unit": "mg",
+    "notes": "Topical: 1-2% serum concentration applied daily (no cycling needed). Injectable (subcutaneous) educational protocols start at 1 mg/day, titrating to 2-3 mg/day after ~2 weeks if well tolerated."
+  },
+  "route": "TOPICAL",
+  "frequency": "daily",
+  "halfLife": "Short elimination half-life ~1.5-2 hours (systemic)",
+  "cycleLength": "Topical: continuous, no cycling. Injectable: typically 4-8 weeks on, often a 30-day active cycle with optional breaks.",
+  "reconstitution": {
+    "vialMg": 50,
+    "bacWaterMl": 5,
+    "notes": "50 mg vial + 5 mL bacteriostatic water = 10 mg/mL, so 2 mg = 0.2 mL (20 units on a U-100 insulin syringe). Alternatively 50 mg + 2 mL = 25 mg/mL. The blue-green color is normal and indicates the intact copper complex."
+  },
+  "storage": "Store lyophilized vials frozen at -20C. After reconstitution, refrigerate at 2-8C and use within ~30 days. Protect from light.",
+  "contraindications": [
+    "Active cancer or history of malignancy",
+    "Wilson's disease or other copper metabolism disorders",
+    "Pregnancy and breastfeeding",
+    "Known hypersensitivity to copper or the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "Vitamin C (ascorbic acid)",
+      "kind": "caution",
+      "note": "High-strength vitamin C can destabilize the copper complex if layered together topically; apply at separate times."
+    },
+    {
+      "with": "bpc-157",
+      "kind": "synergy",
+      "note": "Often combined for wound/skin repair; complementary regenerative and angiogenic effects."
+    }
+  ],
+  "references": [
+    {
+      "title": "Regenerative and Protective Actions of the GHK-Cu Peptide in the Light of the New Gene Data (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6073405/"
+    },
+    {
+      "title": "Skin Regenerative and Anti-Cancer Actions of Copper Peptides (Cosmetics, MDPI)",
+      "url": "https://www.mdpi.com/2079-9284/5/2/29"
+    },
+    {
+      "title": "Copper Peptide (GHK-Cu): Clinical Uses, Stability & Compounding (Fagron Academy)",
+      "url": "https://www.fagronacademy.us/blog/ghk-cu-beyond-cosmetic-hype"
+    },
+    {
+      "title": "GHK-Cu Peptide: Skin & Healing Benefits (Paragon Sports Medicine)",
+      "url": "https://www.paragonsportsmedicine.com/peptides/ghk-cu"
+    }
+  ],
+  "tags": ["skin-antiaging", "recovery-injury", "longevity"],
+  "status": "research"
+}

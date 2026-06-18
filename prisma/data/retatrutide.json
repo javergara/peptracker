@@ -1,0 +1,97 @@
+{
+  "slug": "retatrutide",
+  "name": "Retatrutide",
+  "aliases": ["LY3437943", "Triple-G", "GGG tri-agonist"],
+  "category": "GLP_GIP",
+  "summary": "Retatrutide is an investigational once-weekly triple agonist of the GLP-1, GIP, and glucagon receptors, producing among the largest weight-loss effects seen in obesity trials to date. It remains investigational and is not FDA-approved.",
+  "mechanism": "Retatrutide is a single synthetic peptide that simultaneously activates three metabolic hormone receptors: glucagon-like peptide-1 (GLP-1), glucose-dependent insulinotropic polypeptide (GIP), and glucagon (GCGR). GLP-1 and GIP agonism enhance glucose-dependent insulin secretion, slow gastric emptying, and reduce appetite via central pathways, while glucagon-receptor agonism increases energy expenditure and hepatic fat mobilization. Relative to native hormones it is markedly more potent at GIPR and somewhat less potent at GCGR and GLP-1R.\n\nThe net result is suppressed food intake, increased basal metabolic rate, and improved glycemic control. The added glucagon component, balanced by the incretin actions, is thought to drive greater fat loss and reductions in hepatic steatosis than dual GLP-1/GIP agonists, while the incretin effects offset glucagon's tendency to raise blood glucose.",
+  "benefits": [
+    "Mean weight loss up to ~24% at 48 weeks (12 mg) in phase 2 obesity trial",
+    "Large reductions in HbA1c in type 2 diabetes (up to ~2% lowering)",
+    "Marked reductions in liver fat / hepatic steatosis (MASLD)",
+    "Reduced appetite and food intake via delayed gastric emptying",
+    "Improvements in blood pressure and lipid markers"
+  ],
+  "risks": [
+    "Investigational, not FDA-approved; long-term safety unknown",
+    "Class-effect boxed warning for thyroid C-cell tumors (rodent data) seen with GLP-1 receptor agonists",
+    "Dose-dependent increase in heart rate (~6-7 bpm at higher doses)",
+    "Risk of hypoglycemia when combined with insulin or sulfonylureas",
+    "Possible pancreatitis and gallbladder disease (class effect)",
+    "Delayed gastric emptying may affect absorption of oral medications"
+  ],
+  "sideEffects": [
+    "Nausea (up to ~60% at highest dose during escalation)",
+    "Vomiting",
+    "Diarrhea",
+    "Constipation",
+    "Decreased appetite",
+    "Injection-site reactions",
+    "Fatigue"
+  ],
+  "dosage": {
+    "low": "1-2",
+    "standard": "4-8",
+    "high": "12",
+    "unit": "mg",
+    "notes": "Investigational. Trial protocols used gradual titration every 4 weeks (e.g., 2 mg start, escalating 2 -> 4 -> 6 -> 9 -> 12 mg) to reduce GI side effects. Each step is held ~4 weeks to reach steady state. Lower starting dose (2 mg vs 4 mg) reduces nausea."
+  },
+  "route": "SUBQ",
+  "frequency": "once weekly",
+  "halfLife": "~6 days (~144 hours)",
+  "cycleLength": "Continuous long-term use in trials (48-68 weeks); no defined off-cycle. Full washout ~30 days after stopping.",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "Adding 2 mL bacteriostatic water to a 10 mg vial yields 5 mg/mL. For larger vials, 6 mL into 30 mg gives 5 mg/mL for easier sub-milligram dosing. Swirl gently, do not shake."
+  },
+  "storage": "Lyophilized: store frozen/cool (-20 C long-term, or 2-8 C). Reconstituted: refrigerate at 2-8 C and use within ~4 weeks. Protect from light; do not freeze reconstituted solution.",
+  "contraindications": [
+    "Personal or family history of medullary thyroid carcinoma",
+    "Multiple endocrine neoplasia syndrome type 2 (MEN 2)",
+    "History of pancreatitis",
+    "Pregnancy and breastfeeding",
+    "Known hypersensitivity to the compound"
+  ],
+  "interactions": [
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "Increased risk of hypoglycemia; insulin dose may need reduction."
+    },
+    {
+      "with": "sulfonylureas",
+      "kind": "caution",
+      "note": "Increased hypoglycemia risk when combined."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Both affect glucose metabolism; GHRH analogs can worsen glucose tolerance while retatrutide improves it. Monitor glycemia closely if combined."
+    }
+  ],
+  "references": [
+    {
+      "title": "Jastreboff AM et al. Triple-Hormone-Receptor Agonist Retatrutide for Obesity - A Phase 2 Trial. NEJM 2023",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2301972"
+    },
+    {
+      "title": "Rosenstock J et al. Retatrutide for people with type 2 diabetes: phase 2 trial. The Lancet 2023",
+      "url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(23)01053-X/abstract"
+    },
+    {
+      "title": "Triple hormone receptor agonist retatrutide for MASLD: phase 2a trial. Nature Medicine 2024",
+      "url": "https://www.nature.com/articles/s41591-024-03018-2"
+    },
+    {
+      "title": "Retatrutide - A Game Changer in Obesity Pharmacotherapy (PMC review)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12190491/"
+    },
+    {
+      "title": "Structural insights into triple agonism at GLP-1R, GIPR and GCGR by retatrutide (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11255275/"
+    }
+  ],
+  "tags": ["fat-loss", "metabolic", "longevity"],
+  "status": "research"
+}

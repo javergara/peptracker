@@ -1,0 +1,85 @@
+{
+  "slug": "kpv",
+  "name": "KPV",
+  "aliases": [
+    "Lys-Pro-Val",
+    "Lysine-Proline-Valine",
+    "alpha-MSH (11-13)",
+    "KPV tripeptide"
+  ],
+  "category": "IMMUNE_ANTIINFLAMMATORY",
+  "summary": "KPV is a three-amino-acid C-terminal fragment of alpha-MSH studied for broad anti-inflammatory effects, particularly in gut and skin inflammation, without the pigmentary activity of the parent hormone.",
+  "mechanism": "KPV (lysine-proline-valine) is derived from positions 11-13 of alpha-melanocyte-stimulating hormone (alpha-MSH) but lacks the melanocortin-receptor-binding region, so it produces no tanning or pigmentation. Its anti-inflammatory action is largely receptor-independent: after entering cells it inhibits NF-kB signaling by stabilizing IkB-alpha and blocking nuclear translocation of the p65 (RelA) NF-kB subunit, competing at the importin-alpha binding site. This suppresses transcription of pro-inflammatory cytokines such as TNF-alpha, IL-1beta, and IL-6.\n\nIn the intestine, KPV is taken up by epithelial and immune cells through the di/tripeptide transporter PepT1, which is upregulated during inflammation, allowing inflamed tissue to concentrate the peptide. In animal colitis models (DSS- and TNBS-induced), oral KPV reduced weight loss, colonic myeloperoxidase activity, histological damage, and inflammatory cytokine expression at nanomolar concentrations.",
+  "benefits": [
+    "Reduces NF-kB-driven inflammatory cytokine production (TNF-alpha, IL-1beta, IL-6)",
+    "May support gut/intestinal inflammation (preclinical colitis models)",
+    "Potential wound-healing and skin-soothing/anti-acne effects (topical)",
+    "No melanocortin-receptor activity, so no skin tanning or pigmentation",
+    "Self-targets inflamed intestinal tissue via upregulated PepT1 transporter"
+  ],
+  "risks": [
+    "Human clinical evidence is limited; most data is preclinical (animal/cell studies)",
+    "Not FDA-approved; sourcing and purity vary by supplier",
+    "Long-term safety in humans is not established"
+  ],
+  "sideEffects": [
+    "Generally well tolerated in studies",
+    "Injection-site irritation (with SubQ use)",
+    "Mild GI upset (with oral use)",
+    "Possible mild flushing or headache (anecdotal)"
+  ],
+  "dosage": {
+    "low": "200",
+    "standard": "250-500",
+    "high": "1000",
+    "unit": "mcg",
+    "notes": "Typically 200-500 mcg/day. Oral capsules favored for gut/IBD (PepT1 self-targeting); SubQ used for systemic effect; topical for skin. Doses above 500 mcg are not better supported by evidence."
+  },
+  "route": "SUBQ",
+  "frequency": "daily",
+  "halfLife": "Short (minutes) in plasma; rapidly transported/metabolized",
+  "cycleLength": "Commonly used in 4-8 week cycles, or as-needed for acute flares; no formal human protocol established",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "A 10 mg vial in 2 mL bacteriostatic water yields 5 mg/mL (5000 mcg/mL); 0.05 mL = 250 mcg. Oral/topical formulations are also common and bypass injection."
+  },
+  "storage": "Store lyophilized vial in freezer; refrigerate (2-8 C) after reconstitution and use within ~2-4 weeks; protect from light.",
+  "contraindications": [
+    "Pregnancy and breastfeeding (insufficient data)",
+    "Known hypersensitivity to the peptide",
+    "Active malignancy (use only under medical guidance given limited data)"
+  ],
+  "interactions": [
+    {
+      "with": "BPC-157",
+      "kind": "synergy",
+      "note": "Frequently combined for gut healing and anti-inflammatory support; complementary mechanisms (anecdotal/preclinical)."
+    },
+    {
+      "with": "immunosuppressants",
+      "kind": "caution",
+      "note": "Additive immunomodulation is theoretically possible; use under medical supervision."
+    }
+  ],
+  "references": [
+    {
+      "title": "Dalmasso et al. PepT1-Mediated Tripeptide KPV Uptake Reduces Intestinal Inflammation (Gastroenterology, 2008)",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0016508507018525"
+    },
+    {
+      "title": "KPV Peptide: Anti-Inflammatory Mechanism (PeptideFox)",
+      "url": "https://peptidefox.com/content/kpv"
+    },
+    {
+      "title": "KPV Dosage Calculator and Guide (Peptides.org)",
+      "url": "https://www.peptides.org/kpv-dosage-calculator/"
+    },
+    {
+      "title": "KPV Peptide: Benefits, Safety & Buying Advice (Innerbody)",
+      "url": "https://www.innerbody.com/kpv-peptide"
+    }
+  ],
+  "tags": ["immune", "recovery-injury", "skin-antiaging", "metabolic"],
+  "status": "research"
+}

@@ -1,0 +1,88 @@
+{
+  "slug": "mots-c",
+  "name": "MOTS-c",
+  "aliases": ["Mitochondrial ORF of the 12S rRNA type-c", "MOTSc"],
+  "category": "MITOCHONDRIAL",
+  "summary": "MOTS-c is a 16-amino-acid mitochondrial-derived peptide that acts as an 'exercise mimetic,' activating AMPK to improve metabolic homeostasis, insulin sensitivity, and exercise capacity. It is investigational with no human clinical approval.",
+  "mechanism": "MOTS-c is a 16-amino-acid peptide encoded by the 12S rRNA region of mitochondrial DNA and is the first mitochondrial-derived peptide shown to act as a systemic signaling molecule (a 'mitokine'). It targets the methionine-folate cycle, raising cellular AICAR levels that activate AMP-activated protein kinase (AMPK), the cell's master metabolic regulator.\n\nAMPK activation drives glucose uptake (via GLUT4 translocation, independent of insulin spikes), fatty acid oxidation, mitochondrial biogenesis, and cellular energy homeostasis. Under metabolic stress, MOTS-c also translocates to the nucleus where it regulates stress-response and antioxidant gene expression, linking mitochondrial signaling to nuclear gene programs. Circulating MOTS-c rises with exercise in humans, suggesting it mediates some of the metabolic benefits of physical activity.",
+  "benefits": [
+    "Activates AMPK to improve glucose uptake and metabolic flexibility (preclinical)",
+    "Improves insulin sensitivity (~30% in animal models)",
+    "Increases fatty acid oxidation and prevents diet-induced obesity (mice)",
+    "Improves physical/exercise capacity and reduces age-related decline (mice)",
+    "Promotes mitochondrial biogenesis and protects against muscle wasting (preclinical)",
+    "Modestly extended lifespan when started late in life in mice (~6%)"
+  ],
+  "risks": [
+    "No human clinical trials completed; safety and efficacy in humans unestablished",
+    "Dosing and protocols are extrapolated from animal data and anecdote",
+    "Sourced from unregulated research-grade suppliers with quality/purity concerns",
+    "Theoretical effects on blood glucose - caution in diabetics on glucose-lowering agents"
+  ],
+  "sideEffects": [
+    "Injection-site reactions (redness, itching, minor discomfort)",
+    "Temporary fatigue",
+    "Occasional nausea",
+    "Generally mild and transient in reported use"
+  ],
+  "dosage": {
+    "low": "5",
+    "standard": "10",
+    "high": "10",
+    "unit": "mg",
+    "notes": "No established human dose. Community protocols commonly use ~5-10 mg subcutaneously, 1-3 times per week (e.g., 5-on/2-off or 3x weekly intermittent dosing modeled on mouse studies). Morning dosing 30-60 min before exercise is reported to amplify the AMPK response. Some sources cite lower daily microgram-to-low-mg regimens; evidence is limited."
+  },
+  "route": "SUBQ",
+  "frequency": "1-3x weekly (intermittent)",
+  "halfLife": "Short, ~1-4 hours in circulation (rodent ~1-2 h); downstream AMPK/biogenesis effects persist much longer.",
+  "cycleLength": "Typical research/community cycles ~4-12 weeks, often with intermittent (e.g., 5-on/2-off or 3x weekly) dosing and breaks between cycles. No validated protocol exists.",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "Adding 2 mL bacteriostatic water to a 10 mg vial yields 5 mg/mL (0.2 mL = 1 mg). Swirl gently to dissolve; do not shake."
+  },
+  "storage": "Lyophilized: store frozen at -20 C for long-term, or refrigerated. Reconstituted: refrigerate at 2-8 C and use within ~14-30 days; never store at room temperature for extended periods.",
+  "contraindications": [
+    "Pregnancy and breastfeeding (no data)",
+    "Active malignancy (no safety data)",
+    "Caution in diabetics or those on glucose-lowering medication (theoretical hypoglycemia)",
+    "Known hypersensitivity to the compound"
+  ],
+  "interactions": [
+    {
+      "with": "metformin",
+      "kind": "synergy",
+      "note": "Both activate AMPK; potential additive metabolic effect but also additive glucose-lowering - monitor."
+    },
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "AMPK-driven insulin-independent glucose uptake could increase hypoglycemia risk when combined with insulin."
+    },
+    {
+      "with": "retatrutide",
+      "kind": "synergy",
+      "note": "Complementary metabolic mechanisms (incretin appetite/insulin effects plus mitochondrial AMPK activation); theoretical additive fat-loss support, but combined glucose-lowering warrants monitoring."
+    }
+  ],
+  "references": [
+    {
+      "title": "Lee C et al. The mitochondrial-derived peptide MOTS-c promotes metabolic homeostasis and reduces obesity and insulin resistance. Cell Metabolism 2015 (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4486282/"
+    },
+    {
+      "title": "Reynolds JC et al. MOTS-c is an exercise-induced mitochondrial-encoded regulator of age-dependent physical decline and muscle homeostasis. Nature Communications 2021",
+      "url": "https://www.nature.com/articles/s41467-021-20790-0"
+    },
+    {
+      "title": "Kim KH et al. MOTS-c regulation of metabolism and the nuclear stress response (review, PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6739622/"
+    },
+    {
+      "title": "MOTS-c report - Alzheimer's Drug Discovery Foundation / Cognitive Vitality",
+      "url": "https://www.alzdiscovery.org/uploads/cognitive_vitality_media/MOTS-c.pdf"
+    }
+  ],
+  "tags": ["metabolic", "longevity", "fat-loss", "recovery-injury"],
+  "status": "research"
+}

@@ -1,0 +1,163 @@
+// Peptides Tracker — Prisma schema
+// NOTE: SQLite does not support Prisma `enum` or scalar list types.
+// Enum-like fields are stored as String (validated in app via zod, see src/types).
+// Arrays / structured blobs are stored as Json (no Json DB-defaults on SQLite,
+// so seed/creates always supply values; optional ones are nullable).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String   @default("Me")
+  email      String?  @unique
+  weightUnit String   @default("kg") // kg | lb
+  doseUnit   String   @default("mcg") // mcg | mg
+  theme      String   @default("system") // system | light | dark
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  cycles       Cycle[]
+  stacks       Stack[]
+  measurements Measurement[]
+  journal      JournalEntry[]
+}
+
+model Peptide {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  aliases           Json // string[]
+  category          String // GLP_GIP | GH_SECRETAGOGUE | HEALING_REPAIR | MITOCHONDRIAL | COSMETIC | NOOTROPIC_ANXIOLYTIC | IMMUNE_ANTIINFLAMMATORY
+  summary           String
+  mechanism         String
+  benefits          Json // string[]
+  risks             Json // string[]
+  sideEffects       Json // string[]
+  dosage            Json // { low, standard, high, unit, notes }
+  route             String // SUBQ | IM | NASAL | TOPICAL | ORAL
+  frequency         String
+  halfLife          String
+  cycleLength       String
+  reconstitution    Json // { vialMg, bacWaterMl, notes }
+  storage           String
+  contraindications Json // string[]
+  interactions      Json // { with, kind, note }[]  (raw, includes non-peptide entities)
+  references        Json // { title, url }[]
+  tags              Json // string[] goal tags
+  status            String   @default("research")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  stackItems    StackItem[]
+  doseLogs      DoseLog[]
+  cycles        Cycle[]
+  interactionsA PeptideInteraction[] @relation("InteractionA")
+  interactionsB PeptideInteraction[] @relation("InteractionB")
+}
+
+// Peptide-to-peptide interactions only (powers combine/stack checks).
+model PeptideInteraction {
+  id         String  @id @default(cuid())
+  peptideAId String
+  peptideBId String
+  kind       String // synergy | caution | avoid
+  note       String
+  peptideA   Peptide @relation("InteractionA", fields: [peptideAId], references: [id], onDelete: Cascade)
+  peptideB   Peptide @relation("InteractionB", fields: [peptideBId], references: [id], onDelete: Cascade)
+
+  @@unique([peptideAId, peptideBId])
+}
+
+model Stack {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  goal        String?
+  description String
+  isPreset    Boolean  @default(false)
+  tags        Json? // string[]
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items  StackItem[]
+  cycles Cycle[]
+}
+
+model StackItem {
+  id        String  @id @default(cuid())
+  stackId   String
+  peptideId String
+  dose      String?
+  frequency String?
+  timing    String?
+  notes     String?
+  order     Int     @default(0)
+  stack     Stack   @relation(fields: [stackId], references: [id], onDelete: Cascade)
+  peptide   Peptide @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+
+  @@unique([stackId, peptideId])
+}
+
+model Cycle {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  peptideId      String?
+  stackId        String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         String    @default("planned") // planned | active | paused | completed
+  scheduleConfig Json? // { days, timesPerDay, dosePerAdmin, unit, ... }
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  peptide  Peptide?  @relation(fields: [peptideId], references: [id], onDelete: SetNull)
+  stack    Stack?    @relation(fields: [stackId], references: [id], onDelete: SetNull)
+  doseLogs DoseLog[]
+}
+
+model DoseLog {
+  id        String   @id @default(cuid())
+  cycleId   String?
+  peptideId String
+  takenAt   DateTime @default(now())
+  amount    Float
+  unit      String   @default("mcg")
+  route     String?
+  site      String? // injection-site rotation label
+  notes     String?
+  cycle     Cycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  peptide   Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+}
+
+model Measurement {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String // weight | bodyFat | sleep | recovery | custom
+  label      String?
+  value      Float
+  unit       String?
+  recordedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model JournalEntry {
+  id      String   @id @default(cuid())
+  userId  String
+  date    DateTime @default(now())
+  body    String
+  tags    Json? // string[]
+  cycleId String?
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

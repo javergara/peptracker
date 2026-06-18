@@ -1,0 +1,102 @@
+{
+  "slug": "tesamorelin",
+  "name": "Tesamorelin",
+  "aliases": ["Egrifta", "Egrifta SV", "Egrifta WR", "TH9507"],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "Tesamorelin is an FDA-approved stabilized synthetic analog of growth-hormone-releasing hormone (GHRH 1-44) that stimulates the pituitary to release endogenous growth hormone, approved to reduce excess visceral abdominal fat in HIV-associated lipodystrophy.",
+  "mechanism": "Tesamorelin binds the GHRH receptor on pituitary somatotrophs and stimulates the synthesis and pulsatile release of endogenous growth hormone (GH), which in turn raises serum IGF-1. It is a stabilized analog of human GHRH(1-44) with a trans-3-hexenoic acid group at the N-terminus that protects it from rapid degradation by dipeptidyl peptidase-IV (DPP-IV), extending its functional activity enough for once-daily dosing.\n\nBy acting upstream on the GHRH receptor rather than supplying exogenous GH, tesamorelin preserves the physiologic feedback of the GH axis, which is thought to lower the risk of excessive GH/IGF-1 exposure compared with recombinant GH. The resulting GH pulses promote lipolysis, preferentially mobilizing visceral adipose tissue, and reduce hepatic fat, while leaving subcutaneous fat largely unchanged.",
+  "benefits": [
+    "FDA-approved 15-18% reduction in visceral adipose tissue (VAT) over 26 weeks",
+    "Reduces liver fat (driving off-label use in NAFLD/MASLD)",
+    "Improves triglycerides and some lipid parameters",
+    "Raises endogenous GH and IGF-1 while preserving physiologic GH pulsatility",
+    "May improve sleep quality and body composition"
+  ],
+  "risks": [
+    "Stimulates IGF-1 - monitor levels; discontinue if persistently elevated",
+    "Can worsen glucose tolerance / cause insulin resistance and new-onset diabetes",
+    "May promote growth of occult or pre-existing malignancy",
+    "Fluid retention and increased risk of edema",
+    "Contraindicated with disrupted hypothalamic-pituitary axis"
+  ],
+  "sideEffects": [
+    "Injection-site reactions (redness, swelling, itching)",
+    "Joint pain (arthralgia) and muscle pain",
+    "Peripheral edema / fluid retention",
+    "Flushing",
+    "Headache",
+    "Nausea",
+    "Paresthesia / numbness or tingling",
+    "Hypersensitivity reactions (~4%)"
+  ],
+  "dosage": {
+    "low": "1",
+    "standard": "1.4-2",
+    "high": "2",
+    "unit": "mg",
+    "notes": "FDA-approved dose is 2 mg SubQ once daily (original Egrifta) or 1.4 mg once daily (Egrifta SV single-vial formulation). Inject into the abdomen, rotating sites at least 2 inches from the navel. No titration required; given at a fixed daily dose."
+  },
+  "route": "SUBQ",
+  "frequency": "daily",
+  "halfLife": "~18-38 minutes (18.6 min single dose; ~37.8 min with multiple dosing)",
+  "cycleLength": "Continuous daily use; benefits reverse on discontinuation, so ongoing administration is required to maintain VAT reduction. IGF-1 monitored throughout.",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 3,
+    "notes": "Adding 3 mL bacteriostatic water to a 10 mg vial yields ~3.33 mg/mL. The Egrifta SV / WR single-vial product reconstitutes with 1.3 mL to give 8 mg/mL. Inject gently; do not shake vigorously."
+  },
+  "storage": "Lyophilized: refrigerate at 2-8 C (per label). Reconstituted: refrigerate at 2-8 C and use within ~7 days. Do not freeze; avoid repeated freeze-thaw; protect from light.",
+  "contraindications": [
+    "Disruption of the hypothalamic-pituitary axis (hypopituitarism, pituitary tumor, prior head irradiation, head trauma)",
+    "Active malignancy (any) or history of malignancy",
+    "Pregnancy",
+    "Known hypersensitivity to tesamorelin or mannitol",
+    "Active proliferative or severe non-proliferative diabetic retinopathy (GH class effect)"
+  ],
+  "interactions": [
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "GH-induced insulin resistance may raise insulin/antidiabetic requirements; monitor glucose."
+    },
+    {
+      "with": "corticosteroids",
+      "kind": "caution",
+      "note": "Glucocorticoids can blunt the GH-stimulating effect of GHRH analogs; dose adjustment may be needed."
+    },
+    {
+      "with": "ipamorelin",
+      "kind": "synergy",
+      "note": "GHRH analog plus GH secretagogue (GHRP) act on complementary pathways and are commonly combined to amplify GH pulse."
+    },
+    {
+      "with": "cjc-1295",
+      "kind": "caution",
+      "note": "Both are GHRH-class agents; stacking is redundant and increases IGF-1 exposure - avoid simultaneous use."
+    }
+  ],
+  "references": [
+    {
+      "title": "EGRIFTA (tesamorelin) FDA Prescribing Information",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/022505s020lbl.pdf"
+    },
+    {
+      "title": "FDA Clinical Pharmacology Review, NDA 22-505 (tesamorelin)",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2010/022505Orig1s000ClinPharmR.pdf"
+    },
+    {
+      "title": "Tesamorelin Monograph for Professionals - Drugs.com",
+      "url": "https://www.drugs.com/monograph/tesamorelin.html"
+    },
+    {
+      "title": "Tesamorelin (subcutaneous route) - Mayo Clinic",
+      "url": "https://www.mayoclinic.org/drugs-supplements/tesamorelin-subcutaneous-route/description/drg-20074632"
+    },
+    {
+      "title": "EGRIFTA WR (tesamorelin kit) - DailyMed (NIH)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=839334d3-8c1d-4c26-9036-2ab524a6ea75&audience=consumer"
+    }
+  ],
+  "tags": ["fat-loss", "gh-axis", "metabolic", "sleep"],
+  "status": "research"
+}

@@ -1,0 +1,84 @@
+{
+  "slug": "selank",
+  "name": "Selank",
+  "aliases": [
+    "Thr-Lys-Pro-Arg-Pro-Gly-Pro",
+    "Tuftsin analog",
+    "Selank nasal",
+    "TP-7"
+  ],
+  "category": "NOOTROPIC_ANXIOLYTIC",
+  "summary": "Selank is a synthetic tuftsin-analog heptapeptide used in Russia as an anxiolytic and nootropic, offering benzodiazepine-comparable anxiety relief without sedation, tolerance, or dependence.",
+  "mechanism": "Selank is a structural analog of tuftsin, an endogenous tetrapeptide (Thr-Lys-Pro-Arg) cleaved from the Fc region of IgG with immunomodulatory roles. Selank adds a Pro-Gly-Pro tail for metabolic stability and nootropic activity. Rather than binding the benzodiazepine site on GABA-A receptors, it modulates GABAergic tone indirectly, altering expression of GABA-A receptor subunit genes, which provides a molecular basis for anxiolytic activity without classic benzodiazepine sedation, amnesia, or tolerance.\n\nSelank also modulates serotonin, dopamine, and norepinephrine systems and inhibits enkephalin degradation, raising leu-enkephalin levels (which are reduced in anxiety/asthenia and correlate with symptom severity). Its plasma half-life is only 2-3 minutes, but the Pro-Gly-Pro tail is cleaved into longer-acting tuftsin-like metabolites that retain GABAergic and immunomodulatory effects, so behavioral effects far outlast plasma presence.",
+  "benefits": [
+    "Anxiolytic effects comparable to low-dose benzodiazepines without sedation",
+    "No tolerance, dependence, or withdrawal in studied use",
+    "Antiasthenic and mild psychostimulant effects (unlike benzodiazepines)",
+    "Raises leu-enkephalin and modulates BDNF/serotonin for mood and resilience",
+    "Immunomodulatory activity via tuftsin-like fragments"
+  ],
+  "risks": [
+    "Human evidence is largely Russian-language; limited Western replication",
+    "Not FDA-approved; research-grade product quality varies",
+    "Long-term safety data is limited"
+  ],
+  "sideEffects": [
+    "Nasal irritation or dryness (intranasal use)",
+    "Mild fatigue or drowsiness in some users",
+    "Headache",
+    "Transient altered taste/smell after dosing"
+  ],
+  "dosage": {
+    "low": "250",
+    "standard": "300-500",
+    "high": "900",
+    "unit": "mcg",
+    "notes": "Intranasal 250-500 mcg, 1-3x daily; some need up to ~900 mcg/day in divided doses for noticeable anxiolysis. Oral bioavailability is effectively zero (gastric peptidases), so intranasal delivery is required for partial nose-to-brain transport."
+  },
+  "route": "NASAL",
+  "frequency": "1-3x daily",
+  "halfLife": "Plasma 2-3 minutes; behavioral/biochemical effects last hours to days via active metabolites",
+  "cycleLength": "Often 2-3 week courses (mirroring Russian GAD protocols), or as-needed; can be used daily during anxious periods",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "A 10 mg vial in 2 mL yields 5 mg/mL; reconstitute into a metered nasal-spray bottle and calibrate spray volume to deliver the target mcg per actuation. Bacteriostatic water or sterile saline are suitable for nasal use."
+  },
+  "storage": "Store lyophilized vial frozen; refrigerate (2-8 C) after reconstitution; nasal-spray solution best used within 2-4 weeks; protect from light and heat.",
+  "contraindications": [
+    "Pregnancy and breastfeeding (insufficient data)",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "semax",
+      "kind": "synergy",
+      "note": "Classic Russian nootropic stack: Selank's calming, anxiolytic profile balances Semax's stimulating, focus/BDNF-driven effects; the two are frequently dosed together for combined cognition plus anxiety relief."
+    },
+    {
+      "with": "benzodiazepines",
+      "kind": "caution",
+      "note": "Both increase GABAergic tone via different mechanisms; combined sedation/additive effects are possible, though Selank itself is non-sedating."
+    }
+  ],
+  "references": [
+    {
+      "title": "Selank Administration Affects the Expression of Some Genes Involved in GABAergic Neurotransmission (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4757669/"
+    },
+    {
+      "title": "Selank: GABAergic Gene Expression (Frontiers in Pharmacology)",
+      "url": "https://www.frontiersin.org/journals/pharmacology/articles/10.3389/fphar.2016.00031/full"
+    },
+    {
+      "title": "Efficacy and possible mechanisms of action of a new peptide anxiolytic selank in GAD and neurasthenia (ResearchGate)",
+      "url": "https://www.researchgate.net/publication/299052506_Efficacy_and_possible_mechanisms_of_action_of_a_new_peptide_anxiolytic_selank_in_the_therapy_of_generalized_anxiety_disorders_and_neurasthenia"
+    },
+    {
+      "title": "Selank — Molecular Specifications & Research Monograph (Peptide Biologix)",
+      "url": "https://peptidebiologix.com/selank"
+    }
+  ],
+  "tags": ["cognition-mood", "immune", "sleep", "longevity"],
+  "status": "research"
+}

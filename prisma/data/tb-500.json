@@ -1,0 +1,77 @@
+{
+  "slug": "tb-500",
+  "name": "TB-500 (Thymosin Beta-4 Fragment)",
+  "aliases": ["Thymosin Beta-4", "TB4", "Thymosin Beta 4 Fragment", "TB500"],
+  "category": "HEALING_REPAIR",
+  "summary": "TB-500 is a synthetic peptide based on the active actin-binding region of Thymosin Beta-4, a naturally occurring protein involved in tissue repair. It is used in research and athletic settings to promote recovery of muscle, tendon, ligament, and skin injuries.",
+  "mechanism": "Thymosin Beta-4 is a 43-amino-acid protein first isolated from calf thymus in 1981 that participates in nearly every stage of tissue repair. TB-500 contains the peptide's key actin-binding domain. Its primary mechanism is binding G-actin monomers and regulating the sequestration and polymerization of actin into F-actin filaments. By modulating the actin cytoskeleton, it enhances cell migration, allowing repair cells, endothelial cells, and immune cells to move into injured tissue.\n\nThrough these actions TB-500 promotes angiogenesis (new blood vessel formation), upregulates cell survival, reduces inflammation, and supports differentiation of progenitor cells. The combined effects accelerate healing across muscle, tendons, ligaments, and skin and reduce swelling. Because it requires systemic tissue saturation, protocols typically use a loading phase followed by maintenance dosing.",
+  "benefits": [
+    "Promotes tissue repair and regeneration in muscle, tendon, ligament, and skin",
+    "Enhances cell migration and angiogenesis for faster recovery",
+    "Anti-inflammatory effects that reduce swelling and discomfort",
+    "May improve flexibility and reduce adhesion/scar tissue formation",
+    "Supports endothelial repair and wound healing"
+  ],
+  "risks": [
+    "Not approved by FDA, EMA, or other major regulators for human medical use",
+    "Banned by WADA and prohibited in professional/competitive sport",
+    "Limited human clinical safety/efficacy data; most evidence is preclinical",
+    "Theoretical concern that pro-angiogenic activity could affect tumor growth"
+  ],
+  "sideEffects": [
+    "Injection-site redness, irritation, or soreness",
+    "Temporary head rush or lightheadedness after injection",
+    "Fatigue or lethargy reported by some users",
+    "Transient flu-like feeling during loading phase"
+  ],
+  "dosage": {
+    "low": "2",
+    "standard": "2-2.5",
+    "high": "2.5",
+    "unit": "mg",
+    "notes": "Loading phase (weeks 1-4): 2-2.5 mg, 2-3x per week to build systemic levels. Maintenance phase (weeks 5-8): 2-2.5 mg once weekly. Dose injected subcutaneously; works systemically from any SubQ site (abdomen is convenient)."
+  },
+  "route": "SUBQ",
+  "frequency": "2-3x weekly during loading, then once weekly maintenance",
+  "halfLife": "Not formally published in humans; dosing every 3-4 days implies tissue-relevant levels persist several days per injection",
+  "cycleLength": "Typically an 8-week protocol: ~4-week loading phase followed by ~4-week maintenance phase",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "10 mg vial + 2 mL bacteriostatic water = 5 mg/mL, so 2 mg = 0.4 mL (40 units on a U-100 insulin syringe). Swirl gently, do not shake."
+  },
+  "storage": "Store lyophilized vials frozen or refrigerated. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. Protect from light.",
+  "contraindications": [
+    "Active or history of cancer (caution due to angiogenic activity)",
+    "Pregnancy and breastfeeding",
+    "Competitive athletes subject to anti-doping testing",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "bpc-157",
+      "kind": "synergy",
+      "note": "Core of the 'Wolverine stack.' TB-500 mobilizes and migrates repair cells into position while BPC-157 builds the repair infrastructure (blood vessels, growth factors); they target overlapping but distinct healing pathways for broader tissue repair."
+    }
+  ],
+  "references": [
+    {
+      "title": "TB4 and TB-500 Peptide Therapy: What to Know (Innerbody Research)",
+      "url": "https://www.innerbody.com/thymosin-beta-4-and-tb-500"
+    },
+    {
+      "title": "TB-500 Peptide: Healing & Flexibility (Paragon Sports Medicine)",
+      "url": "https://www.paragonsportsmedicine.com/peptides/tb-500"
+    },
+    {
+      "title": "TB-500 Dosage Guide: Thymosin Beta-4 Protocol, Frequency & Cycle (PeptideDeck)",
+      "url": "https://www.peptidedeck.com/blog/tb-500-dosage-guide"
+    },
+    {
+      "title": "TB-500 Peptide: Thymosin Beta-4 Healing Guide (Medsbase)",
+      "url": "https://medsbase.com/tb-500-thymosin-beta-4-peptide-guide/"
+    }
+  ],
+  "tags": ["recovery-injury", "muscle-growth", "immune"],
+  "status": "research"
+}
