@@ -42,6 +42,17 @@ export async function getPeptideInteractions(peptideId: string) {
   }));
 }
 
+/** Flat peptide-to-peptide interaction rows (for the stack builder / checks). */
+export async function getAllInteractionRows() {
+  const rows = await prisma.peptideInteraction.findMany();
+  return rows.map((r) => ({
+    peptideAId: r.peptideAId,
+    peptideBId: r.peptideBId,
+    kind: r.kind,
+    note: r.note,
+  }));
+}
+
 export async function listStacks() {
   return prisma.stack.findMany({
     orderBy: [{ isPreset: "desc" }, { name: "asc" }],

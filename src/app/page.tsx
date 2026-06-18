@@ -1,65 +1,237 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  Activity,
+  BookOpen,
+  CalendarRange,
+  CheckCircle2,
+  Plus,
+  Syringe,
+} from "lucide-react";
 
-export default function Home() {
+import { PageHeader } from "@/components/common/page-header";
+import { StatCard } from "@/components/common/stat-card";
+import { EmptyState } from "@/components/common/empty-state";
+import { Disclaimer } from "@/components/disclaimer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  getActiveCycles,
+  getRecentDoseLogs,
+  listPeptides,
+} from "@/lib/queries";
+import {
+  cycleProgress,
+  getTodaysDoses,
+  type CycleLike,
+  type ScheduleConfig,
+} from "@/lib/schedule";
+import { formatDate } from "@/lib/dates";
+
+export default async function DashboardPage() {
+  const [activeCycles, peptides, recentDoses] = await Promise.all([
+    getActiveCycles(),
+    listPeptides(),
+    getRecentDoseLogs(8),
+  ]);
+
+  const cycleLikes: CycleLike[] = activeCycles.map((c) => ({
+    id: c.id,
+    name: c.name,
+    startDate: c.startDate,
+    endDate: c.endDate,
+    status: c.status,
+    scheduleConfig: c.scheduleConfig as ScheduleConfig | null,
+    peptide: c.peptide ? { name: c.peptide.name } : null,
+    stack: c.stack ? { name: c.stack.name } : null,
+  }));
+
+  const todays = getTodaysDoses(cycleLikes, new Date());
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const dosesThisWeek = recentDoses.filter((d) => d.takenAt >= weekAgo).length;
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-between bg-white px-16 py-32 sm:items-start dark:bg-black">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="mx-auto max-w-6xl">
+      <PageHeader
+        title="Dashboard"
+        description="Your protocols at a glance."
+        actions={
+          <Button render={<Link href="/cycles/new" />}>
+            <Plus className="size-4" />
+            New cycle
+          </Button>
+        }
+      />
+      <Disclaimer className="mb-6" />
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Active cycles"
+          value={activeCycles.length}
+          icon={<CalendarRange className="size-5" />}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="bg-foreground text-background flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors hover:bg-[#383838] md:w-[158px] dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <StatCard
+          label="Doses this week"
+          value={dosesThisWeek}
+          icon={<Syringe className="size-5" />}
+        />
+        <StatCard
+          label="Today's doses due"
+          value={todays.reduce((sum, t) => sum + t.times, 0)}
+          icon={<Activity className="size-5" />}
+        />
+        <StatCard
+          label="Peptides in library"
+          value={peptides.length}
+          icon={<BookOpen className="size-5" />}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Today&apos;s doses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {todays.length === 0 ? (
+              <EmptyState
+                icon={<CheckCircle2 className="size-6" />}
+                title="Nothing due today"
+                description="Active cycles with a dose scheduled for today will appear here."
+              />
+            ) : (
+              <ul className="divide-y">
+                {todays.map(({ cycle, times }) => (
+                  <li
+                    key={cycle.id}
+                    className="flex items-center justify-between py-2.5"
+                  >
+                    <div>
+                      <Link
+                        href={`/cycles/${cycle.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {cycle.name}
+                      </Link>
+                      <p className="text-muted-foreground text-xs">
+                        {cycle.peptide?.name ?? cycle.stack?.name ?? "—"}
+                      </p>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                      {times}× today
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active cycles</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {cycleLikes.length === 0 ? (
+              <EmptyState
+                icon={<CalendarRange className="size-6" />}
+                title="No active cycles"
+                description="Start a cycle from a peptide or stack to track it here."
+                action={
+                  <Button size="sm" render={<Link href="/cycles/new" />}>
+                    New cycle
+                  </Button>
+                }
+              />
+            ) : (
+              <ul className="space-y-4">
+                {cycleLikes.map((c) => {
+                  const prog = cycleProgress(c.startDate, c.endDate);
+                  return (
+                    <li key={c.id} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <Link
+                          href={`/cycles/${c.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {c.name}
+                        </Link>
+                        <span className="text-muted-foreground text-xs">
+                          {prog.percent !== null
+                            ? `${prog.percent}%`
+                            : `Day ${prog.daysElapsed + 1}`}
+                        </span>
+                      </div>
+                      <Progress value={prog.percent ?? 0} />
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Recent doses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentDoses.length === 0 ? (
+            <EmptyState
+              icon={<Syringe className="size-6" />}
+              title="No doses logged yet"
+              description="Log your first dose to start building a history."
+              action={
+                <Button size="sm" render={<Link href="/log" />}>
+                  Log a dose
+                </Button>
+              }
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Peptide</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>When</TableHead>
+                  <TableHead>Site</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentDoses.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="font-medium">
+                      {d.peptide.name}
+                    </TableCell>
+                    <TableCell>
+                      {d.amount} {d.unit}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(d.takenAt, "MMM d, h:mm a")}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {d.site ?? "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

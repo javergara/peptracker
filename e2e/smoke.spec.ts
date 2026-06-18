@@ -1,0 +1,39 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * Data-driven smoke test: exercises the main navigation and confirms seeded
+ * content renders. Kept resilient to markup changes by asserting on visible
+ * domain text rather than specific selectors.
+ */
+
+test("dashboard loads", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/not medical advice/i).first()).toBeVisible();
+});
+
+test("peptides knowledge base lists seeded peptides", async ({ page }) => {
+  await page.goto("/peptides");
+  await expect(page.getByText(/Retatrutide/i).first()).toBeVisible();
+  await expect(page.getByText(/Tesamorelin/i).first()).toBeVisible();
+});
+
+test("peptide detail page renders", async ({ page }) => {
+  await page.goto("/peptides/retatrutide");
+  await expect(
+    page.getByRole("heading", { name: /Retatrutide/i }),
+  ).toBeVisible();
+  // Cited references live behind the "References" tab.
+  await page.getByRole("tab", { name: /references/i }).click();
+  await expect(page.getByText(/NEJM|Lancet|Nature|PMC/i).first()).toBeVisible();
+});
+
+test("wolverine preset stack is present", async ({ page }) => {
+  await page.goto("/stacks/wolverine");
+  await expect(page.getByText(/BPC-?157/i).first()).toBeVisible();
+  await expect(page.getByText(/TB-?500/i).first()).toBeVisible();
+});
+
+test("suggestions page loads", async ({ page }) => {
+  await page.goto("/suggestions");
+  await expect(page.getByText(/not medical advice/i).first()).toBeVisible();
+});
