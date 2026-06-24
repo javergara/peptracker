@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -17,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { logDose } from "@/lib/actions/doses";
-import { getCycle } from "@/lib/queries";
+import { getCurrentUser, getCycle } from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
 
@@ -30,7 +31,7 @@ export default async function CycleDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const cycle = await getCycle(id);
+  const [user, cycle] = await Promise.all([getCurrentUser(), getCycle(id)]);
   if (!cycle) notFound();
 
   const prog = cycleProgress(cycle.startDate, cycle.endDate);
@@ -48,6 +49,7 @@ export default async function CycleDetailPage({
         description={`${cycle.peptide?.name ?? cycle.stack?.name ?? "—"} · ${formatDate(
           cycle.startDate,
         )}${cycle.endDate ? ` → ${formatDate(cycle.endDate)}` : ""}`}
+        accentColor={user.color ?? undefined}
         actions={
           <Button variant="outline" render={<Link href="/cycles" />}>
             <ArrowLeft className="size-4" />
@@ -67,7 +69,17 @@ export default async function CycleDetailPage({
                 : `Day ${prog.daysElapsed + 1}`}
             </span>
           </div>
-          <Progress value={prog.percent ?? 0} />
+          <Progress
+            value={prog.percent ?? 0}
+            style={
+              user.color ? ({ "--pc": user.color } as CSSProperties) : undefined
+            }
+            className={
+              user.color
+                ? "[&_[data-slot=progress-indicator]]:bg-[var(--pc)]"
+                : undefined
+            }
+          />
         </div>
       </div>
 

@@ -18,6 +18,8 @@ export interface CalendarDose {
   takenAtISO: string;
   site: string | null;
   cycleName: string | null;
+  profileName: string;
+  profileColor: string | null;
 }
 
 interface PeptideOption {
@@ -32,14 +34,35 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function monthHref(year: number, monthIndex: number) {
-  // monthIndex may be -1 or 12; normalize.
-  const d = new Date(year, monthIndex, 1);
-  return `/calendar?month=${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
-}
-
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2";
+
+function ProfileDot({ color }: { color: string | null }) {
+  return (
+    <span
+      className="inline-block size-2.5 shrink-0 rounded-full"
+      style={{ background: color ?? FALLBACK_ACCENT }}
+    />
+  );
+}
+
+/** Distinct profiles (with dose counts) present in a set of doses. */
+function profilesIn(doses: CalendarDose[]) {
+  const m = new Map<
+    string,
+    { name: string; color: string | null; count: number }
+  >();
+  for (const d of doses) {
+    const e = m.get(d.profileName) ?? {
+      name: d.profileName,
+      color: d.profileColor,
+      count: 0,
+    };
+    e.count += 1;
+    m.set(d.profileName, e);
+  }
+  return Array.from(m.values());
+}
 
 export function DoseCalendar({
   year,
@@ -48,6 +71,9 @@ export function DoseCalendar({
   accentColor,
   profileName,
   peptides,
+  multiProfile = false,
+  legend,
+  view,
 }: {
   year: number;
   monthIndex: number;
@@ -55,10 +81,19 @@ export function DoseCalendar({
   accentColor: string | null;
   profileName: string;
   peptides: PeptideOption[];
+  multiProfile?: boolean;
+  legend: { name: string; color: string | null }[];
+  view?: "all";
 }) {
   const accent = accentColor ?? FALLBACK_ACCENT;
   const [isPending, startTransition] = useTransition();
   const [showLog, setShowLog] = React.useState(false);
+
+  const viewSuffix = view === "all" ? "&view=all" : "";
+  function monthHref(y: number, m: number) {
+    const d = new Date(y, m, 1);
+    return `/calendar?month=${d.getFullYear()}-${pad(d.getMonth() + 1)}${viewSuffix}`;
+  }
 
   // Group doses by day-of-month (local time).
   const byDay = React.useMemo(() => {
@@ -107,22 +142,25 @@ export function DoseCalendar({
     });
   }
 
-  // Local datetime (noon) for the selected day, in datetime-local format.
   const selectedTakenAt = `${year}-${pad(monthIndex + 1)}-${pad(selected)}T12:00`;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 className="text-lg font-semibold">{monthLabel}</h2>
-            <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
-              <span
-                className="inline-block size-2.5 rounded-full"
-                style={{ background: accent }}
-              />
-              {profileName}
-            </span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {legend.map((p) => (
+                <span
+                  key={p.name}
+                  className="text-muted-foreground inline-flex items-center gap-1.5 text-xs"
+                >
+                  <ProfileDot color={p.color} />
+                  {p.name}
+                </span>
+              ))}
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <Link
@@ -163,6 +201,7 @@ export function DoseCalendar({
             const dayDoses = byDay.get(day) ?? [];
             const isToday = isThisMonth && day === todayDate;
             const isSelected = day === selected;
+            const profs = multiProfile ? profilesIn(dayDoses) : [];
             return (
               <button
                 key={day}
@@ -186,13 +225,31 @@ export function DoseCalendar({
                   {day}
                 </span>
                 {dayDoses.length > 0 ? (
-                  <span
-                    className="mt-1 inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10px] font-medium"
-                    style={{ backgroundColor: `${accent}26`, color: accent }}
-                  >
-                    <Syringe className="size-2.5" />
-                    {dayDoses.length}
-                  </span>
+                  multiProfile ? (
+                    <span className="mt-1 flex items-center gap-0.5">
+                      {profs.slice(0, 4).map((p) => (
+                        <span
+                          key={p.name}
+                          title={`${p.name}: ${p.count}`}
+                          className="size-2 rounded-full"
+                          style={{ background: p.color ?? FALLBACK_ACCENT }}
+                        />
+                      ))}
+                      {profs.length > 4 ? (
+                        <span className="text-muted-foreground text-[9px]">
+                          +{profs.length - 4}
+                        </span>
+                      ) : null}
+                    </span>
+                  ) : (
+                    <span
+                      className="mt-1 inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10px] font-medium"
+                      style={{ backgroundColor: `${accent}26`, color: accent }}
+                    >
+                      <Syringe className="size-2.5" />
+                      {dayDoses.length}
+                    </span>
+                  )
                 ) : null}
               </button>
             );
@@ -209,18 +266,20 @@ export function DoseCalendar({
               day: "numeric",
             })}
           </h3>
-          <Button
-            type="button"
-            size="sm"
-            variant={showLog ? "secondary" : "outline"}
-            onClick={() => setShowLog((v) => !v)}
-          >
-            <Plus className="size-4" />
-            Log
-          </Button>
+          {!multiProfile ? (
+            <Button
+              type="button"
+              size="sm"
+              variant={showLog ? "secondary" : "outline"}
+              onClick={() => setShowLog((v) => !v)}
+            >
+              <Plus className="size-4" />
+              Log
+            </Button>
+          ) : null}
         </div>
 
-        {showLog ? (
+        {showLog && !multiProfile ? (
           <form
             action={handleQuickLog}
             className="bg-muted/30 space-y-2 rounded-lg border p-3"
@@ -254,7 +313,7 @@ export function DoseCalendar({
               disabled={isPending}
               className="w-full"
             >
-              {isPending ? "Logging…" : "Log dose on this day"}
+              {isPending ? "Logging…" : `Log dose for ${profileName}`}
             </Button>
           </form>
         ) : null}
@@ -270,12 +329,18 @@ export function DoseCalendar({
               .map((d) => (
                 <li key={d.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{d.peptideName}</span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      {multiProfile ? (
+                        <ProfileDot color={d.profileColor} />
+                      ) : null}
+                      {d.peptideName}
+                    </span>
                     <span className="text-muted-foreground">
                       {d.amount} {d.unit}
                     </span>
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">
+                    {multiProfile ? `${d.profileName} · ` : ""}
                     {new Date(d.takenAtISO).toLocaleTimeString(undefined, {
                       hour: "numeric",
                       minute: "2-digit",

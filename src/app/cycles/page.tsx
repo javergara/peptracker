@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { listCycles } from "@/lib/queries";
+import { getCurrentUser, listCycles } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: "Cycles" };
@@ -19,13 +19,15 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default async function CyclesPage() {
-  const cycles = await listCycles();
+  const [user, cycles] = await Promise.all([getCurrentUser(), listCycles()]);
+  const accent = user.color ?? undefined;
 
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title="Cycles"
-        description="Your peptide protocols and their progress."
+        description={`${user.name}'s peptide protocols and their progress.`}
+        accentColor={accent}
         actions={
           <Button render={<Link href="/cycles/new" />}>
             <Plus className="size-4" />
@@ -48,7 +50,8 @@ export default async function CyclesPage() {
           {cycles.map((c) => (
             <Card
               key={c.id}
-              className="hover:border-primary/40 transition-colors"
+              className="hover:border-primary/40 border-l-4 transition-colors"
+              style={accent ? { borderLeftColor: accent } : undefined}
             >
               <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div className="min-w-0">

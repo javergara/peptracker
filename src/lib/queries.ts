@@ -133,6 +133,15 @@ export async function getDoseLogsInRange(start: Date, end: Date) {
   });
 }
 
+/** Dose logs across ALL profiles in a range (combined calendar overlay). */
+export async function getAllDoseLogsInRange(start: Date, end: Date) {
+  return prisma.doseLog.findMany({
+    where: { takenAt: { gte: start, lte: end } },
+    orderBy: { takenAt: "asc" },
+    include: { peptide: true, cycle: true, user: true },
+  });
+}
+
 export async function listMeasurements(type?: string) {
   const user = await getActiveUser();
   return prisma.measurement.findMany({

@@ -5,11 +5,14 @@ import { PageHeader } from "@/components/common/page-header";
 import { DoseCalendar } from "@/components/calendar/dose-calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getAllUsers } from "@/lib/active-user";
 import {
+  getAllDoseLogsInRange,
   getCurrentUser,
   getDoseLogsInRange,
   listPeptides,
 } from "@/lib/queries";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
@@ -26,34 +29,76 @@ function parseMonth(value?: string): { year: number; monthIndex: number } {
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; view?: string }>;
 }) {
-  const { month } = await searchParams;
+  const { month, view } = await searchParams;
   const { year, monthIndex } = parseMonth(month);
+  const isAll = view === "all";
 
   const start = new Date(year, monthIndex, 1, 0, 0, 0, 0);
   const end = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
-  const [logs, user, peptides] = await Promise.all([
-    getDoseLogsInRange(start, end),
+
+  const [user, peptides] = await Promise.all([
     getCurrentUser(),
     listPeptides(),
   ]);
 
-  const doses = logs.map((d) => ({
-    id: d.id,
-    peptideName: d.peptide.name,
-    amount: d.amount,
-    unit: d.unit,
-    takenAtISO: d.takenAt.toISOString(),
-    site: d.site,
-    cycleName: d.cycle?.name ?? null,
-  }));
+  let doses;
+  let legend: { name: string; color: string | null }[];
+
+  if (isAll) {
+    const [logs, users] = await Promise.all([
+      getAllDoseLogsInRange(start, end),
+      getAllUsers(),
+    ]);
+    doses = logs.map((d) => ({
+      id: d.id,
+      peptideName: d.peptide.name,
+      amount: d.amount,
+      unit: d.unit,
+      takenAtISO: d.takenAt.toISOString(),
+      site: d.site,
+      cycleName: d.cycle?.name ?? null,
+      profileName: d.user?.name ?? "Unknown",
+      profileColor: d.user?.color ?? null,
+    }));
+    legend = users.map((u) => ({ name: u.name, color: u.color }));
+  } else {
+    const logs = await getDoseLogsInRange(start, end);
+    doses = logs.map((d) => ({
+      id: d.id,
+      peptideName: d.peptide.name,
+      amount: d.amount,
+      unit: d.unit,
+      takenAtISO: d.takenAt.toISOString(),
+      site: d.site,
+      cycleName: d.cycle?.name ?? null,
+      profileName: user.name,
+      profileColor: user.color,
+    }));
+    legend = [{ name: user.name, color: user.color }];
+  }
+
+  const monthParam = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+  const toggle = [
+    {
+      label: "This profile",
+      href: `/calendar?month=${monthParam}`,
+      on: !isAll,
+    },
+    {
+      label: "All profiles",
+      href: `/calendar?month=${monthParam}&view=all`,
+      on: isAll,
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title="Calendar"
-        description="Your logged doses, visualized by day. Switch profiles in the sidebar to view someone else's."
+        description="Your logged doses, visualized by day. Compare profiles with the overlay."
+        accentColor={isAll ? undefined : (user.color ?? undefined)}
         actions={
           <Button render={<Link href="/log" />}>
             <Plus className="size-4" />
@@ -61,12 +106,33 @@ export default async function CalendarPage({
           </Button>
         }
       />
+
+      <div className="mb-4 inline-flex rounded-lg border p-0.5 text-sm">
+        {toggle.map((t) => (
+          <Link
+            key={t.label}
+            href={t.href}
+            className={cn(
+              "rounded-md px-3 py-1.5 font-medium transition-colors",
+              t.on
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
       <Card>
         <CardContent className="p-4 sm:p-6">
           <DoseCalendar
             year={year}
             monthIndex={monthIndex}
             doses={doses}
+            multiProfile={isAll}
+            legend={legend}
+            view={isAll ? "all" : undefined}
             accentColor={user.color}
             profileName={user.name}
             peptides={peptides.map((p) => ({ id: p.id, name: p.name }))}

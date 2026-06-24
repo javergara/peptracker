@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import {
   Activity,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import {
   getActiveCycles,
+  getCurrentUser,
   getRecentDoseLogs,
   listPeptides,
 } from "@/lib/queries";
@@ -37,11 +39,13 @@ import {
 import { formatDate } from "@/lib/dates";
 
 export default async function DashboardPage() {
-  const [activeCycles, peptides, recentDoses] = await Promise.all([
+  const [user, activeCycles, peptides, recentDoses] = await Promise.all([
+    getCurrentUser(),
     getActiveCycles(),
     listPeptides(),
     getRecentDoseLogs(8),
   ]);
+  const accent = user.color ?? undefined;
 
   const cycleLikes: CycleLike[] = activeCycles.map((c) => ({
     id: c.id,
@@ -64,7 +68,8 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl">
       <PageHeader
         title="Dashboard"
-        description="Your protocols at a glance."
+        description={`${user.name}'s protocols at a glance.`}
+        accentColor={accent}
         actions={
           <Button render={<Link href="/cycles/new" />}>
             <Plus className="size-4" />
@@ -172,7 +177,19 @@ export default async function DashboardPage() {
                             : `Day ${prog.daysElapsed + 1}`}
                         </span>
                       </div>
-                      <Progress value={prog.percent ?? 0} />
+                      <Progress
+                        value={prog.percent ?? 0}
+                        style={
+                          accent
+                            ? ({ "--pc": accent } as CSSProperties)
+                            : undefined
+                        }
+                        className={
+                          accent
+                            ? "[&_[data-slot=progress-indicator]]:bg-[var(--pc)]"
+                            : undefined
+                        }
+                      />
                     </li>
                   );
                 })}

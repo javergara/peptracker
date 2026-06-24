@@ -67,3 +67,12 @@ test("calendar has a per-day quick-log control", async ({ page }) => {
   await page.goto("/calendar");
   await expect(page.getByRole("button", { name: /^Log$/ })).toBeVisible();
 });
+
+test("calendar all-profiles overlay shows every profile", async ({ page }) => {
+  await page.goto("/calendar");
+  await page.getByRole("link", { name: "All profiles" }).click();
+  await expect(page).toHaveURL(/view=all/);
+  // Legend lists both seeded profiles.
+  await expect(page.getByText("Me").first()).toBeVisible();
+  await expect(page.getByText("Partner").first()).toBeVisible();
+});
