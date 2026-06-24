@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { linearRegression } from "./stats";
+import { correlationStrength, linearRegression } from "./stats";
 
 describe("linearRegression", () => {
-  it("fits a perfect positive line (R²=1)", () => {
+  it("fits a perfect positive line (R²=1, r=1)", () => {
     const r = linearRegression([
       { x: 1, y: 3 },
       { x: 2, y: 5 },
@@ -12,7 +12,18 @@ describe("linearRegression", () => {
     expect(r.slope).toBeCloseTo(2);
     expect(r.intercept).toBeCloseTo(1);
     expect(r.r2).toBeCloseTo(1);
+    expect(r.r).toBeCloseTo(1);
     expect(r.n).toBe(3);
+  });
+
+  it("gives a negative Pearson r for an inverse relationship", () => {
+    const r = linearRegression([
+      { x: 1, y: 10 },
+      { x: 2, y: 8 },
+      { x: 3, y: 6 },
+    ]);
+    expect(r.r).toBeCloseTo(-1);
+    expect(r.r2).toBeCloseTo(1);
   });
 
   it("fits a noisy line with 0 < R² < 1", () => {
@@ -36,5 +47,15 @@ describe("linearRegression", () => {
       { x: 2, y: 9 },
     ]);
     expect(flat.slope).toBe(0);
+    expect(flat.r).toBe(0);
+  });
+});
+
+describe("correlationStrength", () => {
+  it("buckets by magnitude", () => {
+    expect(correlationStrength(0.9)).toBe("strong");
+    expect(correlationStrength(-0.5)).toBe("moderate");
+    expect(correlationStrength(0.25)).toBe("weak");
+    expect(correlationStrength(0.05)).toBe("negligible");
   });
 });

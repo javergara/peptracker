@@ -9,8 +9,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { MetricChart } from "@/components/metrics/metric-chart";
 import { CorrelationChart } from "@/components/metrics/correlation-chart";
-import { ScatterCorrelation } from "@/components/metrics/scatter-correlation";
-import { linearRegression } from "@/lib/stats";
+import { CorrelationExplorer } from "@/components/metrics/correlation-explorer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addMeasurement } from "@/lib/actions/measurements";
@@ -86,24 +85,45 @@ export default async function MetricsPage() {
   const weightUnit = weights[0]?.unit ?? "kg";
   const igfUnit = igf[0]?.unit ?? "ng/mL";
 
-  // Scatter: pair each IGF result with the nearest bodyweight within 14 days.
-  const PAIR_WINDOW_MS = 14 * 86_400_000;
-  const scatterPoints = igf
-    .map((l) => {
-      let best: { diff: number; weight: number } | null = null;
-      for (const w of weights) {
-        const diff = Math.abs(w.recordedAt.getTime() - l.takenAt.getTime());
-        if (diff <= PAIR_WINDOW_MS && (!best || diff < best.diff)) {
-          best = { diff, weight: w.value };
-        }
-      }
-      return best
-        ? { x: best.weight, y: l.value, date: formatDate(l.takenAt, "MMM d") }
-        : null;
-    })
-    .filter((p): p is { x: number; y: number; date: string } => p !== null);
-  const regression = linearRegression(scatterPoints);
-  const hasScatter = scatterPoints.length >= 2;
+  // Selectable series (metric types + lab markers) for the correlation explorer.
+  const corrSeries: {
+    key: string;
+    label: string;
+    unit?: string | null;
+    points: { t: number; value: number }[];
+  }[] = [];
+  const mByType = new Map<string, typeof measurements>();
+  for (const m of measurements) {
+    const arr = mByType.get(m.type) ?? [];
+    arr.push(m);
+    mByType.set(m.type, arr);
+  }
+  for (const [type, rows] of mByType) {
+    corrSeries.push({
+      key: `m:${type}`,
+      label: TYPE_LABELS[type] ?? type,
+      unit: rows[0]?.unit ?? null,
+      points: rows
+        .map((r) => ({ t: r.recordedAt.getTime(), value: r.value }))
+        .sort((a, b) => a.t - b.t),
+    });
+  }
+  const lByMarker = new Map<string, typeof labs>();
+  for (const l of labs) {
+    const arr = lByMarker.get(l.marker) ?? [];
+    arr.push(l);
+    lByMarker.set(l.marker, arr);
+  }
+  for (const [marker, rows] of lByMarker) {
+    corrSeries.push({
+      key: `l:${marker}`,
+      label: marker,
+      unit: rows[0]?.unit ?? null,
+      points: rows
+        .map((r) => ({ t: r.takenAt.getTime(), value: r.value }))
+        .sort((a, b) => a.t - b.t),
+    });
+  }
 
   // Group measurements by type (already ordered by recordedAt asc).
   const byType = new Map<string, typeof measurements>();
@@ -265,32 +285,11 @@ export default async function MetricsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GitCompareArrows className="size-4" />
-              Weight × IGF-1 scatter
-              {hasScatter ? (
-                <span className="text-muted-foreground ml-1 text-sm font-normal">
-                  R² = {regression.r2.toFixed(2)} · n = {regression.n} ·{" "}
-                  {regression.slope >= 0 ? "positive" : "negative"} trend
-                </span>
-              ) : null}
+              Correlate any two markers
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {hasScatter ? (
-              <ScatterCorrelation
-                points={scatterPoints}
-                slope={regression.slope}
-                intercept={regression.intercept}
-                xLabel={`Weight (${weightUnit})`}
-                yLabel={`IGF-1 (${igfUnit})`}
-                color={profileColor}
-              />
-            ) : (
-              <EmptyState
-                icon={<GitCompareArrows className="size-6" />}
-                title="Need paired data points"
-                description="Each IGF-1 result is paired with a bodyweight within 14 days. Log both near the same dates to plot the regression."
-              />
-            )}
+            <CorrelationExplorer series={corrSeries} color={profileColor} />
           </CardContent>
         </Card>
       </div>
