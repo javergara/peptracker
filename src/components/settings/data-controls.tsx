@@ -2,14 +2,53 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Download, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 
-import { exportUserData, importUserData } from "@/lib/actions/settings";
+import {
+  exportUserData,
+  importUserData,
+  exportDosesCsv,
+  exportLabsCsv,
+} from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
 
 export function DataControls() {
   const [isPending, startTransition] = useTransition();
   const [json, setJson] = useState("");
+
+  function downloadCsv(csv: string, filename: string) {
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function onExportDosesCsv() {
+    startTransition(async () => {
+      try {
+        const csv = await exportDosesCsv();
+        downloadCsv(csv, `doses-${new Date().toISOString().slice(0, 10)}.csv`);
+        toast.success("Exported dose log CSV");
+      } catch {
+        toast.error("CSV export failed.");
+      }
+    });
+  }
+
+  function onExportLabsCsv() {
+    startTransition(async () => {
+      try {
+        const csv = await exportLabsCsv();
+        downloadCsv(csv, `labs-${new Date().toISOString().slice(0, 10)}.csv`);
+        toast.success("Exported labs CSV");
+      } catch {
+        toast.error("CSV export failed.");
+      }
+    });
+  }
 
   function onExport() {
     startTransition(async () => {
@@ -49,10 +88,28 @@ export function DataControls() {
 
   return (
     <div className="space-y-4">
-      <Button variant="outline" onClick={onExport} disabled={isPending}>
-        <Download className="size-4" />
-        Export data (JSON)
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" onClick={onExport} disabled={isPending}>
+          <Download className="size-4" />
+          Export data (JSON)
+        </Button>
+        <Button
+          variant="outline"
+          onClick={onExportDosesCsv}
+          disabled={isPending}
+        >
+          <FileSpreadsheet className="size-4" />
+          Export doses (CSV)
+        </Button>
+        <Button
+          variant="outline"
+          onClick={onExportLabsCsv}
+          disabled={isPending}
+        >
+          <FileSpreadsheet className="size-4" />
+          Export labs (CSV)
+        </Button>
+      </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Import backup</label>

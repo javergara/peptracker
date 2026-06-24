@@ -216,6 +216,50 @@ async function main() {
     }
   }
   console.log(`Upserted ${PRESET_STACKS.length} preset stacks`);
+
+  // 6) Demo health data for the default profile (idempotent: only if empty).
+  const tesa = bySlug.get("tesamorelin");
+  if (tesa) {
+    const vialCount = await prisma.vial.count({ where: { userId: user.id } });
+    if (vialCount === 0) {
+      await prisma.vial.create({
+        data: {
+          userId: user.id,
+          peptideId: tesa.id,
+          label: "Tesamorelin 10mg",
+          totalMcg: 10000,
+          bacWaterMl: 2,
+          concentrationMcgPerMl: 5000,
+          remainingMcg: 7500,
+          reconstitutedAt: new Date(Date.now() - 6 * 86_400_000),
+          expiresAt: new Date(Date.now() + 5 * 86_400_000), // expiring soon (demo)
+          status: "active",
+        },
+      });
+    }
+  }
+  const labCount = await prisma.labResult.count({ where: { userId: user.id } });
+  if (labCount === 0) {
+    const igf = [
+      { d: 90, v: 180 },
+      { d: 45, v: 230 },
+      { d: 5, v: 265 },
+    ];
+    for (const r of igf) {
+      await prisma.labResult.create({
+        data: {
+          userId: user.id,
+          marker: "IGF-1",
+          value: r.v,
+          unit: "ng/mL",
+          refLow: 88,
+          refHigh: 246,
+          takenAt: new Date(Date.now() - r.d * 86_400_000),
+        },
+      });
+    }
+  }
+
   console.log(`Seed complete for user "${user.name}" (${user.id})`);
 }
 

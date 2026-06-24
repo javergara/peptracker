@@ -89,3 +89,69 @@ export async function importUserData(json: string) {
   revalidatePath("/settings");
   return measurements.length;
 }
+
+function csvCell(value: unknown): string {
+  const s = value == null ? "" : String(value);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function toCsv(headers: string[], rows: unknown[][]): string {
+  return [headers, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
+}
+
+/** Dose-log history for the active profile as CSV text. */
+export async function exportDosesCsv(): Promise<string> {
+  const user = await getCurrentUser();
+  const doses = await prisma.doseLog.findMany({
+    where: { userId: user.id },
+    orderBy: { takenAt: "desc" },
+    include: { peptide: true, cycle: true },
+  });
+  return toCsv(
+    [
+      "takenAt",
+      "peptide",
+      "amount",
+      "unit",
+      "route",
+      "site",
+      "cycle",
+      "mood",
+      "energy",
+      "notes",
+    ],
+    doses.map((d) => [
+      d.takenAt.toISOString(),
+      d.peptide.name,
+      d.amount,
+      d.unit,
+      d.route ?? "",
+      d.site ?? "",
+      d.cycle?.name ?? "",
+      d.mood ?? "",
+      d.energy ?? "",
+      d.notes ?? "",
+    ]),
+  );
+}
+
+/** Lab results for the active profile as CSV text. */
+export async function exportLabsCsv(): Promise<string> {
+  const user = await getCurrentUser();
+  const labs = await prisma.labResult.findMany({
+    where: { userId: user.id },
+    orderBy: { takenAt: "desc" },
+  });
+  return toCsv(
+    ["takenAt", "marker", "value", "unit", "refLow", "refHigh", "notes"],
+    labs.map((l) => [
+      l.takenAt.toISOString(),
+      l.marker,
+      l.value,
+      l.unit ?? "",
+      l.refLow ?? "",
+      l.refHigh ?? "",
+      l.notes ?? "",
+    ]),
+  );
+}

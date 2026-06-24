@@ -45,13 +45,19 @@ src/
     app-shell.tsx, theme-provider.tsx
   lib/
     db.ts              # `import { prisma } from "@/lib/db"` (runtime client)
-    queries.ts         # all read queries live here
+    queries.ts         # all read queries live here (profile-scoped)
+    active-user.ts     # getActiveUser() — cookie-based active profile
+    actions/           # server actions: doses, cycles, vials, labs, photos, …
     reconstitution.ts  # pure dosing math
+    vials.ts           # vial concentration / doses-remaining / expiry status
+    adherence.ts       # computeAdherence(cycles, doseLogs, window)
+    sites.ts           # INJECTION_SITES + suggestNextSite (rotation)
+    schedule.ts, suggestions.ts, interactions.ts
     units.ts, dates.ts, constants.ts, utils.ts  # pure helpers
-    # schedule.ts, suggestions.ts, interactions.ts may be added as features grow
   types/
     peptide.ts         # SOURCE OF TRUTH for valid values + zod schemas + parsers
   generated/prisma/    # generated client (gitignored; run `npx prisma generate`)
+public/uploads/        # runtime progress-photo storage (gitignored; see below)
 prisma/
   schema.prisma        # models; SQLite has no enum/array (see below)
   seed.ts              # idempotent seed; contains PRESET_STACKS
@@ -72,9 +78,21 @@ Path alias: `@/*` -> `src/*`.
   derived at seed time from each peptide's `interactions`.
 - **Stack** / **StackItem** — curated or user stacks of peptides.
 - **Cycle** — a planned/active dosing cycle for a peptide or stack.
-- **DoseLog** — individual logged administrations.
+- **DoseLog** — individual logged administrations. Optional `vialId` (source
+  vial; logging decrements its `remainingMcg`), `mood`/`energy` (1–5), and
+  `sideEffects` (Json string[]).
 - **Measurement** — weight/bodyFat/sleep/recovery/custom data points.
 - **JournalEntry** — free-text notes.
+- **Vial** — inventory: `totalMcg`, `bacWaterMl`, `concentrationMcgPerMl`,
+  `remainingMcg`, `reconstitutedAt`, `expiresAt`, `status`
+  (sealed|active|empty|expired). Math helpers in `src/lib/vials.ts`.
+- **LabResult** — bloodwork markers over time (`marker`, `value`, `unit`,
+  `refLow`/`refHigh`, `takenAt`).
+- **Photo** — progress photos; `path` is a public URL under `public/uploads/`.
+
+All profile-owned data (Cycle, DoseLog, Measurement, Vial, LabResult, Photo,
+JournalEntry) is scoped to the active profile — see the multi-profile note in
+Conventions.
 
 ### SQLite constraints (read carefully)
 
@@ -129,9 +147,26 @@ URL + seed command live in `prisma.config.ts`. `DATABASE_URL` is in `.env`
   peptide library, preset stacks, and interactions are global. New profile-owned
   writes must stamp `userId`. Switching/managing profiles: `src/lib/actions/profiles.ts`.
 - **Disclaimer** must appear on peptide/stack/suggestion surfaces.
+- **Design system (ReturnQueen emerald/teal).** Colors live as CSS variables in
+  `src/app/globals.css` (`:root` light + `.dark`) and flow through Tailwind v4
+  `@theme inline`. NEVER hardcode hex/oklch in components — use tokens
+  (`bg-primary`, `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`,
+  `sidebar-*`). Cards have a soft shadow + `--radius: 0.75rem`. The sidebar nav
+  (`app-shell.tsx`) is grouped: Overview · Tracking · Health · Library · Settings.
+  The **active profile color** (`user.color`) tints chart strokes, progress bars
+  (via a `--pc` CSS var on `[data-slot=progress-indicator]`), and dose-row accents.
+- **Progress-photo storage:** `uploadPhoto` writes files to `public/uploads/`
+  (gitignored) and stores the public path on `Photo.path`. This is for
+  local/self-host; production should swap to object storage (S3/R2).
 - **Never commit secrets, `.env`, or `*.db`** (already gitignored). The generated
   Prisma client (`src/generated`) is gitignored — regenerate, don't commit.
 - Style is enforced by prettier + eslint (+ a defensive format hook).
+
+## Routes
+
+`/` dashboard · `/log` · `/calendar` · `/cycles` (+`/new`,`/[id]`) · `/inventory`
+(vials) · `/metrics` · `/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks`
+(+`/new`,`/[slug]`) · `/suggestions` · `/settings`.
 
 ## How to add a peptide
 

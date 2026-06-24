@@ -3,6 +3,7 @@ import { Syringe } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { DeleteDoseButton } from "@/components/log/delete-dose-button";
+import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,27 +19,45 @@ import {
   getLoggableCycles,
   getRecentDoseLogs,
   listPeptides,
+  listActiveVials,
+  getCurrentUser,
 } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
 import { ROUTES, ROUTE_LABELS } from "@/types/peptide";
+import { suggestNextSite } from "@/lib/sites";
 
 export const metadata = { title: "Log Dose" };
+export const dynamic = "force-dynamic";
 
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function LogPage() {
-  const [peptides, cycles, recent] = await Promise.all([
+  const [peptides, cycles, recent, activeVials, user] = await Promise.all([
     listPeptides(),
     getLoggableCycles(),
     getRecentDoseLogs(15),
+    listActiveVials(),
+    getCurrentUser(),
   ]);
+
+  const lastSite = recent.find((d) => d.site)?.site ?? null;
+  const suggestedSite = suggestNextSite(lastSite);
+
+  // Shape vials for DoseFormFields (include peptide name)
+  const vialsForForm = activeVials.map((v) => ({
+    id: v.id,
+    label: v.label,
+    remainingMcg: v.remainingMcg,
+    peptide: v.peptide ? { name: v.peptide.name } : null,
+  }));
 
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Log a dose"
         description="Record an administration. Track injection sites to rotate them."
+        accentColor={user.color ?? undefined}
       />
 
       <Card className="mb-6">
@@ -99,14 +118,6 @@ export default async function LogPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Injection site</label>
-              <input
-                name="site"
-                placeholder="e.g. R delt, L abdomen"
-                className={inputCls}
-              />
-            </div>
-            <div className="space-y-1.5">
               <label className="text-sm font-medium">When</label>
               <input
                 name="takenAt"
@@ -118,6 +129,14 @@ export default async function LogPage() {
               <label className="text-sm font-medium">Notes</label>
               <input name="notes" className={inputCls} />
             </div>
+
+            {/* Enriched optional fields */}
+            <DoseFormFields
+              vials={vialsForForm}
+              suggestedSite={suggestedSite}
+              lastSite={lastSite}
+            />
+
             <div className="sm:col-span-2">
               <Button type="submit">
                 <Syringe className="size-4" />
@@ -151,7 +170,14 @@ export default async function LogPage() {
               </TableHeader>
               <TableBody>
                 {recent.map((d) => (
-                  <TableRow key={d.id}>
+                  <TableRow
+                    key={d.id}
+                    style={
+                      user.color
+                        ? { borderLeft: `3px solid ${user.color}` }
+                        : undefined
+                    }
+                  >
                     <TableCell className="font-medium">
                       {d.peptide.name}
                     </TableCell>
@@ -177,5 +203,3 @@ export default async function LogPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarRange,
   CheckCircle2,
+  Flame,
   Plus,
   Syringe,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { StatCard } from "@/components/common/stat-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
+import { DueOverdueCard } from "@/components/dashboard/due-overdue-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -27,9 +29,11 @@ import {
 import {
   getActiveCycles,
   getCurrentUser,
+  getDoseLogsInRange,
   getRecentDoseLogs,
   listPeptides,
 } from "@/lib/queries";
+import { computeAdherence } from "@/lib/adherence";
 import {
   cycleProgress,
   getTodaysDoses,
@@ -39,12 +43,19 @@ import {
 import { formatDate } from "@/lib/dates";
 
 export default async function DashboardPage() {
-  const [user, activeCycles, peptides, recentDoses] = await Promise.all([
-    getCurrentUser(),
-    getActiveCycles(),
-    listPeptides(),
-    getRecentDoseLogs(8),
-  ]);
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [user, activeCycles, peptides, recentDoses, rangeLogs] =
+    await Promise.all([
+      getCurrentUser(),
+      getActiveCycles(),
+      listPeptides(),
+      getRecentDoseLogs(8),
+      getDoseLogsInRange(thirtyDaysAgo, now),
+    ]);
+
   const accent = user.color ?? undefined;
 
   const cycleLikes: CycleLike[] = activeCycles.map((c) => ({
@@ -58,11 +69,9 @@ export default async function DashboardPage() {
     stack: c.stack ? { name: c.stack.name } : null,
   }));
 
-  const todays = getTodaysDoses(cycleLikes, new Date());
-
-  const now = new Date();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const todays = getTodaysDoses(cycleLikes, now);
   const dosesThisWeek = recentDoses.filter((d) => d.takenAt >= weekAgo).length;
+  const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -79,7 +88,8 @@ export default async function DashboardPage() {
       />
       <Disclaimer className="mb-6" />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stat cards — 6 across on large screens */}
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Active cycles"
           value={activeCycles.length}
@@ -99,6 +109,27 @@ export default async function DashboardPage() {
           label="Peptides in library"
           value={peptides.length}
           icon={<BookOpen className="size-5" />}
+        />
+        {/* Adherence + streak inline — reuse AdherenceCards for the two extra slots */}
+        <StatCard
+          label="30-day adherence"
+          value={adherence.percent !== null ? `${adherence.percent}%` : "—"}
+          icon={<Activity className="size-5" />}
+          hint={
+            adherence.percent !== null
+              ? `${adherence.logged} of ${adherence.expected} doses`
+              : "No scheduled doses"
+          }
+        />
+        <StatCard
+          label="Current streak"
+          value={adherence.streak === 0 ? "—" : `${adherence.streak}d`}
+          icon={<Flame className="size-5" />}
+          hint={
+            adherence.streak > 0
+              ? "Consecutive days on schedule"
+              : "Log a dose to start"
+          }
         />
       </div>
 
@@ -199,6 +230,12 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
+      {/* Due / Overdue widget */}
+      <div className="mt-6">
+        <DueOverdueCard cycles={cycleLikes} logs={rangeLogs} now={now} />
+      </div>
+
+      {/* Recent doses with profile-color left border accent */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Recent doses</CardTitle>
@@ -219,6 +256,7 @@ export default async function DashboardPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-1 p-0" />
                   <TableHead>Peptide</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>When</TableHead>
@@ -227,7 +265,17 @@ export default async function DashboardPage() {
               </TableHeader>
               <TableBody>
                 {recentDoses.map((d) => (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} className="relative">
+                    {/* Profile-color accent dot on the left */}
+                    <TableCell className="w-1 p-0 pr-2">
+                      {accent ? (
+                        <span
+                          aria-hidden
+                          className="block h-4 w-1 rounded-full"
+                          style={{ background: accent }}
+                        />
+                      ) : null}
+                    </TableCell>
                     <TableCell className="font-medium">
                       {d.peptide.name}
                     </TableCell>

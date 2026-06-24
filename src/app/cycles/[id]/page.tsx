@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { CycleActions } from "@/components/cycles/cycle-actions";
+import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -18,9 +19,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { logDose } from "@/lib/actions/doses";
-import { getCurrentUser, getCycle } from "@/lib/queries";
+import {
+  getCurrentUser,
+  getCycle,
+  getActiveVialsForPeptide,
+} from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
+import { suggestNextSite } from "@/lib/sites";
 
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
@@ -41,6 +47,22 @@ export default async function CycleDetailPage({
   const peptideOptions = cycle.peptide
     ? [cycle.peptide]
     : (cycle.stack?.items.map((i) => i.peptide) ?? []);
+
+  // Active vials for single-peptide cycles
+  const activeVials = cycle.peptide
+    ? await getActiveVialsForPeptide(cycle.peptide.id)
+    : [];
+
+  // Suggest next injection site from cycle dose history
+  const lastSite = cycle.doseLogs.find((d) => d.site)?.site ?? null;
+  const suggestedSite = suggestNextSite(lastSite);
+
+  const vialsForForm = activeVials.map((v) => ({
+    id: v.id,
+    label: v.label,
+    remainingMcg: v.remainingMcg,
+    peptideName: cycle.peptide?.name ?? undefined,
+  }));
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -133,14 +155,16 @@ export default async function CycleDetailPage({
                 <option value="mg">mg</option>
               </select>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Site</label>
-              <input
-                name="site"
-                placeholder="e.g. L abdomen"
-                className={inputCls}
+
+            {/* Enriched optional fields — spans the full grid */}
+            <div className="contents">
+              <DoseFormFields
+                vials={vialsForForm}
+                suggestedSite={suggestedSite}
+                lastSite={lastSite}
               />
             </div>
+
             <div className="sm:col-span-2 lg:col-span-4">
               <Button type="submit">Log dose</Button>
             </div>
@@ -167,7 +191,14 @@ export default async function CycleDetailPage({
               </TableHeader>
               <TableBody>
                 {cycle.doseLogs.map((d) => (
-                  <TableRow key={d.id}>
+                  <TableRow
+                    key={d.id}
+                    style={
+                      user.color
+                        ? { borderLeft: `3px solid ${user.color}` }
+                        : undefined
+                    }
+                  >
                     <TableCell className="font-medium">
                       {d.peptide.name}
                     </TableCell>

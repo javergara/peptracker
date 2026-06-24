@@ -76,3 +76,32 @@ test("calendar all-profiles overlay shows every profile", async ({ page }) => {
   await expect(page.getByText("Me").first()).toBeVisible();
   await expect(page.getByText("Partner").first()).toBeVisible();
 });
+
+test("inventory page shows the seeded vial", async ({ page }) => {
+  await page.goto("/inventory");
+  await expect(page.getByRole("heading", { name: /Inventory/i })).toBeVisible();
+  // Seeded vial label (distinct from the hidden select <option>).
+  await expect(page.getByText(/Tesamorelin 10mg/i).first()).toBeVisible();
+});
+
+test("labs page shows the seeded marker", async ({ page }) => {
+  await page.goto("/labs");
+  await expect(page.getByText(/IGF-1/i).first()).toBeVisible();
+});
+
+test("photos page loads with an upload control", async ({ page }) => {
+  await page.goto("/photos");
+  await expect(page.getByRole("heading", { name: /Photos/i })).toBeVisible();
+  await expect(page.locator('input[type="file"]')).toBeAttached();
+});
+
+test("dashboard shows adherence widget", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/adherence/i).first()).toBeVisible();
+});
+
+test("nav is grouped with new sections", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("Tracking").first()).toBeVisible();
+  await expect(page.getByText("Health").first()).toBeVisible();
+});

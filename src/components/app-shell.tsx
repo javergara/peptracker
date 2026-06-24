@@ -9,15 +9,18 @@ import {
   CalendarDays,
   CalendarRange,
   FlaskConical,
+  Images,
   LayoutDashboard,
   Layers,
   LineChart,
   Menu,
   Moon,
+  Package,
   Settings,
   Sparkles,
   Sun,
   Syringe,
+  TestTube,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -32,17 +35,42 @@ import {
 } from "@/components/ui/sheet";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
+type NavGroup = { label: string | null; items: NavItem[] };
 
-const NAV: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/peptides", label: "Peptides", icon: BookOpen },
-  { href: "/stacks", label: "Stacks", icon: Layers },
-  { href: "/cycles", label: "Cycles", icon: CalendarRange },
-  { href: "/log", label: "Log Dose", icon: Syringe },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/metrics", label: "Metrics", icon: LineChart },
-  { href: "/suggestions", label: "Suggestions", icon: Sparkles },
-  { href: "/settings", label: "Settings", icon: Settings },
+const NAV: NavGroup[] = [
+  {
+    label: null,
+    items: [{ href: "/", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Tracking",
+    items: [
+      { href: "/log", label: "Log Dose", icon: Syringe },
+      { href: "/calendar", label: "Calendar", icon: CalendarDays },
+      { href: "/cycles", label: "Cycles", icon: CalendarRange },
+      { href: "/inventory", label: "Inventory", icon: Package },
+    ],
+  },
+  {
+    label: "Health",
+    items: [
+      { href: "/metrics", label: "Metrics", icon: LineChart },
+      { href: "/labs", label: "Labs", icon: TestTube },
+      { href: "/photos", label: "Photos", icon: Images },
+    ],
+  },
+  {
+    label: "Library",
+    items: [
+      { href: "/peptides", label: "Peptides", icon: BookOpen },
+      { href: "/stacks", label: "Stacks", icon: Layers },
+      { href: "/suggestions", label: "Suggestions", icon: Sparkles },
+    ],
+  },
+  {
+    label: null,
+    items: [{ href: "/settings", label: "Settings", icon: Settings }],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -53,27 +81,36 @@ function isActive(pathname: string, href: string) {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-1 px-3">
-      {NAV.map((item) => {
-        const active = isActive(pathname, item.href);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground",
-            )}
-          >
-            <Icon className="size-4 shrink-0" />
-            {item.label}
-          </Link>
-        );
-      })}
+    <nav className="flex flex-col gap-4 px-3">
+      {NAV.map((group, gi) => (
+        <div key={group.label ?? `g${gi}`} className="flex flex-col gap-1">
+          {group.label ? (
+            <p className="text-muted-foreground/70 px-3 pt-1 pb-0.5 text-[0.7rem] font-semibold tracking-wider uppercase">
+              {group.label}
+            </p>
+          ) : null}
+          {group.items.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }

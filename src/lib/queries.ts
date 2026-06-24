@@ -149,3 +149,58 @@ export async function listMeasurements(type?: string) {
     orderBy: { recordedAt: "asc" },
   });
 }
+
+// --- Vials / inventory -----------------------------------------------------
+
+export async function listVials() {
+  const user = await getActiveUser();
+  return prisma.vial.findMany({
+    where: { userId: user.id },
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    include: { peptide: true },
+  });
+}
+
+/** Active/sealed vials for a peptide — used by the dose-log vial selector. */
+export async function getActiveVialsForPeptide(peptideId: string) {
+  const user = await getActiveUser();
+  return prisma.vial.findMany({
+    where: {
+      userId: user.id,
+      peptideId,
+      status: { in: ["sealed", "active"] },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, label: true, remainingMcg: true, expiresAt: true },
+  });
+}
+
+/** All active/sealed vials (for log forms that pick peptide + vial together). */
+export async function listActiveVials() {
+  const user = await getActiveUser();
+  return prisma.vial.findMany({
+    where: { userId: user.id, status: { in: ["sealed", "active"] } },
+    orderBy: { createdAt: "asc" },
+    include: { peptide: true },
+  });
+}
+
+// --- Labs ------------------------------------------------------------------
+
+export async function listLabs() {
+  const user = await getActiveUser();
+  return prisma.labResult.findMany({
+    where: { userId: user.id },
+    orderBy: { takenAt: "asc" },
+  });
+}
+
+// --- Photos ----------------------------------------------------------------
+
+export async function listPhotos() {
+  const user = await getActiveUser();
+  return prisma.photo.findMany({
+    where: { userId: user.id },
+    orderBy: { takenAt: "desc" },
+  });
+}

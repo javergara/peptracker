@@ -1,4 +1,4 @@
-import { LineChart as LineChartIcon } from "lucide-react";
+import { LineChart as LineChartIcon, Smile, Zap } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
@@ -6,7 +6,11 @@ import { MetricChart } from "@/components/metrics/metric-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addMeasurement } from "@/lib/actions/measurements";
-import { listMeasurements } from "@/lib/queries";
+import {
+  listMeasurements,
+  getCurrentUser,
+  getDoseLogsInRange,
+} from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: "Metrics" };
@@ -22,18 +26,20 @@ const TYPE_LABELS: Record<string, string> = {
   custom: "Custom",
 };
 
-const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
-
 export default async function MetricsPage() {
-  const measurements = await listMeasurements();
+  const now = new Date();
+  const start90 = new Date(now);
+  start90.setDate(start90.getDate() - 90);
 
-  // Group by type (already ordered by recordedAt asc).
+  const [measurements, user, doseLogs] = await Promise.all([
+    listMeasurements(),
+    getCurrentUser(),
+    getDoseLogsInRange(start90, now),
+  ]);
+
+  const profileColor = user.color ?? "var(--chart-1)";
+
+  // Group measurements by type (already ordered by recordedAt asc).
   const byType = new Map<string, typeof measurements>();
   for (const m of measurements) {
     const arr = byType.get(m.type) ?? [];
@@ -41,11 +47,29 @@ export default async function MetricsPage() {
     byType.set(m.type, arr);
   }
 
+  // Build mood & energy chart points from dose logs.
+  const moodPoints = doseLogs
+    .filter((d) => d.mood != null)
+    .map((d) => ({
+      date: formatDate(d.takenAt, "MMM d"),
+      value: d.mood as number,
+    }));
+
+  const energyPoints = doseLogs
+    .filter((d) => d.energy != null)
+    .map((d) => ({
+      date: formatDate(d.takenAt, "MMM d"),
+      value: d.energy as number,
+    }));
+
+  const hasMoodData = moodPoints.length > 0 || energyPoints.length > 0;
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Metrics"
         description="Track outcomes over time and correlate them with your cycles."
+        accentColor={profileColor}
       />
 
       <Card className="mb-6">
@@ -110,7 +134,7 @@ export default async function MetricsPage() {
         />
       ) : (
         <div className="grid gap-6">
-          {Array.from(byType.entries()).map(([type, rows], idx) => {
+          {Array.from(byType.entries()).map(([type, rows]) => {
             const data = rows.map((r) => ({
               date: formatDate(r.recordedAt, "MMM d"),
               value: r.value,
@@ -130,7 +154,7 @@ export default async function MetricsPage() {
                 <CardContent>
                   <MetricChart
                     data={data}
-                    color={CHART_COLORS[idx % CHART_COLORS.length]}
+                    color={profileColor}
                     unit={rows[0]?.unit}
                   />
                 </CardContent>
@@ -139,6 +163,71 @@ export default async function MetricsPage() {
           })}
         </div>
       )}
+
+      {/* Mood & Energy trends from dose logs (last 90 days) */}
+      <div className="mt-8">
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+          Mood &amp; Energy (last 90 days)
+        </h2>
+        {hasMoodData ? (
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smile className="size-4" />
+                  Mood
+                  <span className="text-muted-foreground text-sm font-normal">
+                    (1–5)
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {moodPoints.length > 0 ? (
+                  <MetricChart
+                    data={moodPoints}
+                    color={profileColor}
+                    unit="/ 5"
+                  />
+                ) : (
+                  <p className="text-muted-foreground py-4 text-center text-sm">
+                    No mood ratings logged yet.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="size-4" />
+                  Energy
+                  <span className="text-muted-foreground text-sm font-normal">
+                    (1–5)
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {energyPoints.length > 0 ? (
+                  <MetricChart
+                    data={energyPoints}
+                    color={profileColor}
+                    unit="/ 5"
+                  />
+                ) : (
+                  <p className="text-muted-foreground py-4 text-center text-sm">
+                    No energy ratings logged yet.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <EmptyState
+            icon={<Smile className="size-6" />}
+            title="No mood or energy data yet"
+            description="Rate your mood and energy (1–5) when logging a dose to see trends here."
+          />
+        )}
+      </div>
     </div>
   );
 }

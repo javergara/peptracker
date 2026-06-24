@@ -25,6 +25,13 @@ exactly; reuse primitives instead of reinventing them.
   components). **Toasts:** `sonner`. **Theme:** `next-themes`.
 - **Styling:** Tailwind v4 utility classes; merge with the existing `cn()` from
   `src/lib/utils.ts`. Match spacing/typography of existing pages.
+- **Theme (ReturnQueen emerald/teal):** colors are CSS variables in
+  `src/app/globals.css` — NEVER hardcode hex/oklch in components; use tokens
+  (`bg-primary`, `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`,
+  `sidebar-*`). Cards already carry a soft shadow + `--radius: 0.75rem`. The
+  sidebar nav in `app-shell.tsx` is grouped (Overview · Tracking · Health ·
+  Library · Settings). Tint charts/progress/dose-rows with the active profile
+  color (`user.color`) via inline style, falling back to tokens.
 - **Data:** reads come from `src/lib/queries.ts` (add functions there, import
   `prisma` from `@/lib/db`). Mutations are **server actions** (`"use server"`).
 - **Parse Json columns** through `src/types/peptide.ts` helpers (`asStringArray`,

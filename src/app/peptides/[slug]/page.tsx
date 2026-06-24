@@ -321,6 +321,7 @@ export default async function PeptideDetailPage({
           <ReconstitutionCalculator
             defaultVialMg={reconstitution?.vialMg}
             defaultBacWaterMl={reconstitution?.bacWaterMl}
+            peptideId={peptide.id}
           />
 
           {reconstitution?.notes && (

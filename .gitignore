@@ -56,3 +56,7 @@ prisma/*.db-journal
 /playwright-report
 /test-results
 /coverage
+
+# user-uploaded progress photos (runtime, local storage)
+/public/uploads/*
+!/public/uploads/.gitkeep

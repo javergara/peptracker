@@ -29,6 +29,9 @@ model User {
   measurements Measurement[]
   journal      JournalEntry[]
   doseLogs     DoseLog[]
+  vials        Vial[]
+  labs         LabResult[]
+  photos       Photo[]
 }
 
 model Peptide {
@@ -60,6 +63,7 @@ model Peptide {
   stackItems    StackItem[]
   doseLogs      DoseLog[]
   cycles        Cycle[]
+  vials         Vial[]
   interactionsA PeptideInteraction[] @relation("InteractionA")
   interactionsB PeptideInteraction[] @relation("InteractionB")
 }
@@ -130,19 +134,78 @@ model Cycle {
 }
 
 model DoseLog {
-  id        String   @id @default(cuid())
-  userId    String? // owning profile (nullable for legacy rows; always set on create)
-  cycleId   String?
-  peptideId String
-  takenAt   DateTime @default(now())
-  amount    Float
-  unit      String   @default("mcg")
-  route     String?
-  site      String? // injection-site rotation label
-  notes     String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cycle     Cycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
-  peptide   Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String? // owning profile (nullable for legacy rows; always set on create)
+  cycleId     String?
+  peptideId   String
+  vialId      String? // optional source vial (decrements its remaining on log)
+  takenAt     DateTime @default(now())
+  amount      Float
+  unit        String   @default("mcg")
+  route       String?
+  site        String? // injection-site rotation label
+  mood        Int? // 1-5 wellbeing rating
+  energy      Int? // 1-5 energy rating
+  sideEffects Json? // string[]
+  notes       String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cycle       Cycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  peptide     Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+  vial        Vial?    @relation(fields: [vialId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// Reconstituted/sealed peptide vials — inventory + expiry tracking.
+model Vial {
+  id                   String    @id @default(cuid())
+  userId               String
+  peptideId            String
+  label                String?
+  totalMcg             Float // total peptide in the vial (mcg)
+  bacWaterMl           Float? // diluent volume when reconstituted
+  concentrationMcgPerMl Float? // derived: totalMcg / bacWaterMl
+  remainingMcg         Float // decremented as doses are drawn
+  reconstitutedAt      DateTime?
+  expiresAt            DateTime?
+  status               String    @default("sealed") // sealed | active | empty | expired
+  notes                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  peptide  Peptide   @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+  doseLogs DoseLog[]
+
+  @@index([userId])
+}
+
+// Bloodwork / lab markers over time.
+model LabResult {
+  id      String   @id @default(cuid())
+  userId  String
+  marker  String // e.g. "IGF-1", "Free T", "HbA1c"
+  value   Float
+  unit    String?
+  refLow  Float?
+  refHigh Float?
+  takenAt DateTime @default(now())
+  cycleId String?
+  notes   String?
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Progress photos (stored on local filesystem under public/uploads).
+model Photo {
+  id      String   @id @default(cuid())
+  userId  String
+  path    String // public URL path, e.g. /uploads/<id>.jpg
+  caption String?
+  takenAt DateTime @default(now())
+  tags    Json? // string[]
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
