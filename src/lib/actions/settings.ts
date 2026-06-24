@@ -26,7 +26,7 @@ export async function exportUserData() {
   const [cycles, doseLogs, measurements, journal, customStacks] =
     await Promise.all([
       prisma.cycle.findMany({ where: { userId: user.id } }),
-      prisma.doseLog.findMany(),
+      prisma.doseLog.findMany({ where: { userId: user.id } }),
       prisma.measurement.findMany({ where: { userId: user.id } }),
       prisma.journalEntry.findMany({ where: { userId: user.id } }),
       prisma.stack.findMany({

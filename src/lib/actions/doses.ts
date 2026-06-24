@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
+import { getActiveUser } from "@/lib/active-user";
 
 export async function logDose(formData: FormData) {
+  const user = await getActiveUser();
   const peptideId = String(formData.get("peptideId") ?? "");
   const cycleId = String(formData.get("cycleId") ?? "");
   const amount = Number(formData.get("amount") ?? 0);
@@ -20,6 +22,7 @@ export async function logDose(formData: FormData) {
 
   await prisma.doseLog.create({
     data: {
+      userId: user.id,
       peptideId,
       cycleId: cycleId || null,
       amount,
@@ -32,6 +35,7 @@ export async function logDose(formData: FormData) {
   });
 
   revalidatePath("/log");
+  revalidatePath("/calendar");
   revalidatePath("/");
   if (cycleId) revalidatePath(`/cycles/${cycleId}`);
 }
@@ -39,6 +43,7 @@ export async function logDose(formData: FormData) {
 export async function deleteDose(id: string) {
   const dose = await prisma.doseLog.delete({ where: { id } });
   revalidatePath("/log");
+  revalidatePath("/calendar");
   revalidatePath("/");
   if (dose.cycleId) revalidatePath(`/cycles/${dose.cycleId}`);
 }

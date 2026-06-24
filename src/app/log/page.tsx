@@ -14,7 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { logDose } from "@/lib/actions/doses";
-import { getRecentDoseLogs, listCycles, listPeptides } from "@/lib/queries";
+import {
+  getLoggableCycles,
+  getRecentDoseLogs,
+  listPeptides,
+} from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
 import { ROUTES, ROUTE_LABELS } from "@/types/peptide";
 
@@ -26,7 +30,7 @@ const inputCls =
 export default async function LogPage() {
   const [peptides, cycles, recent] = await Promise.all([
     listPeptides(),
-    listCycles(),
+    getLoggableCycles(),
     getRecentDoseLogs(15),
   ]);
 

@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/common/page-header";
 import { DataControls } from "@/components/settings/data-controls";
+import { ProfilesCard } from "@/components/profiles/profiles-card";
 import { Disclaimer } from "@/components/disclaimer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +19,13 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Settings" description="Preferences and your data." />
 
+      <div className="mb-6">
+        <ProfilesCard />
+      </div>
+
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Profile & units</CardTitle>
+          <CardTitle>Active profile & units</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={updateUserSettings} className="space-y-4">

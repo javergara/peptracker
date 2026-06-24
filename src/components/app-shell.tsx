@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BookOpen,
+  CalendarDays,
   CalendarRange,
   FlaskConical,
   LayoutDashboard,
@@ -38,6 +39,7 @@ const NAV: NavItem[] = [
   { href: "/stacks", label: "Stacks", icon: Layers },
   { href: "/cycles", label: "Cycles", icon: CalendarRange },
   { href: "/log", label: "Log Dose", icon: Syringe },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/metrics", label: "Metrics", icon: LineChart },
   { href: "/suggestions", label: "Suggestions", icon: Sparkles },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -103,7 +105,13 @@ function ThemeToggle() {
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  profileSlot,
+}: {
+  children: React.ReactNode;
+  profileSlot?: React.ReactNode;
+}) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -111,6 +119,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
         <Brand />
+        {profileSlot ? <div className="px-3 pb-2">{profileSlot}</div> : null}
         <div className="mt-2 flex-1 overflow-y-auto pb-4">
           <NavLinks />
         </div>
@@ -139,6 +148,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="w-72 p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <Brand />
+              {profileSlot ? (
+                <div className="px-3 pb-2">{profileSlot}</div>
+              ) : null}
               <NavLinks onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>

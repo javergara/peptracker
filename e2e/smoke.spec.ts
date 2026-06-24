@@ -37,3 +37,21 @@ test("suggestions page loads", async ({ page }) => {
   await page.goto("/suggestions");
   await expect(page.getByText(/not medical advice/i).first()).toBeVisible();
 });
+
+test("calendar view loads", async ({ page }) => {
+  await page.goto("/calendar");
+  await expect(
+    page.getByRole("heading", { name: /^Calendar$/i }),
+  ).toBeVisible();
+  // The month grid renders weekday headers.
+  await expect(page.getByText("Mon").first()).toBeVisible();
+});
+
+test("profile switcher and management are present", async ({ page }) => {
+  await page.goto("/");
+  // Active profile shown in the sidebar switcher.
+  await expect(page.getByText("Me").first()).toBeVisible();
+  await page.goto("/settings");
+  await expect(page.getByText("Profiles").first()).toBeVisible();
+  await expect(page.getByPlaceholder("New profile name")).toBeVisible();
+});

@@ -20,6 +20,7 @@ model User {
   weightUnit String   @default("kg") // kg | lb
   doseUnit   String   @default("mcg") // mcg | mg
   theme      String   @default("system") // system | light | dark
+  color      String? // hex accent for the profile switcher / calendar
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -27,6 +28,7 @@ model User {
   stacks       Stack[]
   measurements Measurement[]
   journal      JournalEntry[]
+  doseLogs     DoseLog[]
 }
 
 model Peptide {
@@ -129,6 +131,7 @@ model Cycle {
 
 model DoseLog {
   id        String   @id @default(cuid())
+  userId    String? // owning profile (nullable for legacy rows; always set on create)
   cycleId   String?
   peptideId String
   takenAt   DateTime @default(now())
@@ -137,8 +140,11 @@ model DoseLog {
   route     String?
   site      String? // injection-site rotation label
   notes     String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   cycle     Cycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
   peptide   Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Measurement {

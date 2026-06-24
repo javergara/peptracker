@@ -122,6 +122,12 @@ URL + seed command live in `prisma.config.ts`. `DATABASE_URL` is in `.env`
 - **base-ui render prop, not `asChild`.** To compose a primitive with another
   element, use `render={<NextLink href="…" />}` style props.
 - **Parse Json columns** through `src/types/peptide.ts` helpers — never cast raw.
+- **Multi-profile (no login).** The active profile is stored in the
+  `activeUserId` cookie. Resolve it via `getActiveUser()` (`src/lib/active-user.ts`);
+  `getCurrentUser()` in `queries.ts` delegates to it. All profile-owned reads
+  (cycles, dose logs, measurements) MUST filter by the active user's id; the
+  peptide library, preset stacks, and interactions are global. New profile-owned
+  writes must stamp `userId`. Switching/managing profiles: `src/lib/actions/profiles.ts`.
 - **Disclaimer** must appear on peptide/stack/suggestion surfaces.
 - **Never commit secrets, `.env`, or `*.db`** (already gitignored). The generated
   Prisma client (`src/generated`) is gitignored — regenerate, don't commit.
