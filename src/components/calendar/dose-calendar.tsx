@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Plus, Syringe } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import { logDose } from "@/lib/actions/doses";
 import { Button } from "@/components/ui/button";
@@ -242,12 +242,17 @@ export function DoseCalendar({
                       ) : null}
                     </span>
                   ) : (
-                    <span
-                      className="mt-1 inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10px] font-medium"
-                      style={{ backgroundColor: `${accent}26`, color: accent }}
-                    >
-                      <Syringe className="size-2.5" />
-                      {dayDoses.length}
+                    <span className="mt-1 inline-flex items-center gap-1">
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ background: accent }}
+                      />
+                      <span
+                        className="text-[10px] font-semibold"
+                        style={{ color: accent }}
+                      >
+                        {dayDoses.length}
+                      </span>
                     </span>
                   )
                 ) : null}

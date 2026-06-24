@@ -1,8 +1,14 @@
-import { LineChart as LineChartIcon, Smile, Zap } from "lucide-react";
+import {
+  GitCompareArrows,
+  LineChart as LineChartIcon,
+  Smile,
+  Zap,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { MetricChart } from "@/components/metrics/metric-chart";
+import { CorrelationChart } from "@/components/metrics/correlation-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addMeasurement } from "@/lib/actions/measurements";
@@ -10,6 +16,7 @@ import {
   listMeasurements,
   getCurrentUser,
   getDoseLogsInRange,
+  listLabs,
 } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
 
@@ -31,13 +38,51 @@ export default async function MetricsPage() {
   const start90 = new Date(now);
   start90.setDate(start90.getDate() - 90);
 
-  const [measurements, user, doseLogs] = await Promise.all([
+  const [measurements, user, doseLogs, labs] = await Promise.all([
     listMeasurements(),
     getCurrentUser(),
     getDoseLogsInRange(start90, now),
+    listLabs(),
   ]);
 
   const profileColor = user.color ?? "var(--chart-1)";
+
+  // Bodyweight vs IGF-1 correlation: merge both series by calendar day.
+  const weights = measurements.filter((m) => m.type === "weight");
+  const igf = labs.filter((l) => /igf/i.test(l.marker));
+  const corrMap = new Map<
+    string,
+    { ts: number; date: string; weight: number | null; igf: number | null }
+  >();
+  function corrKey(d: Date) {
+    return d.toISOString().slice(0, 10);
+  }
+  for (const w of weights) {
+    const key = corrKey(w.recordedAt);
+    const e = corrMap.get(key) ?? {
+      ts: w.recordedAt.getTime(),
+      date: formatDate(w.recordedAt, "MMM d"),
+      weight: null,
+      igf: null,
+    };
+    e.weight = w.value;
+    corrMap.set(key, e);
+  }
+  for (const l of igf) {
+    const key = corrKey(l.takenAt);
+    const e = corrMap.get(key) ?? {
+      ts: l.takenAt.getTime(),
+      date: formatDate(l.takenAt, "MMM d"),
+      weight: null,
+      igf: null,
+    };
+    e.igf = l.value;
+    corrMap.set(key, e);
+  }
+  const correlation = Array.from(corrMap.values()).sort((a, b) => a.ts - b.ts);
+  const hasCorrelation = weights.length > 0 && igf.length > 0;
+  const weightUnit = weights[0]?.unit ?? "kg";
+  const igfUnit = igf[0]?.unit ?? "ng/mL";
 
   // Group measurements by type (already ordered by recordedAt asc).
   const byType = new Map<string, typeof measurements>();
@@ -163,6 +208,38 @@ export default async function MetricsPage() {
           })}
         </div>
       )}
+
+      {/* Bodyweight vs IGF-1 correlation */}
+      <div className="mt-8">
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+          Correlation
+        </h2>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GitCompareArrows className="size-4" />
+              Bodyweight vs IGF-1
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {hasCorrelation ? (
+              <CorrelationChart
+                data={correlation}
+                leftLabel={`Weight (${weightUnit})`}
+                rightLabel={`IGF-1 (${igfUnit})`}
+                leftColor={profileColor}
+                rightColor="var(--chart-3)"
+              />
+            ) : (
+              <EmptyState
+                icon={<GitCompareArrows className="size-6" />}
+                title="Not enough data to correlate yet"
+                description="Log bodyweight on the Metrics page and IGF-1 results on the Labs page to overlay them here."
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Mood & Energy trends from dose logs (last 90 days) */}
       <div className="mt-8">

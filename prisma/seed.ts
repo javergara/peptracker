@@ -259,6 +259,28 @@ async function main() {
       });
     }
   }
+  // Bodyweight series (aligns with IGF dates so the correlation view has data).
+  const weightCount = await prisma.measurement.count({
+    where: { userId: user.id, type: "weight" },
+  });
+  if (weightCount === 0) {
+    const weights = [
+      { d: 90, v: 82.5 },
+      { d: 45, v: 84 },
+      { d: 5, v: 85.6 },
+    ];
+    for (const w of weights) {
+      await prisma.measurement.create({
+        data: {
+          userId: user.id,
+          type: "weight",
+          value: w.v,
+          unit: "kg",
+          recordedAt: new Date(Date.now() - w.d * 86_400_000),
+        },
+      });
+    }
+  }
 
   console.log(`Seed complete for user "${user.name}" (${user.id})`);
 }
