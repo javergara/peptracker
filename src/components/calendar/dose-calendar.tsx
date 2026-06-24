@@ -2,8 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Syringe } from "lucide-react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { ChevronLeft, ChevronRight, Plus, Syringe } from "lucide-react";
 
+import { logDose } from "@/lib/actions/doses";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface CalendarDose {
@@ -16,23 +20,46 @@ export interface CalendarDose {
   cycleName: string | null;
 }
 
+interface PeptideOption {
+  id: string;
+  name: string;
+}
+
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const FALLBACK_ACCENT = "#10b981";
+
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
 
 function monthHref(year: number, monthIndex: number) {
   // monthIndex may be -1 or 12; normalize.
   const d = new Date(year, monthIndex, 1);
-  return `/calendar?month=${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return `/calendar?month=${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 }
+
+const inputCls =
+  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2";
 
 export function DoseCalendar({
   year,
   monthIndex,
   doses,
+  accentColor,
+  profileName,
+  peptides,
 }: {
   year: number;
   monthIndex: number;
   doses: CalendarDose[];
+  accentColor: string | null;
+  profileName: string;
+  peptides: PeptideOption[];
 }) {
+  const accent = accentColor ?? FALLBACK_ACCENT;
+  const [isPending, startTransition] = useTransition();
+  const [showLog, setShowLog] = React.useState(false);
+
   // Group doses by day-of-month (local time).
   const byDay = React.useMemo(() => {
     const map = new Map<number, CalendarDose[]>();
@@ -68,11 +95,35 @@ export function DoseCalendar({
     year: "numeric",
   });
 
+  async function handleQuickLog(formData: FormData) {
+    startTransition(async () => {
+      try {
+        await logDose(formData);
+        toast.success("Dose logged");
+        setShowLog(false);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not log dose.");
+      }
+    });
+  }
+
+  // Local datetime (noon) for the selected day, in datetime-local format.
+  const selectedTakenAt = `${year}-${pad(monthIndex + 1)}-${pad(selected)}T12:00`;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{monthLabel}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">{monthLabel}</h2>
+            <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
+              <span
+                className="inline-block size-2.5 rounded-full"
+                style={{ background: accent }}
+              />
+              {profileName}
+            </span>
+          </div>
           <div className="flex items-center gap-1">
             <Link
               href={monthHref(year, monthIndex - 1)}
@@ -135,7 +186,10 @@ export function DoseCalendar({
                   {day}
                 </span>
                 {dayDoses.length > 0 ? (
-                  <span className="mt-1 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-1.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+                  <span
+                    className="mt-1 inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10px] font-medium"
+                    style={{ backgroundColor: `${accent}26`, color: accent }}
+                  >
                     <Syringe className="size-2.5" />
                     {dayDoses.length}
                   </span>
@@ -147,13 +201,64 @@ export function DoseCalendar({
       </div>
 
       <aside className="space-y-3">
-        <h3 className="font-semibold">
-          {new Date(year, monthIndex, selected).toLocaleString(undefined, {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-          })}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">
+            {new Date(year, monthIndex, selected).toLocaleString(undefined, {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            })}
+          </h3>
+          <Button
+            type="button"
+            size="sm"
+            variant={showLog ? "secondary" : "outline"}
+            onClick={() => setShowLog((v) => !v)}
+          >
+            <Plus className="size-4" />
+            Log
+          </Button>
+        </div>
+
+        {showLog ? (
+          <form
+            action={handleQuickLog}
+            className="bg-muted/30 space-y-2 rounded-lg border p-3"
+          >
+            <input type="hidden" name="takenAt" value={selectedTakenAt} />
+            <select name="peptideId" required className={inputCls}>
+              {peptides.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <input
+                name="amount"
+                type="number"
+                step="any"
+                min="0"
+                required
+                placeholder="Amount"
+                className={inputCls}
+              />
+              <select name="unit" defaultValue="mcg" className={inputCls}>
+                <option value="mcg">mcg</option>
+                <option value="mg">mg</option>
+              </select>
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isPending}
+              className="w-full"
+            >
+              {isPending ? "Logging…" : "Log dose on this day"}
+            </Button>
+          </form>
+        ) : null}
+
         {selectedDoses.length === 0 ? (
           <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
             No doses logged on this day.

@@ -5,7 +5,11 @@ import { PageHeader } from "@/components/common/page-header";
 import { DoseCalendar } from "@/components/calendar/dose-calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDoseLogsInRange } from "@/lib/queries";
+import {
+  getCurrentUser,
+  getDoseLogsInRange,
+  listPeptides,
+} from "@/lib/queries";
 
 export const metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
@@ -29,7 +33,11 @@ export default async function CalendarPage({
 
   const start = new Date(year, monthIndex, 1, 0, 0, 0, 0);
   const end = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
-  const logs = await getDoseLogsInRange(start, end);
+  const [logs, user, peptides] = await Promise.all([
+    getDoseLogsInRange(start, end),
+    getCurrentUser(),
+    listPeptides(),
+  ]);
 
   const doses = logs.map((d) => ({
     id: d.id,
@@ -55,7 +63,14 @@ export default async function CalendarPage({
       />
       <Card>
         <CardContent className="p-4 sm:p-6">
-          <DoseCalendar year={year} monthIndex={monthIndex} doses={doses} />
+          <DoseCalendar
+            year={year}
+            monthIndex={monthIndex}
+            doses={doses}
+            accentColor={user.color}
+            profileName={user.name}
+            peptides={peptides.map((p) => ({ id: p.id, name: p.name }))}
+          />
         </CardContent>
       </Card>
     </div>

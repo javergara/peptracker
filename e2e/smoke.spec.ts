@@ -55,3 +55,15 @@ test("profile switcher and management are present", async ({ page }) => {
   await expect(page.getByText("Profiles").first()).toBeVisible();
   await expect(page.getByPlaceholder("New profile name")).toBeVisible();
 });
+
+test("switching profiles works", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /^Me/ }).first().click();
+  await page.getByRole("button", { name: "Partner" }).click();
+  await expect(page.getByRole("button", { name: /^Partner/ })).toBeVisible();
+});
+
+test("calendar has a per-day quick-log control", async ({ page }) => {
+  await page.goto("/calendar");
+  await expect(page.getByRole("button", { name: /^Log$/ })).toBeVisible();
+});

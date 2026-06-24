@@ -97,11 +97,20 @@ async function main() {
   const peptides = loadPeptides();
   console.log(`Loaded ${peptides.length} peptide records from prisma/data/`);
 
-  // 1) Default single user.
+  // 1) Default profiles (multi-profile demo: "Me" + "Partner").
   const user = await prisma.user.upsert({
     where: { email: "local@peptides.app" },
-    update: {},
-    create: { name: "Me", email: "local@peptides.app" },
+    update: { color: "#6366f1" },
+    create: { name: "Me", email: "local@peptides.app", color: "#6366f1" },
+  });
+  await prisma.user.upsert({
+    where: { email: "partner@peptides.app" },
+    update: { color: "#ec4899" },
+    create: {
+      name: "Partner",
+      email: "partner@peptides.app",
+      color: "#ec4899",
+    },
   });
 
   // 2) Upsert peptides.
