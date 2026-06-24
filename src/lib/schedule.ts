@@ -117,6 +117,8 @@ export function cycleProgress(
     return { daysElapsed, totalDays, percent: 100 };
   }
 
-  const percent = Math.min(100, Math.max(0, (daysElapsed / totalDays) * 100));
+  const percent = Math.round(
+    Math.min(100, Math.max(0, (daysElapsed / totalDays) * 100)),
+  );
   return { daysElapsed, totalDays, percent };
 }
