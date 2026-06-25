@@ -1,8 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import {
-  Activity,
-  BookOpen,
   CalendarRange,
   CheckCircle2,
   Flame,
@@ -11,7 +9,6 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
-import { StatCard } from "@/components/common/stat-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { DueOverdueCard } from "@/components/dashboard/due-overdue-card";
@@ -70,6 +67,7 @@ export default async function DashboardPage() {
   }));
 
   const todays = getTodaysDoses(cycleLikes, now);
+  const todaysDue = todays.reduce((sum, t) => sum + t.times, 0);
   const dosesThisWeek = recentDoses.filter((d) => d.takenAt >= weekAgo).length;
   const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
 
@@ -88,49 +86,87 @@ export default async function DashboardPage() {
       />
       <Disclaimer className="mb-6" />
 
-      {/* Stat cards — 6 across on large screens */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatCard
-          label="Active cycles"
-          value={activeCycles.length}
-          icon={<CalendarRange className="size-5" />}
-        />
-        <StatCard
-          label="Doses this week"
-          value={dosesThisWeek}
-          icon={<Syringe className="size-5" />}
-        />
-        <StatCard
-          label="Today's doses due"
-          value={todays.reduce((sum, t) => sum + t.times, 0)}
-          icon={<Activity className="size-5" />}
-        />
-        <StatCard
-          label="Peptides in library"
-          value={peptides.length}
-          icon={<BookOpen className="size-5" />}
-        />
-        {/* Adherence + streak inline — reuse AdherenceCards for the two extra slots */}
-        <StatCard
-          label="30-day adherence"
-          value={adherence.percent !== null ? `${adherence.percent}%` : "—"}
-          icon={<Activity className="size-5" />}
-          hint={
-            adherence.percent !== null
-              ? `${adherence.logged} of ${adherence.expected} doses`
-              : "No scheduled doses"
-          }
-        />
-        <StatCard
-          label="Current streak"
-          value={adherence.streak === 0 ? "—" : `${adherence.streak}d`}
-          icon={<Flame className="size-5" />}
-          hint={
-            adherence.streak > 0
-              ? "Consecutive days on schedule"
-              : "Log a dose to start"
-          }
-        />
+      {/* Hero — the one thing to do now (focal point), plus adherence. */}
+      <div className="mb-4 grid gap-4 lg:grid-cols-3">
+        <Card className="border-primary/30 bg-primary/[0.04] lg:col-span-2">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Today
+              </p>
+              <p className="mt-1 flex items-baseline gap-2">
+                <span className="num text-primary text-4xl font-semibold">
+                  {todaysDue}
+                </span>
+                <span className="text-muted-foreground text-sm">
+                  {todaysDue === 1 ? "dose" : "doses"} due
+                </span>
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {todaysDue === 0
+                  ? "Nothing scheduled — you're all caught up."
+                  : "Log each dose as you take it to stay on track."}
+              </p>
+            </div>
+            <Button size="lg" render={<Link href="/log" />}>
+              <Syringe className="size-4" />
+              Log dose
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              30-day adherence
+            </p>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="num text-4xl font-semibold">
+                {adherence.percent !== null ? `${adherence.percent}%` : "—"}
+              </span>
+              <span className="text-muted-foreground inline-flex items-center gap-1 text-sm">
+                <Flame className="size-3.5" />
+                <span className="num">{adherence.streak}</span>d streak
+              </span>
+            </div>
+            <Progress
+              value={adherence.percent ?? 0}
+              className={
+                accent
+                  ? "mt-3 [&_[data-slot=progress-indicator]]:bg-[var(--pc)]"
+                  : "mt-3"
+              }
+              style={accent ? ({ "--pc": accent } as CSSProperties) : undefined}
+            />
+            <p className="text-muted-foreground mt-2 text-xs">
+              {adherence.percent !== null
+                ? `${adherence.logged} of ${adherence.expected} scheduled doses`
+                : "No scheduled doses yet"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Secondary, demoted stats. */}
+      <div className="text-muted-foreground mb-6 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+        <span>
+          <span className="num text-foreground font-semibold">
+            {activeCycles.length}
+          </span>{" "}
+          active {activeCycles.length === 1 ? "cycle" : "cycles"}
+        </span>
+        <span>
+          <span className="num text-foreground font-semibold">
+            {dosesThisWeek}
+          </span>{" "}
+          doses this week
+        </span>
+        <Link href="/peptides" className="hover:text-foreground">
+          <span className="num text-foreground font-semibold">
+            {peptides.length}
+          </span>{" "}
+          peptides in library →
+        </Link>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
