@@ -1,0 +1,110 @@
+{
+  "slug": "cjc-1295",
+  "name": "CJC-1295",
+  "aliases": [
+    "CJC-1295 DAC",
+    "CJC-1295 with DAC",
+    "Drug Affinity Complex GRF",
+    "DAC:GRF",
+    "CJC-1295 without DAC",
+    "Modified GRF (1-29)",
+    "Mod GRF 1-29",
+    "CJC-1293"
+  ],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "CJC-1295 is a synthetic analog of growth hormone-releasing hormone (GHRH) based on the GRF(1-29) sequence, designed to stimulate the pituitary to release growth hormone (GH) and raise IGF-1. It exists in two forms: 'with DAC' (a Drug Affinity Complex that binds serum albumin for a multi-day half-life and weekly dosing) and 'without DAC' (Modified GRF 1-29, a short-acting version dosed daily that better preserves natural pulsatile GH release).",
+  "mechanism": "CJC-1295 is a tetrasubstituted analog of the first 29 amino acids of GHRH (GRF 1-29, the bioactive core also known as sermorelin). The amino-acid substitutions protect the peptide from rapid enzymatic degradation by dipeptidyl peptidase-IV (DPP-IV), extending its activity relative to native GHRH. It acts on GHRH receptors on pituitary somatotrophs to increase the amplitude of growth hormone pulses, which in turn raises hepatic IGF-1 production.\n\nThe defining structural feature of the 'with DAC' version is a maleimidopropionyl-lysine (Drug Affinity Complex) moiety that forms a covalent bond with circulating serum albumin. This dramatically prolongs circulation, giving an estimated half-life of roughly 6-8 days and producing sustained, tonic elevation of GH and IGF-1. The 'without DAC' version (Modified GRF 1-29) lacks the albumin-binding complex, so it has a short half-life of about 30 minutes and produces a brief, more physiologic GH pulse.\n\nBecause GHRH analogs and GH-releasing peptides (GHRPs, e.g. ipamorelin) act through different receptors and complementary pathways, they are frequently studied as a combination to amplify GH release beyond either compound alone.",
+  "benefits": [
+    "Stimulates endogenous GH release and raises IGF-1 rather than supplying exogenous GH",
+    "In a controlled trial, single doses raised mean plasma GH 2- to 10-fold for 6+ days and IGF-1 1.5- to 3-fold for 9-11 days (DAC version)",
+    "Multiple DAC doses kept IGF-1 elevated for up to ~28 days in healthy adults",
+    "Studied for body composition support (lean mass, fat metabolism), recovery, and sleep quality via the GH axis",
+    "Without-DAC (Mod GRF 1-29) form better preserves the natural pulsatile pattern of GH secretion",
+    "Synergizes with GHRPs such as ipamorelin for a larger combined GH pulse"
+  ],
+  "risks": [
+    "Not FDA-approved for human use; clinical development was abandoned and there is no approved therapeutic product",
+    "Prohibited at all times by WADA (GH secretagogues / GHRH class) in competitive sport",
+    "Sustained IGF-1 elevation from the DAC form carries theoretical concern regarding tissue/tumor growth and insulin resistance",
+    "Manufacturer trials were discontinued after a participant death in 2006 (attributed by the attending physician to pre-existing coronary disease, not the drug); long-term human safety is not established",
+    "Much enthusiast dosing guidance is extrapolated; rigorous long-term human safety/efficacy data are limited",
+    "Quality and purity of research-grade material vary; contamination risk with non-pharmaceutical sources"
+  ],
+  "sideEffects": [
+    "Injection-site reactions: redness, itching, swelling, or pain",
+    "Facial flushing and transient warmth shortly after injection",
+    "Headache and dizziness",
+    "Water retention, tingling, or numbness (paresthesia)",
+    "Joint aches or carpal-tunnel-like symptoms with excessive GH/IGF-1 elevation",
+    "Reduced insulin sensitivity / higher blood glucose with sustained high IGF-1",
+    "Fatigue or vivid dreams"
+  ],
+  "dosage": {
+    "low": "100",
+    "standard": "100-300",
+    "high": "300",
+    "unit": "mcg",
+    "notes": "Common educational protocols differ sharply by form. WITH DAC: a frequently cited research dose is ~1-2 mg per week (often split into 1-2 injections) because the multi-day half-life provides tonic stimulation; clinical trials studied 30, 60, and 125 mcg/kg single doses. WITHOUT DAC (Mod GRF 1-29): ~100 mcg per dose, 1-3x daily, often timed at bedtime and/or post-workout to match natural GH pulses, frequently combined 1:1 with ipamorelin (e.g. 100 mcg + 100 mcg). The numeric range above reflects the without-DAC per-dose model; for the DAC form think in mg/week instead."
+  },
+  "route": "SUBQ",
+  "frequency": "Without DAC (Mod GRF 1-29): daily, often 1-3x/day (e.g. bedtime, post-workout). With DAC: roughly once or twice weekly.",
+  "halfLife": "Without DAC (Mod GRF 1-29): ~30 minutes. With DAC: ~6-8 days due to covalent albumin binding.",
+  "cycleLength": "Commonly studied/used in 8-12 week cycles; longer GH-axis use is sometimes cycled with breaks to monitor IGF-1.",
+  "reconstitution": {
+    "vialMg": 2,
+    "bacWaterMl": 2,
+    "notes": "2 mg vial + 2 mL bacteriostatic water = 1 mg/mL (1000 mcg/mL), so 100 mcg = 0.1 mL (10 units on a U-100 insulin syringe) and 1 mg = 1.0 mL (100 units). Add the diluent slowly down the vial wall and swirl gently; do not shake. Adjust diluent volume to make per-dose measurement convenient."
+  },
+  "storage": "Store lyophilized vials refrigerated (2-8C) or frozen and protected from light. After reconstitution, refrigerate at 2-8C and use within ~3-4 weeks; do not freeze the reconstituted solution.",
+  "contraindications": [
+    "Active or history of cancer / malignancy (GH-IGF-1 axis stimulation is a theoretical growth concern)",
+    "Pregnancy and breastfeeding",
+    "Diabetes or significant insulin resistance without close monitoring (IGF-1 can impair glucose control)",
+    "Active proliferative diabetic retinopathy",
+    "Competitive athletes subject to anti-doping testing (WADA-prohibited)",
+    "Known hypersensitivity to GHRH analogs"
+  ],
+  "interactions": [
+    {
+      "with": "ipamorelin",
+      "kind": "synergy",
+      "note": "Classic GHRH + GHRP combination. CJC-1295 (a GHRH analog) increases GH pulse amplitude while ipamorelin (a selective GH-releasing peptide/ghrelin-receptor agonist) triggers a GH pulse via a separate receptor; together they produce a larger, more reliable GH release than either alone. The without-DAC (Mod GRF 1-29) form is most often paired 1:1 with ipamorelin."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Tesamorelin is also a GHRH analog acting on the same pituitary GHRH receptors. Stacking two GHRH analogs is redundant rather than additive and compounds GH/IGF-1 elevation, increasing the risk of fluid retention, joint symptoms, and reduced insulin sensitivity; combining them offers little benefit over choosing one."
+    },
+    {
+      "with": "mots-c",
+      "kind": "synergy",
+      "note": "Non-overlapping pathways: CJC-1295 drives the GH/IGF-1 axis for anabolism and recovery, while MOTS-c acts on mitochondrial/metabolic (AMPK) signaling. Sometimes combined in body-composition-focused research protocols, though human evidence is limited."
+    }
+  ],
+  "references": [
+    {
+      "title": "Teichman et al. Prolonged stimulation of GH and IGF-I secretion by CJC-1295, a long-acting analog of GHRH, in healthy adults (PubMed, J Clin Endocrinol Metab 2006)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16352683/"
+    },
+    {
+      "title": "Prolonged Stimulation of GH and IGF-I Secretion by CJC-1295 (Oxford Academic / JCEM)",
+      "url": "https://academic.oup.com/jcem/article-abstract/91/3/799/2843281"
+    },
+    {
+      "title": "Activation of the GH/IGF-1 axis by CJC-1295, a long-acting GHRH analog (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19386527/"
+    },
+    {
+      "title": "CJC-1295 - Wikipedia (mechanism, DAC albumin binding, half-life, FDA/WADA status)",
+      "url": "https://en.wikipedia.org/wiki/CJC-1295"
+    }
+  ],
+  "tags": [
+    "gh-axis",
+    "muscle-growth",
+    "recovery-injury",
+    "fat-loss",
+    "longevity"
+  ],
+  "status": "research"
+}

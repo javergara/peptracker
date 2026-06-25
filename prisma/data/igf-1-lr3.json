@@ -1,0 +1,113 @@
+{
+  "slug": "igf-1-lr3",
+  "name": "IGF-1 LR3",
+  "aliases": [
+    "IGF-1",
+    "Long R3 IGF-1",
+    "IGF1-LR3",
+    "Long R3 IGF-I",
+    "LR3 IGF-1",
+    "Insulin-like Growth Factor 1 Long R3"
+  ],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "IGF-1 LR3 is a synthetic 83-amino-acid analog of insulin-like growth factor 1 (IGF-1) engineered for greatly increased stability and potency. It is not a growth hormone secretagogue: it acts downstream of GH as a direct IGF-1 receptor agonist, and is grouped under the GH-axis category because IGF-1 is the principal effector hormone of that axis. It is an investigational research chemical with no human therapeutic approval.",
+  "mechanism": "Native IGF-1 is a 70-amino-acid peptide and the main downstream mediator of growth hormone (GH): GH stimulates hepatic and local IGF-1 production, and IGF-1 then drives much of GH's anabolic and growth-promoting signaling. IGF-1 LR3 is a recombinant analog with two engineered changes: an arginine substituted for glutamic acid at position 3 ('R3'), and a 13-amino-acid N-terminal extension ('Long'), giving 83 residues total.\n\nThese modifications dramatically lower its affinity for the IGF binding proteins (IGFBPs) that normally sequester and clear circulating IGF-1. As a result a far greater fraction of IGF-1 LR3 stays free and available to bind the IGF-1 receptor, a tyrosine-kinase receptor that activates the PI3K/Akt and Ras/MAPK pathways to promote cell growth, proliferation, protein synthesis, and survival. Because the IGF-1 receptor is highly homologous to the insulin receptor, IGF-1 also exerts insulin-like effects, including lowering blood glucose. Reduced IGFBP binding plus slower renal clearance give IGF-1 LR3 an in vivo half-life roughly 20-30x longer than free native IGF-1 and an estimated ~3-fold greater biological potency.",
+  "benefits": [
+    "Direct, sustained activation of the IGF-1 receptor (acts downstream of GH rather than stimulating GH release)",
+    "Studied in research models for skeletal muscle hypertrophy and satellite cell proliferation",
+    "Investigated for tissue repair, bone biology, and neuroprotection in preclinical work",
+    "Much longer-acting and more potent than native IGF-1 due to minimal IGFBP binding",
+    "Widely used as a laboratory reagent for cell culture and sustained IGF-1R signaling studies"
+  ],
+  "risks": [
+    "Highly investigational: sold as a research chemical, not FDA-approved or approved for any human use",
+    "Hypoglycemia is a primary acute danger, since IGF-1 has insulin-like glucose-lowering activity and the long half-life can cause prolonged, hard-to-reverse blood sugar drops",
+    "Theoretical and biologically plausible cancer risk: IGF-1 receptor signaling promotes cell proliferation and survival, and elevated IGF-1 levels are epidemiologically associated with prostate, breast, and colon cancers; sustained exogenous IGF-1R activation may accelerate growth of existing or undiagnosed tumors",
+    "Can drive non-selective growth of internal organs (organomegaly) and other tissues at high or chronic exposure",
+    "Long half-life (~20-30 hours) means effects and adverse events cannot be quickly stopped once injected",
+    "No established human dosing, purity, or long-term safety data; research-chemical sourcing carries contamination and mislabeling risk",
+    "Prohibited in sport: IGF-1 and its analogs are banned by WADA at all times"
+  ],
+  "sideEffects": [
+    "Hypoglycemia: shakiness, sweating, dizziness, confusion, palpitations, and in severe cases loss of consciousness",
+    "Injection-site redness, swelling, pain, or lipohypertrophy",
+    "Headache and fatigue",
+    "Fluid retention, joint aches, or jaw/limb discomfort (IGF/GH-axis effects)",
+    "Reported numbness or tingling in extremities"
+  ],
+  "dosage": {
+    "low": "10",
+    "standard": "20-50",
+    "high": "50-100",
+    "unit": "mcg",
+    "notes": "Educational reference only, not a protocol or medical advice. Research-context figures commonly cited fall in the 10-100 mcg/day range, with users often eating carbohydrate around dosing because of the hypoglycemia risk. Because IGF-1 LR3 has a long half-life and potent insulin-like activity, even small overestimates of dose can cause prolonged low blood sugar. No validated human therapeutic dose exists."
+  },
+  "route": "SUBQ",
+  "frequency": "Once daily when used in research contexts; some protocols dose only on training/active days",
+  "halfLife": "Approximately 20-30 hours in vivo, roughly 20-30x longer than free native IGF-1 (which is cleared in minutes when unbound)",
+  "cycleLength": "Short cycles are typically described in the research-chemical community (around 4 weeks), reflecting concern over IGF-1R desensitization and growth-related risks; no clinically validated cycle exists",
+  "reconstitution": {
+    "vialMg": 1,
+    "bacWaterMl": 2,
+    "notes": "Example math: a 1 mg (1000 mcg) vial + 2 mL bacteriostatic water = 500 mcg/mL, so 20 mcg = 0.04 mL (4 units on a U-100 insulin syringe). IGF-1 LR3 is sometimes reconstituted with bacteriostatic water; some sources prefer acetic-acid-based diluents for stability. Swirl gently, do not shake."
+  },
+  "storage": "Store lyophilized vials frozen (-20C) and protect from light. After reconstitution, refrigerate at 2-8C and use within a few weeks; avoid freeze-thaw cycles of the reconstituted solution.",
+  "contraindications": [
+    "Active, prior, or suspected cancer, or strong family/personal risk of IGF-driven malignancies (prostate, breast, colon)",
+    "Diabetes or any condition predisposing to unstable blood glucose (hypoglycemia risk)",
+    "Pregnancy and breastfeeding",
+    "Pediatric or adolescent use outside of clinical supervision (uncontrolled growth signaling)",
+    "Competitive athletes subject to anti-doping testing",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "cjc-1295",
+      "kind": "caution",
+      "note": "CJC-1295 raises GH, which raises endogenous IGF-1; stacking with exogenous IGF-1 LR3 is redundant on the same pathway and compounds growth and hypoglycemia/organ-growth risks rather than adding a distinct benefit."
+    },
+    {
+      "with": "ipamorelin",
+      "kind": "caution",
+      "note": "Ipamorelin is a GH secretagogue that increases IGF-1 indirectly; combining with direct IGF-1 LR3 layers two sources of IGF-1R activation and amplifies axis-related risks."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Tesamorelin (a GHRH analog) elevates GH and IGF-1; adding exogenous IGF-1 LR3 is overlapping/redundant on the GH-IGF-1 axis and increases cumulative growth and metabolic risk."
+    },
+    {
+      "with": "insulin",
+      "kind": "avoid",
+      "note": "IGF-1 has insulin-like glucose-lowering activity; combining with insulin or insulin secretagogues sharply increases the risk of severe, prolonged hypoglycemia."
+    }
+  ],
+  "references": [
+    {
+      "title": "IGF-1 LR3 - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/IGF-1_LR3"
+    },
+    {
+      "title": "Superior potency of infused IGF-I analogues which bind poorly to IGF-binding proteins is maintained when administered by injection (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8708565/"
+    },
+    {
+      "title": "Long R3 insulin-like growth factor-I (IGF-I) infusion stimulates organ growth but reduces plasma IGF-I, IGF-II and IGF binding protein concentrations in the guinea pig (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/7561636/"
+    },
+    {
+      "title": "Insulin-like growth factor-1 signaling in the tumor microenvironment: carcinogenesis, cancer drug resistance, and therapeutic potential (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9395641/"
+    },
+    {
+      "title": "Role of insulin-like growth factor 1 receptor signalling in cancer (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2361813/"
+    },
+    {
+      "title": "Recombinant Human LR3 IGF-I/IGF-1 Protein product description (R&D Systems)",
+      "url": "https://www.rndsystems.com/products/recombinant-human-lr3-igf-i-igf-1-protein-cf_8335-g1"
+    }
+  ],
+  "tags": ["muscle-growth", "recovery-injury", "gh-axis"],
+  "status": "research"
+}

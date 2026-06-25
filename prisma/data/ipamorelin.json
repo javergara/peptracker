@@ -1,0 +1,86 @@
+{
+  "slug": "ipamorelin",
+  "name": "Ipamorelin",
+  "aliases": ["NNC 26-0161", "Aib-His-D-2-Nal-D-Phe-Lys-NH2"],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "Ipamorelin is a selective pentapeptide growth hormone secretagogue (a GHRP) that mimics ghrelin at the GHS-R1a receptor to stimulate a pulse of growth hormone from the pituitary. It is notable for being the first GHRP-receptor agonist with selectivity for GH release comparable to GHRH, releasing GH with minimal effect on cortisol, ACTH, or prolactin.",
+  "mechanism": "Ipamorelin (sequence Aib-His-D-2-Nal-D-Phe-Lys-NH2) is a synthetic pentapeptide that acts as a selective agonist at the growth hormone secretagogue receptor type 1a (GHS-R1a), the same receptor activated by the endogenous hormone ghrelin. This receptor is highly expressed on somatotroph cells of the anterior pituitary. Receptor binding signals through Gq/11 proteins, activating phospholipase C, generating IP3 and DAG, and mobilizing intracellular calcium, which triggers exocytosis of GH-containing secretory granules into the circulation.\n\nUnlike a GHRH analog, which acts on the GHRH receptor, ipamorelin works through the ghrelin/GHRP pathway. Pharmacological profiling with GHRP and GHRH antagonists showed that ipamorelin, like GHRP-6, stimulates GH via a GHRP-like receptor. Its defining feature is selectivity: in preclinical and human studies it produced a clean, GHRH-like pulse of GH without significantly raising cortisol, ACTH, or prolactin, even at doses far above those needed for maximal GH release. This contrasts with earlier GHRPs such as GHRP-2 and GHRP-6, which elevate cortisol and prolactin. Because it preserves the natural pulsatile pattern of GH secretion and relies on an intact pituitary, it is often paired with a GHRH analog for an additive or synergistic GH response.",
+  "benefits": [
+    "Selective GH release with minimal cortisol, ACTH, or prolactin elevation",
+    "Stimulates a natural, pulsatile pattern of GH secretion rather than constant elevation",
+    "Studied for supporting lean body mass, recovery, and tissue repair via the GH/IGF-1 axis",
+    "Often reported to support sleep quality, consistent with nocturnal GH pulses",
+    "Synergizes with GHRH analogs (e.g. CJC-1295) for a larger combined GH pulse",
+    "Generally well tolerated relative to less selective GHRPs"
+  ],
+  "risks": [
+    "Not FDA-approved; no large phase 3 trials completed and no approved clinical indication",
+    "Banned by WADA and prohibited in competitive sport as a GH secretagogue",
+    "Stimulating the GH/IGF-1 axis is theoretically a concern with active or prior malignancy",
+    "Can transiently raise blood glucose and lower insulin sensitivity via GH effects",
+    "Human long-term safety data are limited; most evidence is preclinical or small short-term studies"
+  ],
+  "sideEffects": [
+    "Injection-site redness, irritation, or soreness",
+    "Headache, flushing, or lightheadedness shortly after injection",
+    "Transient increase in appetite (ghrelin-receptor activity, milder than GHRP-6)",
+    "Water retention, tingling, or joint stiffness from elevated GH/IGF-1",
+    "Fatigue or drowsiness, especially with evening dosing"
+  ],
+  "dosage": {
+    "low": "100",
+    "standard": "200-300",
+    "high": "300",
+    "unit": "mcg",
+    "notes": "Common educational protocol is 100-300 mcg per dose, often dosed at ~1 mcg/kg, given 1-3 times daily on an empty stomach (food, especially carbohydrate/fat, blunts the GH pulse). When stacked with a GHRH analog, each is typically drawn into the same syringe. This is educational information, not medical advice."
+  },
+  "route": "SUBQ",
+  "frequency": "1-3x daily, often before bed and/or post-workout, on an empty stomach",
+  "halfLife": "Short; terminal half-life roughly 2 hours in human PK studies (reported ~2-3 hours at lower doses), with the GH pulse peaking ~30-60 minutes after dosing and returning to baseline within 2-3 hours",
+  "cycleLength": "Commonly run in cycles of about 8-12 weeks with breaks, to limit receptor desensitization",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 2,
+    "notes": "5 mg vial + 2 mL bacteriostatic water = 2.5 mg/mL (2500 mcg/mL), so 250 mcg = 0.1 mL (10 units on a U-100 insulin syringe). Swirl gently; do not shake."
+  },
+  "storage": "Store lyophilized vials frozen or refrigerated. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. Protect from light.",
+  "contraindications": [
+    "Active or history of cancer (caution due to GH/IGF-1 axis stimulation)",
+    "Pregnancy and breastfeeding",
+    "Competitive athletes subject to anti-doping testing (WADA-prohibited)",
+    "Poorly controlled diabetes or insulin resistance (GH can raise glucose)",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "cjc-1295",
+      "kind": "synergy",
+      "note": "Classic GHRP + GHRH combination. Ipamorelin (GHRP) amplifies the GH pulse while CJC-1295 (GHRH analog) raises the baseline and broadens the release window; together they produce a larger, more sustained GH pulse than either alone, while ipamorelin keeps cortisol/prolactin low."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Tesamorelin is also a GHRH analog and shares the GH-axis mechanism with CJC-1295. Combining it with ipamorelin overlaps GH stimulation; stacking two GH-axis agents compounds effects on IGF-1, glucose, and fluid retention, so monitor accordingly rather than running multiple GHRH analogs at once."
+    }
+  ],
+  "references": [
+    {
+      "title": "Ipamorelin, the first selective growth hormone secretagogue (Raun et al., Eur J Endocrinol 1998, PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/9849822/"
+    },
+    {
+      "title": "Pharmacokinetic-Pharmacodynamic Modeling of Ipamorelin, a Growth Hormone Releasing Peptide, in Human Volunteers (Pharm Res)",
+      "url": "https://link.springer.com/article/10.1023/A:1018955126402"
+    },
+    {
+      "title": "Pharmacokinetic evaluation of ipamorelin and other peptidyl growth hormone secretagogues with emphasis on nasal absorption (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/9879640/"
+    },
+    {
+      "title": "The GH secretagogues ipamorelin and GH-releasing peptide-6 enhance bone formation (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10828840/"
+    }
+  ],
+  "tags": ["gh-axis", "muscle-growth", "recovery-injury", "sleep", "longevity"],
+  "status": "research"
+}
