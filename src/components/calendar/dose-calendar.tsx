@@ -30,7 +30,7 @@ interface PeptideOption {
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const FALLBACK_ACCENT = "#10b981";
+const FALLBACK_ACCENT = "#7C3AED";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");

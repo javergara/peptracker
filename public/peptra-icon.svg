@@ -1,0 +1,5 @@
+<svg width="1024" height="1024" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Peptra app icon">
+  <defs><linearGradient id="gi" x1="16" y1="10" x2="48" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4F46E5"/><stop offset="0.5" stop-color="#7C3AED"/><stop offset="1" stop-color="#A855F7"/></linearGradient><mask id="mi"><rect x="0" y="0" width="64" height="64" fill="white"/><circle cx="34" cy="26" r="7" fill="black"/></mask></defs>
+  <rect x="0" y="0" width="64" height="64" rx="14.5" fill="url(#gi)"/>
+  <g mask="url(#mi)" fill="#ffffff"><rect x="18" y="12" width="12" height="42" rx="6"/><circle cx="32" cy="26" r="14"/></g>
+</svg>

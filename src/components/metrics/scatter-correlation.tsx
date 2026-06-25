@@ -53,7 +53,11 @@ export function ScatterCorrelation({
           dataKey="x"
           name={xLabel}
           domain={["auto", "auto"]}
-          tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+          tick={{
+            fontSize: 12,
+            fill: "var(--muted-foreground)",
+            fontFamily: "var(--font-mono)",
+          }}
           tickLine={false}
           axisLine={false}
           label={{
@@ -69,7 +73,11 @@ export function ScatterCorrelation({
           dataKey="y"
           name={yLabel}
           domain={["auto", "auto"]}
-          tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+          tick={{
+            fontSize: 12,
+            fill: "var(--muted-foreground)",
+            fontFamily: "var(--font-mono)",
+          }}
           tickLine={false}
           axisLine={false}
           width={48}

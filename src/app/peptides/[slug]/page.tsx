@@ -160,7 +160,7 @@ export default async function PeptideDetailPage({
             {benefits.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-emerald-700 dark:text-emerald-400">
+                  <CardTitle className="text-violet-700 dark:text-violet-400">
                     Benefits
                   </CardTitle>
                 </CardHeader>
@@ -168,7 +168,7 @@ export default async function PeptideDetailPage({
                   <ul className="text-muted-foreground space-y-1.5 text-sm">
                     {benefits.map((b, i) => (
                       <li key={i} className="flex gap-2">
-                        <span className="shrink-0 text-emerald-500">✓</span>
+                        <span className="shrink-0 text-violet-500">✓</span>
                         {b}
                       </li>
                     ))}
@@ -272,7 +272,7 @@ export default async function PeptideDetailPage({
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium text-emerald-700 dark:text-emerald-400">
+                      <TableCell className="font-medium text-indigo-700 dark:text-indigo-400">
                         Low
                       </TableCell>
                       <TableCell>{dosage.low}</TableCell>
@@ -281,7 +281,7 @@ export default async function PeptideDetailPage({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium text-sky-700 dark:text-sky-400">
+                      <TableCell className="font-medium text-violet-700 dark:text-violet-400">
                         Standard
                       </TableCell>
                       <TableCell>{dosage.standard}</TableCell>

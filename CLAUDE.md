@@ -169,14 +169,30 @@ strings (Neon) — see `.env.example`.
   lives in `src/proxy.ts` (Next 16 renamed `middleware`→`proxy`); auth config is
   split into edge-safe `src/auth.config.ts` + full `src/auth.ts`.
 - **Disclaimer** must appear on peptide/stack/suggestion surfaces.
-- **Design system (ReturnQueen emerald/teal).** Colors live as CSS variables in
-  `src/app/globals.css` (`:root` light + `.dark`) and flow through Tailwind v4
-  `@theme inline`. NEVER hardcode hex/oklch in components — use tokens
-  (`bg-primary`, `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`,
-  `sidebar-*`). Cards have a soft shadow + `--radius: 0.75rem`. The sidebar nav
-  (`app-shell.tsx`) is grouped: Overview · Tracking · Health · Library · Settings.
-  The **active profile color** (`user.color`) tints chart strokes, progress bars
-  (via a `--pc` CSS var on `[data-slot=progress-indicator]`), and dose-row accents.
+- **Design system (Peptra — violet).** Brand: indigo→violet→orchid
+  (`#4F46E5`/`#7C3AED`/`#A855F7`), Ink `#16102E`, amber `#F59E0B` for
+  alerts/warnings only. Colors live as CSS variables in `src/app/globals.css`
+  (`:root` light + `.dark`) and flow through Tailwind v4 `@theme inline`. NEVER
+  hardcode hex/oklch in components — use tokens (`bg-primary`,
+  `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`, `sidebar-*`).
+  `--radius: 0.75rem`.
+- **Type system:** `font-display` = Space Grotesk (headings/wordmark; h1–h3 get it
+  via a base rule + CardTitle), `font-sans` = IBM Plex Sans (body), `font-mono` =
+  IBM Plex Mono. **Numbers render in mono + tabular** — use the `num` utility
+  (doses, %, stats, vial mcg, lab values, chart axis ticks). Fonts load in
+  `layout.tsx` via `next/font`.
+- **Dark "Ink" brand rail:** the sidebar is dark in BOTH themes. The `.brand-rail`
+  class in `globals.css` is a token-scoping trick: it locally remaps the neutral
+  tokens to a dark violet scale so any child (nav, profile switcher, account menu,
+  disclaimer) reads correctly on the rail without per-component edits. Applied to
+  the `<aside>` + mobile `SheetContent` in `app-shell.tsx`. Sidebar nav is grouped:
+  Overview · Tracking · Health · Library · Settings.
+- **Logo:** `src/components/brand/peptra-logo.tsx` — `PeptraMark` (gradient SVG,
+  unique ids via `useId`) + `PeptraLogo` (mark + wordmark). App icon/favicon =
+  `src/app/icon.svg`; PWA = `src/app/manifest.ts`. App name in `APP_NAME`.
+- The **active profile color** (`user.color`, violet-family defaults) tints chart
+  strokes, progress bars (via a `--pc` CSS var on
+  `[data-slot=progress-indicator]`), and dose-row accents.
 - **Progress-photo storage:** `uploadPhoto` (`src/lib/actions/photos.ts`) uploads
   to **Vercel Blob** (`put`, `access: "public"`) and stores the returned absolute
   Blob URL on `Photo.path`. Needs `BLOB_READ_WRITE_TOKEN` (auto on Vercel;

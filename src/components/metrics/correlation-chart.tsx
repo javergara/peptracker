@@ -41,7 +41,11 @@ export function CorrelationChart({
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+          tick={{
+            fontSize: 12,
+            fill: "var(--muted-foreground)",
+            fontFamily: "var(--font-mono)",
+          }}
           tickLine={false}
           axisLine={false}
         />

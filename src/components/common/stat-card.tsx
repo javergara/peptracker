@@ -23,7 +23,7 @@ export function StatCard({
         ) : null}
         <div className="min-w-0">
           <p className="text-muted-foreground text-xs font-medium">{label}</p>
-          <p className="truncate text-xl font-semibold">{value}</p>
+          <p className="num truncate text-xl font-semibold">{value}</p>
           {hint ? (
             <p className="text-muted-foreground truncate text-xs">{hint}</p>
           ) : null}

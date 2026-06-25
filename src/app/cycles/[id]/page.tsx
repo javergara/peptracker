@@ -95,7 +95,7 @@ export default async function CycleDetailPage({
         <div className="min-w-48 flex-1">
           <div className="text-muted-foreground mb-1 flex justify-between text-xs">
             <span>Progress</span>
-            <span>
+            <span className="num">
               {prog.percent !== null
                 ? `${prog.percent}%`
                 : `Day ${prog.daysElapsed + 1}`}
@@ -214,7 +214,7 @@ export default async function CycleDetailPage({
                     <TableCell className="font-medium">
                       {d.peptide.name}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="num">
                       {d.amount} {d.unit}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

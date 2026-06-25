@@ -11,10 +11,12 @@ import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: "Cycles" };
 
+// Status semantics follow the Peptra palette: active = periwinkle/violet,
+// planned (queued) = slate, paused (rest) = lilac, completed = muted.
 const STATUS_BADGE: Record<string, string> = {
-  active: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-  planned: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
-  paused: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  active: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+  planned: "bg-slate-500/15 text-slate-600 dark:text-slate-300",
+  paused: "bg-purple-400/15 text-purple-700 dark:text-purple-300",
   completed: "bg-muted text-muted-foreground",
 };
 
@@ -69,7 +71,7 @@ export default async function CyclesPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground text-xs">
-                    {c._count.doseLogs} doses
+                    <span className="num">{c._count.doseLogs}</span> doses
                   </span>
                   <Badge variant="outline" className={STATUS_BADGE[c.status]}>
                     {c.status}

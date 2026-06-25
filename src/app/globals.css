@@ -8,8 +8,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,74 +49,110 @@
 }
 
 :root {
-  /* ReturnQueen-inspired: emerald-teal on warm off-white. */
-  --background: oklch(0.99 0.005 160);
-  --foreground: oklch(0.26 0.02 165);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.26 0.02 165);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.26 0.02 165);
-  --primary: oklch(0.6 0.12 168);
-  --primary-foreground: oklch(0.99 0.01 160);
-  --secondary: oklch(0.96 0.012 165);
-  --secondary-foreground: oklch(0.3 0.03 168);
-  --muted: oklch(0.96 0.01 165);
-  --muted-foreground: oklch(0.52 0.02 165);
-  --accent: oklch(0.95 0.04 165);
-  --accent-foreground: oklch(0.35 0.06 168);
-  --destructive: oklch(0.6 0.22 25);
-  --border: oklch(0.91 0.008 165);
-  --input: oklch(0.93 0.008 165);
-  --ring: oklch(0.6 0.12 168);
-  --chart-1: oklch(0.6 0.12 168);
-  --chart-2: oklch(0.72 0.14 175);
-  --chart-3: oklch(0.62 0.17 250);
-  --chart-4: oklch(0.78 0.15 75);
-  --chart-5: oklch(0.63 0.22 15);
+  /* Peptra — violet on violet-tinted white. */
+  --background: #fbfafe;
+  --foreground: #16102e;
+  --card: #ffffff;
+  --card-foreground: #16102e;
+  --popover: #ffffff;
+  --popover-foreground: #16102e;
+  --primary: #7c3aed; /* Violet */
+  --primary-foreground: #ffffff;
+  --secondary: #f1eefb;
+  --secondary-foreground: #2e2658;
+  --muted: #f2effb;
+  --muted-foreground: #6f6a93; /* Slate (darkened for contrast on white) */
+  --accent: #ede9fe; /* Lilac wash */
+  --accent-foreground: #4c1d95;
+  --destructive: #dc2626; /* red — destructive actions (delete) */
+  --border: #e7e2f6;
+  --input: #e7e2f6;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed; /* Violet */
+  --chart-2: #818cf8; /* Periwinkle */
+  --chart-3: #4f46e5; /* Indigo */
+  --chart-4: #a855f7; /* Orchid */
+  --chart-5: #f59e0b; /* Amber (functional) */
   --radius: 0.75rem;
-  --sidebar: oklch(0.985 0.006 160);
-  --sidebar-foreground: oklch(0.26 0.02 165);
-  --sidebar-primary: oklch(0.6 0.12 168);
-  --sidebar-primary-foreground: oklch(0.99 0.01 160);
-  --sidebar-accent: oklch(0.95 0.03 165);
-  --sidebar-accent-foreground: oklch(0.3 0.05 168);
-  --sidebar-border: oklch(0.91 0.008 165);
-  --sidebar-ring: oklch(0.6 0.12 168);
+  /* Sidebar = dark Ink brand rail (same in light & dark). */
+  --sidebar: #16102e;
+  --sidebar-foreground: #efebfa;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #241c4c;
+  --sidebar-accent-foreground: #efebfa;
+  --sidebar-border: rgb(255 255 255 / 10%);
+  --sidebar-ring: #818cf8;
 }
 
 .dark {
-  /* Deep slate-green with bright emerald accents. */
-  --background: oklch(0.19 0.012 168);
-  --foreground: oklch(0.95 0.008 160);
-  --card: oklch(0.22 0.014 168);
-  --card-foreground: oklch(0.95 0.008 160);
-  --popover: oklch(0.22 0.014 168);
-  --popover-foreground: oklch(0.95 0.008 160);
-  --primary: oklch(0.7 0.14 165);
-  --primary-foreground: oklch(0.2 0.02 168);
-  --secondary: oklch(0.28 0.015 168);
-  --secondary-foreground: oklch(0.95 0.008 160);
-  --muted: oklch(0.28 0.015 168);
-  --muted-foreground: oklch(0.72 0.02 165);
-  --accent: oklch(0.32 0.04 168);
-  --accent-foreground: oklch(0.95 0.01 160);
-  --destructive: oklch(0.7 0.19 22);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.14 165);
-  --chart-1: oklch(0.7 0.14 165);
-  --chart-2: oklch(0.78 0.13 175);
-  --chart-3: oklch(0.7 0.15 250);
-  --chart-4: oklch(0.8 0.14 75);
-  --chart-5: oklch(0.7 0.18 15);
-  --sidebar: oklch(0.2 0.013 168);
-  --sidebar-foreground: oklch(0.95 0.008 160);
-  --sidebar-primary: oklch(0.7 0.14 165);
-  --sidebar-primary-foreground: oklch(0.2 0.02 168);
-  --sidebar-accent: oklch(0.3 0.03 168);
-  --sidebar-accent-foreground: oklch(0.95 0.01 160);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.7 0.14 165);
+  /* Deep Ink with brighter orchid accents. */
+  --background: #16102e;
+  --foreground: #efebfa;
+  --card: #221a47;
+  --card-foreground: #efebfa;
+  --popover: #221a47;
+  --popover-foreground: #efebfa;
+  --primary: #a855f7; /* Orchid — brighter on dark */
+  --primary-foreground: #1a1130;
+  --secondary: #2a2154;
+  --secondary-foreground: #efebfa;
+  --muted: #2a2154;
+  --muted-foreground: #a8a2cc;
+  --accent: #2f2660;
+  --accent-foreground: #efebfa;
+  --destructive: #f87171;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
+  --ring: #818cf8;
+  --chart-1: #a855f7; /* Orchid */
+  --chart-2: #818cf8; /* Periwinkle */
+  --chart-3: #6366f1; /* Indigo (lifted) */
+  --chart-4: #c4b5fd; /* Lilac */
+  --chart-5: #fbbf24; /* Amber */
+  --sidebar: #120c26;
+  --sidebar-foreground: #efebfa;
+  --sidebar-primary: #a855f7;
+  --sidebar-primary-foreground: #1a1130;
+  --sidebar-accent: #221a47;
+  --sidebar-accent-foreground: #efebfa;
+  --sidebar-border: rgb(255 255 255 / 10%);
+  --sidebar-ring: #818cf8;
+}
+
+/*
+ * Dark "Ink" brand rail: a local theming scope that remaps the neutral tokens
+ * to a dark violet scale, so any child (nav, profile switcher, account menu,
+ * disclaimer) reads correctly on the rail in BOTH app themes — without editing
+ * each component. Sidebar-* tokens are intentionally left global (violet on ink).
+ */
+.brand-rail {
+  --background: #16102e;
+  --foreground: #efebfa;
+  --card: #1d1640;
+  --card-foreground: #efebfa;
+  --popover: #221a47;
+  --popover-foreground: #efebfa;
+  --muted: #221a47;
+  --muted-foreground: #a8a2cc;
+  --secondary: #241c4c;
+  --secondary-foreground: #efebfa;
+  --accent: #2a2154;
+  --accent-foreground: #efebfa;
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 14%);
+  --ring: #818cf8;
+  background-color: var(--sidebar);
+  color: var(--foreground);
+}
+
+/* Numbers (doses, units, %, stats) render in mono with tabular figures. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 @layer base {
@@ -128,5 +164,11 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 }

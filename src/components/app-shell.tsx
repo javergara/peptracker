@@ -8,7 +8,6 @@ import {
   BookOpen,
   CalendarDays,
   CalendarRange,
-  FlaskConical,
   Images,
   LayoutDashboard,
   Layers,
@@ -24,8 +23,9 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { APP_NAME, DISCLAIMER_SHORT } from "@/lib/constants";
+import { DISCLAIMER_SHORT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { PeptraLogo } from "@/components/brand/peptra-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -117,11 +117,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2 px-5 py-4">
-      <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg">
-        <FlaskConical className="size-4" />
-      </div>
-      <span className="text-base font-semibold tracking-tight">{APP_NAME}</span>
+    <Link href="/" className="flex items-center px-5 py-4">
+      <PeptraLogo markClassName="size-8" wordClassName="text-lg" />
     </Link>
   );
 }
@@ -154,7 +151,7 @@ export function AppShell({
   return (
     <div className="flex min-h-svh">
       {/* Desktop sidebar */}
-      <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
+      <aside className="brand-rail hidden w-64 shrink-0 flex-col border-r lg:flex">
         <Brand />
         {profileSlot ? <div className="px-3 pb-2">{profileSlot}</div> : null}
         <div className="mt-2 flex-1 overflow-y-auto pb-4">
@@ -182,7 +179,7 @@ export function AppShell({
             >
               <Menu className="size-5" />
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SheetContent side="left" className="brand-rail w-72 p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <Brand />
               {profileSlot ? (

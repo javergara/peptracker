@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { signIn, signOut } from "@/auth";
 
-const PROFILE_COLOR = "#6366f1";
+const PROFILE_COLOR = "#7C3AED";
 
 const signupSchema = z.object({
   name: z.string().trim().max(60).optional(),

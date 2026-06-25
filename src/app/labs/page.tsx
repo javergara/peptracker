@@ -47,7 +47,7 @@ function RangeBadge({
     );
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+    <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300">
       In range
     </span>
   );
@@ -184,7 +184,7 @@ export default async function LabsPage() {
                       ) : null}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-semibold">
+                      <span className="num text-base font-semibold">
                         {latest.value}
                       </span>
                       <RangeBadge
@@ -227,7 +227,7 @@ export default async function LabsPage() {
                           <span className="text-muted-foreground text-xs">
                             {formatDate(r.takenAt, "MMM d, yyyy")}
                           </span>
-                          <span className="text-sm font-medium">
+                          <span className="num text-sm font-medium">
                             {r.value}
                             {r.unit ? ` ${r.unit}` : ""}
                           </span>

@@ -1,6 +1,6 @@
-# Peptides Tracker
+# Peptra
 
-A local-first web app to **track peptide protocols** and serve as a **cited knowledge base** — dosing, benefits, risks, routes, cycles, stacks, interaction checks, and rule-based suggestions.
+**Precision for every protocol.** A web app to **track peptide protocols** and serve as a **cited knowledge base** — dosing, benefits, risks, routes, cycles, stacks, interaction checks, and rule-based suggestions. Violet brand: Space Grotesk / IBM Plex type system, mono tabular numbers, dark "Ink" sidebar.
 
 > ⚠️ **Educational and research use only. Not medical advice.** Many peptides listed are research compounds not approved for human use. Nothing here recommends obtaining or using any substance. Consult a qualified healthcare professional before making health decisions.
 

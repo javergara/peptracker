@@ -252,7 +252,7 @@ export default async function InventoryPage() {
                         {concentration != null && (
                           <p className="text-muted-foreground text-xs">
                             Concentration:{" "}
-                            <span className="text-foreground font-medium">
+                            <span className="num text-foreground font-medium">
                               {concentration.toFixed(1)} mcg/mL
                             </span>
                           </p>
@@ -262,7 +262,7 @@ export default async function InventoryPage() {
                             <span className="text-muted-foreground">
                               Remaining
                             </span>
-                            <span className="font-medium tabular-nums">
+                            <span className="num font-medium">
                               {vial.remainingMcg.toFixed(0)} /{" "}
                               {vial.totalMcg.toFixed(0)} mcg
                             </span>
@@ -325,7 +325,7 @@ export default async function InventoryPage() {
                             <span className="text-muted-foreground">
                               Remaining
                             </span>
-                            <span className="font-medium tabular-nums">
+                            <span className="num font-medium">
                               {vial.remainingMcg.toFixed(0)} /{" "}
                               {vial.totalMcg.toFixed(0)} mcg
                             </span>

@@ -70,7 +70,7 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
       : worst === "caution"
         ? "border-amber-500/40 bg-amber-500/10"
         : worst === "synergy"
-          ? "border-emerald-500/40 bg-emerald-500/10"
+          ? "border-indigo-500/40 bg-indigo-500/10"
           : "border-border bg-muted/30";
 
   return (
@@ -180,7 +180,7 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
         <section className="space-y-3">
           <h2 className="text-base font-semibold">Interaction Check</h2>
           {activeInteractions.length === 0 ? (
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+            <div className="flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-700 dark:text-indigo-300">
               <CheckCircle2 className="size-4 shrink-0" />
               No known interactions among the selected peptides.
             </div>

@@ -182,7 +182,7 @@ export default async function LogPage() {
                     <TableCell className="font-medium">
                       {d.peptide.name}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="num">
                       {d.amount} {d.unit}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

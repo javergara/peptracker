@@ -4,7 +4,7 @@ import type {
   InteractionKind,
 } from "@/types/peptide";
 
-export const APP_NAME = "Peptides Tracker";
+export const APP_NAME = "Peptra";
 
 export const DISCLAIMER_SHORT =
   "Educational and research use only. Not medical advice.";
@@ -15,25 +15,25 @@ export const DISCLAIMER_LONG =
 /** Tailwind class fragments for badges per category. */
 export const CATEGORY_BADGE: Record<PeptideCategory, string> = {
   GLP_GIP:
-    "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+    "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30",
   GH_SECRETAGOGUE:
-    "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
+    "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
   HEALING_REPAIR:
     "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
   MITOCHONDRIAL:
-    "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+    "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30",
   COSMETIC:
-    "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-500/30",
+    "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30",
   NOOTROPIC_ANXIOLYTIC:
-    "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30",
+    "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30",
   IMMUNE_ANTIINFLAMMATORY:
-    "bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30",
+    "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
 };
 
 export const GOAL_BADGE: Partial<Record<GoalTag, string>> = {
-  "fat-loss": "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  "fat-loss": "bg-violet-500/15 text-violet-700 dark:text-violet-300",
   "recovery-injury": "bg-rose-500/15 text-rose-700 dark:text-rose-300",
-  "cognition-mood": "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+  "cognition-mood": "bg-purple-500/15 text-purple-700 dark:text-purple-300",
 };
 
 export const INTERACTION_STYLE: Record<
@@ -43,7 +43,7 @@ export const INTERACTION_STYLE: Record<
   synergy: {
     label: "Synergy",
     badge:
-      "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+      "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
   },
   caution: {
     label: "Caution",

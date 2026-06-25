@@ -145,11 +145,11 @@ async function main() {
   });
   await prisma.user.upsert({
     where: { email: "partner@peptides.app" },
-    update: { color: "#ec4899", accountId: account.id },
+    update: { color: "#A855F7", accountId: account.id },
     create: {
       name: "Partner",
       email: "partner@peptides.app",
-      color: "#ec4899",
+      color: "#A855F7",
       accountId: account.id,
     },
   });

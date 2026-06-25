@@ -69,7 +69,7 @@ export async function ProfilesCard() {
           <input
             type="color"
             name="color"
-            defaultValue="#10b981"
+            defaultValue="#A855F7"
             aria-label="New profile color"
             className="border-input h-9 w-10 cursor-pointer rounded-lg border bg-transparent p-1"
           />

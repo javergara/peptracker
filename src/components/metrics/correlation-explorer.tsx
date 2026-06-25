@@ -125,12 +125,17 @@ export function CorrelationExplorer({
         <>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span>
-              Pearson r = <strong style={{ color }}>{reg.r.toFixed(2)}</strong>
+              Pearson r ={" "}
+              <strong className="num" style={{ color }}>
+                {reg.r.toFixed(2)}
+              </strong>
             </span>
             <span className="text-muted-foreground">
-              R² = {reg.r2.toFixed(2)}
+              R² = <span className="num">{reg.r2.toFixed(2)}</span>
             </span>
-            <span className="text-muted-foreground">n = {reg.n}</span>
+            <span className="text-muted-foreground">
+              n = <span className="num">{reg.n}</span>
+            </span>
             <span className="text-muted-foreground">
               {correlationStrength(reg.r)}{" "}
               {reg.slope >= 0 ? "positive" : "negative"}
