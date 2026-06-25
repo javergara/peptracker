@@ -91,6 +91,18 @@ const PRESET_STACKS = [
       { peptide: "selank", timing: "AM/midday" },
     ],
   },
+  {
+    slug: "gh-axis",
+    name: "GH-Axis Stack (CJC-1295 + Ipamorelin)",
+    goal: "Growth hormone axis support",
+    description:
+      "The canonical GHRH + GHRP pairing: CJC-1295 (a GHRH analog) raises the baseline of growth-hormone release while Ipamorelin (a selective ghrelin/GH-secretagogue agonist) drives a clean, selective GH pulse with minimal cortisol or prolactin. Together they produce a larger, more physiological pulse than either alone — typically dosed before bed on an empty stomach.",
+    tags: ["gh-axis", "muscle-growth", "recovery-injury"],
+    items: [
+      { peptide: "cjc-1295", timing: "PM (pre-sleep)" },
+      { peptide: "ipamorelin", timing: "PM (pre-sleep)" },
+    ],
+  },
 ];
 
 async function main() {
