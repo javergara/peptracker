@@ -36,6 +36,16 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
+/** Compact peptide name for tight cells: drop any "(parenthetical)" / alias tail. */
+function shortPeptide(name: string) {
+  return name.split(" (")[0].split(",")[0].trim();
+}
+
+/** Sort doses chronologically (by time, then logged order via id). */
+function byTime(a: CalendarDose, b: CalendarDose) {
+  return a.takenAtISO.localeCompare(b.takenAtISO) || a.id.localeCompare(b.id);
+}
+
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2";
 
@@ -199,74 +209,90 @@ export function DoseCalendar({
           ))}
           {cells.map((day, i) => {
             if (day === null)
-              return <div key={`e${i}`} className="aspect-square" />;
-            const dayDoses = byDay.get(day) ?? [];
+              return <div key={`e${i}`} className="min-h-[4.75rem]" />;
+            const dayDoses = (byDay.get(day) ?? []).slice().sort(byTime);
             const isToday = isThisMonth && day === todayDate;
             const isSelected = day === selected;
             const profs = multiProfile ? profilesIn(dayDoses) : [];
             const dayFace = moodFace(averageMood(dayDoses.map((d) => d.mood)));
+            const MAX = 3;
             return (
               <button
                 key={day}
                 type="button"
                 onClick={() => setSelected(day)}
                 className={cn(
-                  "flex aspect-square flex-col items-center justify-start rounded-lg border p-1 text-sm transition-colors",
+                  "flex min-h-[4.75rem] flex-col gap-1 rounded-lg border p-1 text-left transition-colors",
                   isSelected
                     ? "border-primary bg-primary/5"
                     : "hover:bg-accent border-transparent",
                   isToday && !isSelected && "border-border",
                 )}
               >
-                <span
-                  className={cn(
-                    "flex size-6 items-center justify-center rounded-full text-xs",
-                    isToday &&
-                      "bg-primary text-primary-foreground font-semibold",
-                  )}
-                >
-                  {day}
-                </span>
-                {dayDoses.length > 0 ? (
-                  multiProfile ? (
-                    <span className="mt-1 flex items-center gap-0.5">
-                      {profs.slice(0, 4).map((p) => (
-                        <span
-                          key={p.name}
-                          title={`${p.name}: ${p.count}`}
-                          className="size-2 rounded-full"
-                          style={{ background: p.color ?? FALLBACK_ACCENT }}
-                        />
-                      ))}
-                      {profs.length > 4 ? (
-                        <span className="text-muted-foreground text-[9px]">
-                          +{profs.length - 4}
-                        </span>
-                      ) : null}
-                    </span>
-                  ) : (
-                    <span className="mt-1 inline-flex items-center gap-1">
-                      <span
-                        className="size-2 rounded-full"
-                        style={{ background: accent }}
-                      />
-                      <span
-                        className="text-[10px] font-semibold"
-                        style={{ color: accent }}
-                      >
-                        {dayDoses.length}
-                      </span>
-                    </span>
-                  )
-                ) : null}
-                {dayFace ? (
+                <div className="flex items-center justify-between gap-1">
                   <span
-                    className="text-sm leading-none"
-                    title={`Mood: ${dayFace.label}`}
+                    className={cn(
+                      "flex size-6 items-center justify-center rounded-full text-xs",
+                      isToday &&
+                        "bg-primary text-primary-foreground font-semibold",
+                    )}
                   >
-                    {dayFace.emoji}
+                    {day}
                   </span>
-                ) : null}
+                  {dayFace ? (
+                    <span
+                      className="text-sm leading-none"
+                      title={`Mood: ${dayFace.label}`}
+                    >
+                      {dayFace.emoji}
+                    </span>
+                  ) : null}
+                </div>
+
+                {dayDoses.length === 0 ? null : multiProfile ? (
+                  <span className="flex flex-wrap items-center gap-0.5">
+                    {profs.slice(0, 4).map((p) => (
+                      <span
+                        key={p.name}
+                        title={`${p.name}: ${p.count}`}
+                        className="size-2 rounded-full"
+                        style={{ background: p.color ?? FALLBACK_ACCENT }}
+                      />
+                    ))}
+                    {profs.length > 4 ? (
+                      <span className="text-muted-foreground text-[9px]">
+                        +{profs.length - 4}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : (
+                  <ul className="min-w-0 space-y-0.5">
+                    {dayDoses.slice(0, MAX).map((d) => (
+                      <li
+                        key={d.id}
+                        title={`${d.peptideName} — ${d.amount} ${d.unit}`}
+                        className="flex items-baseline gap-1 text-[10px] leading-tight"
+                      >
+                        <span
+                          className="mt-[3px] size-1.5 shrink-0 self-start rounded-full"
+                          style={{ background: accent }}
+                        />
+                        <span className="min-w-0 flex-1 truncate">
+                          {shortPeptide(d.peptideName)}
+                        </span>
+                        <span className="num text-muted-foreground shrink-0">
+                          {d.amount}
+                          {d.unit}
+                        </span>
+                      </li>
+                    ))}
+                    {dayDoses.length > MAX ? (
+                      <li className="text-muted-foreground text-[9px]">
+                        +{dayDoses.length - MAX} more
+                      </li>
+                    ) : null}
+                  </ul>
+                )}
               </button>
             );
           })}

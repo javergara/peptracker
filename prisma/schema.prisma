@@ -171,6 +171,7 @@ model DoseLog {
   energy      Int? // 1-5 energy rating
   sideEffects Json? // string[]
   notes       String?
+  createdAt   DateTime @default(now()) // logged-at; tiebreaker for same-takenAt ordering
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   cycle       Cycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
   peptide     Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
