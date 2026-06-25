@@ -198,7 +198,7 @@ export function DoseCalendar({
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        <div className="hidden grid-cols-7 gap-1 sm:grid">
           {WEEKDAYS.map((w) => (
             <div
               key={w}
@@ -297,6 +297,88 @@ export function DoseCalendar({
               </button>
             );
           })}
+        </div>
+
+        {/* Mobile: an agenda list (the 7-col grid is too cramped on phones). */}
+        <div className="space-y-2 sm:hidden">
+          {(() => {
+            const agenda = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+              .map((day) => ({
+                day,
+                dayDoses: (byDay.get(day) ?? []).slice().sort(byTime),
+              }))
+              .filter((d) => d.dayDoses.length > 0);
+            if (agenda.length === 0) {
+              return (
+                <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-center text-sm">
+                  No doses logged this month.
+                </p>
+              );
+            }
+            return agenda.map(({ day, dayDoses }) => {
+              const face = moodFace(averageMood(dayDoses.map((d) => d.mood)));
+              const isToday = isThisMonth && day === todayDate;
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setSelected(day)}
+                  className={cn(
+                    "focus-visible:ring-ring flex w-full items-start gap-3 rounded-lg border p-2.5 text-left focus-visible:ring-2 focus-visible:outline-none",
+                    day === selected
+                      ? "border-primary bg-primary/5"
+                      : "border-border",
+                  )}
+                >
+                  <div className="flex w-9 shrink-0 flex-col items-center">
+                    <span className="text-muted-foreground text-[10px] uppercase">
+                      {new Date(year, monthIndex, day).toLocaleString(
+                        undefined,
+                        { weekday: "short" },
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        "num text-lg font-semibold",
+                        isToday && "text-primary",
+                      )}
+                    >
+                      {day}
+                    </span>
+                  </div>
+                  <ul className="min-w-0 flex-1 space-y-0.5">
+                    {dayDoses.map((d) => (
+                      <li
+                        key={d.id}
+                        className="flex items-baseline gap-1.5 text-xs"
+                      >
+                        {multiProfile ? (
+                          <ProfileDot color={d.profileColor} />
+                        ) : (
+                          <span
+                            className="size-1.5 shrink-0 rounded-full"
+                            style={{ background: accent }}
+                          />
+                        )}
+                        <span className="min-w-0 flex-1 truncate">
+                          {shortPeptide(d.peptideName)}
+                        </span>
+                        <span className="num text-muted-foreground shrink-0">
+                          {d.amount}
+                          {d.unit}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {face ? (
+                    <span className="text-base" title={`Mood: ${face.label}`}>
+                      {face.emoji}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            });
+          })()}
         </div>
       </div>
 

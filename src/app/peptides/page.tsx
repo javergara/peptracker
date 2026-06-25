@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { listPeptides } from "@/lib/queries";
 import { PageHeader } from "@/components/common/page-header";
 import { Disclaimer } from "@/components/disclaimer";
@@ -19,7 +21,9 @@ export default async function PeptidesPage() {
         description="Research-grade reference for mechanisms, dosing protocols, and interactions."
       />
       <Disclaimer />
-      <PeptideBrowser peptides={peptides} />
+      <Suspense>
+        <PeptideBrowser peptides={peptides} />
+      </Suspense>
     </div>
   );
 }

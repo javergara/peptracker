@@ -150,6 +150,12 @@ export function AppShell({
 
   return (
     <div className="flex min-h-svh">
+      <a
+        href="#main-content"
+        className="bg-primary text-primary-foreground sr-only z-50 rounded-md px-3 py-2 text-sm focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
+      >
+        Skip to content
+      </a>
       {/* Desktop sidebar */}
       <aside className="brand-rail hidden w-64 shrink-0 flex-col border-r lg:flex">
         <Brand />
@@ -192,7 +198,9 @@ export function AppShell({
           <ThemeToggle />
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main id="main-content" className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );

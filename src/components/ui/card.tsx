@@ -33,9 +33,10 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, ...props }: React.ComponentProps<"h2">) {
+  // Real heading element so screen-reader users can navigate sections by heading.
   return (
-    <div
+    <h2
       data-slot="card-title"
       className={cn(
         "font-display text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",

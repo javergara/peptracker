@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LineChart as LineChartIcon } from "lucide-react";
 import {
   CartesianGrid,
@@ -36,7 +37,18 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
     [series],
   );
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [active, setActive] = React.useState<Set<string>>(() => {
+    // Restore from the URL (?series=key1,key2) if present and valid.
+    const fromUrl = searchParams.get("series");
+    if (fromUrl) {
+      const valid = new Set(usable.map((s) => s.key));
+      const restored = new Set(fromUrl.split(",").filter((k) => valid.has(k)));
+      if (restored.size > 0) return restored;
+    }
     const init = new Set<string>();
     const weight = usable.find((s) => /weight/i.test(s.label));
     const mood = usable.find((s) => /mood/i.test(s.label));
@@ -73,12 +85,17 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
   );
 
   function toggle(key: string) {
-    setActive((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+    const next = new Set(active);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setActive(next);
+
+    // Keep the selection in the URL so it's shareable / survives reload.
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.size > 0) params.set("series", Array.from(next).join(","));
+    else params.delete("series");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
 
   if (usable.length === 0) {

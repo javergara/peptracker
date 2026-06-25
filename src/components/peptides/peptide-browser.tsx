@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -24,8 +25,33 @@ interface PeptideBrowserProps {
 }
 
 export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string>("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Local state for snappy typing; the URL is kept in sync so filters are
+  // shareable / bookmarkable / survive reload.
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  const [category, setCategory] = useState<string>(
+    () => searchParams.get("cat") ?? "all",
+  );
+
+  function syncUrl(q: string, cat: string) {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (cat !== "all") params.set("cat", cat);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
+
+  function updateQuery(q: string) {
+    setQuery(q);
+    syncUrl(q, category);
+  }
+  function updateCategory(cat: string) {
+    setCategory(cat);
+    syncUrl(query, cat);
+  }
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -53,7 +79,7 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
             type="search"
             placeholder="Search peptides by name, alias, or summary…"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
             className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-lg border py-2 pr-3 pl-9 text-sm outline-none focus-visible:ring-2"
           />
         </div>
@@ -62,7 +88,7 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
           <SlidersHorizontal className="text-muted-foreground size-4 shrink-0" />
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => updateCategory(e.target.value)}
             className="border-input bg-background focus-visible:ring-ring rounded-lg border py-2 pr-8 pl-3 text-sm outline-none focus-visible:ring-2"
           >
             <option value="all">All categories</option>
@@ -83,6 +109,7 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
             onClick={() => {
               setQuery("");
               setCategory("all");
+              syncUrl("", "all");
             }}
             className="text-primary ml-2 hover:underline"
           >

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { GitCompareArrows, LineChart as LineChartIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
@@ -304,7 +305,9 @@ export default async function MetricsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <MetricsTrends series={trendSeries} />
+          <Suspense>
+            <MetricsTrends series={trendSeries} />
+          </Suspense>
         </CardContent>
       </Card>
 
