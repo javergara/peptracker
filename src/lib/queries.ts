@@ -90,7 +90,10 @@ export async function getCycle(id: string) {
     include: {
       peptide: true,
       stack: { include: { items: { include: { peptide: true } } } },
-      doseLogs: { orderBy: { takenAt: "desc" }, include: { peptide: true } },
+      doseLogs: {
+        orderBy: [{ takenAt: "desc" }, { id: "desc" }],
+        include: { peptide: true },
+      },
     },
   });
 }
@@ -127,7 +130,7 @@ export async function getRecentDoseLogs(limit = 10) {
   const user = await getActiveUser();
   return prisma.doseLog.findMany({
     where: { userId: user.id },
-    orderBy: { takenAt: "desc" },
+    orderBy: [{ takenAt: "desc" }, { id: "desc" }],
     take: limit,
     include: { peptide: true, cycle: true },
   });
@@ -138,7 +141,7 @@ export async function getDoseLogsInRange(start: Date, end: Date) {
   const user = await getActiveUser();
   return prisma.doseLog.findMany({
     where: { userId: user.id, takenAt: { gte: start, lte: end } },
-    orderBy: { takenAt: "asc" },
+    orderBy: [{ takenAt: "asc" }, { id: "asc" }],
     include: { peptide: true, cycle: true },
   });
 }
@@ -147,7 +150,7 @@ export async function getDoseLogsInRange(start: Date, end: Date) {
 export async function getAllDoseLogsInRange(start: Date, end: Date) {
   return prisma.doseLog.findMany({
     where: { takenAt: { gte: start, lte: end } },
-    orderBy: { takenAt: "asc" },
+    orderBy: [{ takenAt: "asc" }, { id: "asc" }],
     include: { peptide: true, cycle: true, user: true },
   });
 }

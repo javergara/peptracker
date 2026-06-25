@@ -341,7 +341,12 @@ export function DoseCalendar({
         ) : (
           <ul className="space-y-2">
             {selectedDoses
-              .sort((a, b) => a.takenAtISO.localeCompare(b.takenAtISO))
+              .slice()
+              .sort(
+                (a, b) =>
+                  a.takenAtISO.localeCompare(b.takenAtISO) ||
+                  a.id.localeCompare(b.id),
+              )
               .map((d) => (
                 <li key={d.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex items-center justify-between">
