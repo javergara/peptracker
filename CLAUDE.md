@@ -154,6 +154,22 @@ strings (Neon) — see `.env.example`.
   it would let one account touch another's data. See `actions/{cycles,doses}.ts`.
 - **Reads go through `src/lib/queries.ts`**; import the client as
   `import { prisma } from "@/lib/db"`.
+- **Form feedback:** wrap server-action add/edit forms in `ActionForm` +
+  `SubmitButton` (`src/components/common/action-form.tsx`) — pending-disable +
+  spinner, success toast, and the thrown error shown as a toast. Don't use bare
+  `<form action={serverAction}>` for user-facing forms.
+- **Destructive actions** need undo or confirm (never silent immediate): doses use
+  an **undo toast** (`deleteDose` returns a snapshot, `restoreDose` re-creates);
+  photos `confirm()` (blob can't be undone).
+- **Loading states:** data-heavy routes have a `loading.tsx` rendering
+  `PageSkeleton` (`src/components/common/page-skeleton.tsx`).
+- **Client filter/UI state belongs in the URL** (shareable/reload-safe): see the
+  peptide library (`?q&cat`) and metrics trends (`?series`); wrap such client
+  components in `<Suspense>` (for `useSearchParams`). Calendar uses `?month&view`.
+- **A11y baseline:** associate `<label htmlFor>`/`id`; real heading elements
+  (`CardTitle` is an `<h2>`); visible `focus-visible` rings on custom interactive
+  elements; skip-link → `#main-content` in `app-shell`. Globals set
+  `touch-action: manipulation` + honor `prefers-reduced-motion`.
 - **base-ui render prop, not `asChild`.** To compose a primitive with another
   element, use `render={<NextLink href="…" />}` style props.
 - **Parse Json columns** through `src/types/peptide.ts` helpers — never cast raw.

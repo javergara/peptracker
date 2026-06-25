@@ -13,7 +13,7 @@
 
 ## Features
 
-- **Knowledge base** — searchable/filterable peptide library with full detail pages (mechanism, benefits, risks, dosing table, route, half-life, storage, contraindications, references) and a **reconstitution calculator**.
+- **Knowledge base** — searchable/filterable (URL-synced) peptide library with full detail pages: mechanism, benefits, risks, **titration schedules** (with auto-computed injection volume in insulin-syringe units), timing, max dose, half-life, storage, contraindications, cited references, and a **reconstitution calculator**.
 - **Stacks** — curated presets (Wolverine TB-500 + BPC-157, GH-axis CJC-1295 + Ipamorelin, …) plus a **custom stack builder** with live interaction warnings.
 - **Cycles** — create protocols from a peptide or stack, schedule them, track progress and dose history, and **edit** any field later.
 - **Dose log** — fast logging with injection-site rotation, optional source vial, per-dose mood/energy/side-effects, and an optional **bodyweight capture** (handy for weekly GLP-1 dosing); **edit or delete** any logged dose.

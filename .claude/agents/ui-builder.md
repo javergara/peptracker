@@ -53,7 +53,14 @@ exactly; reuse primitives instead of reinventing them.
 - Routes/pages: `src/app/<segment>/page.tsx` (+ `layout.tsx`, `loading.tsx`).
 - Reusable components: `src/components/`; primitives in `src/components/ui/`.
   Shared building blocks in `src/components/common/` (PageHeader{…,accentColor?},
-  StatCard, EmptyState, ReferenceList, badges).
+  StatCard, EmptyState, ReferenceList, badges, **`ActionForm`/`SubmitButton`** for
+  server-action forms with pending+toast+error, **`PageSkeleton`** for
+  `loading.tsx`).
+- **Conventions to follow:** wrap add/edit forms in `ActionForm` (don't use bare
+  `<form action>`); destructive actions get undo/confirm; put client filter/UI
+  state in the URL (wrap `useSearchParams` users in `<Suspense>`); add a route
+  `loading.tsx` with `PageSkeleton`; keep the a11y baseline (`label htmlFor`,
+  heading elements, `focus-visible` rings).
 - Charts (client wrappers in `src/components/metrics/`, recharts): `MetricChart`
   (line; pass `mood` for emoji-face dots), `CorrelationChart` (dual-axis overlay),
   `ScatterCorrelation` (scatter + trend line), `CorrelationExplorer` (interactive
