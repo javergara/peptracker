@@ -239,7 +239,12 @@ subagent). Manual flow:
 1. Research the peptide (3–6 cited reference URLs, PubMed/PMC preferred).
 2. Write `prisma/data/<slug>.json` matching `peptideDataSchema` in
    `src/types/peptide.ts` (category ∈ `PEPTIDE_CATEGORIES`, route ∈ `ROUTES`,
-   tags ⊆ `GOAL_TAGS`, interaction kinds ∈ `INTERACTION_KINDS`).
+   tags ⊆ `GOAL_TAGS`, interaction kinds ∈ `INTERACTION_KINDS`). The `dosage`
+   object also takes optional **`timing`**, **`maxDose`**, and **`protocols`**
+   (titration: `[{ label?, steps: [{ weeks, amount:number, unit:"mg"|"mcg", note? }] }]`).
+   The detail page renders the titration as a table and auto-computes injection
+   volume in insulin-syringe units from the peptide's `reconstitution`
+   (`calculateReconstitution` in `src/lib/reconstitution.ts`).
 3. `npm run db:seed` (idempotent upsert), then verify in `npm run db:studio`.
 
 Cross-peptide interactions are auto-derived at seed time from each peptide's

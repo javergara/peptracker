@@ -68,7 +68,7 @@ model Peptide {
   benefits          Json // string[]
   risks             Json // string[]
   sideEffects       Json // string[]
-  dosage            Json // { low, standard, high, unit, notes }
+  dosage            Json // { low, standard, high, unit, notes, timing?, maxDose?, protocols?: [{ label?, steps: [{ weeks, amount, unit }] }] }
   route             String // SUBQ | IM | NASAL | TOPICAL | ORAL
   frequency         String
   halfLife          String
