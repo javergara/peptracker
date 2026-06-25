@@ -16,11 +16,11 @@ A local-first web app to **track peptide protocols** and serve as a **cited know
 - **Knowledge base** — searchable/filterable peptide library with full detail pages (mechanism, benefits, risks, dosing table, route, half-life, storage, contraindications, references) and a **reconstitution calculator**.
 - **Stacks** — curated presets (Wolverine TB-500 + BPC-157, GH-axis CJC-1295 + Ipamorelin, …) plus a **custom stack builder** with live interaction warnings.
 - **Cycles** — create protocols from a peptide or stack, schedule them, track progress and dose history, and **edit** any field later.
-- **Dose log** — fast logging with injection-site rotation, optional source vial, and per-dose mood/energy/side-effects; **edit or delete** any logged dose.
+- **Dose log** — fast logging with injection-site rotation, optional source vial, per-dose mood/energy/side-effects, and an optional **bodyweight capture** (handy for weekly GLP-1 dosing); **edit or delete** any logged dose.
 - **Inventory** — vial tracking: concentration, reconstitution + expiry warnings, doses-remaining (logging draws a vial down).
-- **Calendar** — month view of logged doses, profile-colored, with an all-profiles overlay and per-day quick-log.
+- **Calendar** — month view of logged doses, profile-colored, with **mood emoji** per day, an all-profiles overlay, and per-day quick-log.
 - **Dashboard** — today's doses, adherence % + streak, and due/overdue reminders.
-- **Metrics & analytics** — weight / body-fat / sleep / recovery charts, mood & energy trends, and a **correlation explorer** (pick any two markers → scatter + trend line with Pearson r / R²).
+- **Metrics & analytics** — weight / body-fat / sleep / recovery charts, **mood (emoji faces)** & energy trends, and a **correlation explorer** (pick any two markers → scatter + trend line with Pearson r / R²).
 - **Labs** — bloodwork markers with value-vs-range flags and trend charts.
 - **Photos** — progress photo gallery (local storage) with before/after.
 - **Accounts & profiles** — log in with email + password; each account can hold multiple profiles (e.g. you + a partner), switchable from the sidebar, fully isolated from other accounts.

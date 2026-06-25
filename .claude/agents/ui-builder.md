@@ -52,11 +52,19 @@ exactly; reuse primitives instead of reinventing them.
   Shared building blocks in `src/components/common/` (PageHeader{…,accentColor?},
   StatCard, EmptyState, ReferenceList, badges).
 - Charts (client wrappers in `src/components/metrics/`, recharts): `MetricChart`
-  (line), `CorrelationChart` (dual-axis overlay), `ScatterCorrelation` (scatter +
-  trend line), `CorrelationExplorer` (interactive pair picker). Stats math is in
-  `src/lib/stats.ts` — don't inline regression in components.
+  (line; pass `mood` for emoji-face dots), `CorrelationChart` (dual-axis overlay),
+  `ScatterCorrelation` (scatter + trend line), `CorrelationExplorer` (interactive
+  pair picker). Stats math is in `src/lib/stats.ts`; mood→emoji mapping is in
+  `src/lib/mood.ts` (`moodFace`/`averageMood`) — reuse, don't inline either.
+- Create/edit forms reuse shared pieces: `components/cycles/cycle-form.tsx`
+  (new + `/[id]/edit`), `components/log/dose-form-fields.tsx` (enriched dose
+  fields; `weightUnit` prop adds an optional weight input on create forms, omit
+  it on edit), `components/log/dose-row-actions.tsx` (edit+delete on dose rows).
+  Date prefills via `toDateInputValue`/`toDateTimeLocalValue` in `src/lib/dates.ts`.
 - Shared logic: `src/lib/` (reads in `queries.ts`, mutations in `actions/`, pure
-  helpers as their own modules with `*.test.ts` beside them).
+  helpers as their own modules with `*.test.ts` beside them). Server actions that
+  update/delete profile-owned rows MUST ownership-scope by the active profile
+  (filter by `id` + `userId`), never by raw `id`.
 
 ## After writing
 

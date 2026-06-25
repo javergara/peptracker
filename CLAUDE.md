@@ -57,8 +57,10 @@ src/
     adherence.ts       # computeAdherence(cycles, doseLogs, window)
     sites.ts           # INJECTION_SITES + suggestNextSite (rotation)
     stats.ts           # linearRegression (slope/intercept/R²/Pearson r) + strength
+    mood.ts            # moodFace/averageMood — 1–5 rating → emoji face (calendar/metrics)
     schedule.ts, suggestions.ts, interactions.ts
     units.ts, dates.ts, constants.ts, utils.ts  # pure helpers
+                       # dates.ts: + toDateInputValue / toDateTimeLocalValue (form prefills)
   types/
     peptide.ts         # SOURCE OF TRUTH for valid values + zod schemas + parsers
   generated/prisma/    # generated client (gitignored; run `npx prisma generate`)
@@ -144,7 +146,11 @@ strings (Neon) — see `.env.example`.
 - **RSC by default.** Only add `"use client"` when you need state, effects, or
   browser APIs. Keep client components small and leaf-level.
 - **Mutations = server actions** (`"use server"`), not API routes, unless an
-  external caller needs a REST endpoint.
+  external caller needs a REST endpoint. **Ownership-scope every update/delete**
+  of profile-owned rows: resolve the active profile, then filter by it (e.g.
+  `findFirst({ where: { id, userId } })` before mutating, or `updateMany/deleteMany`
+  with `{ id, userId }` and check `.count`). Never mutate a row by raw `id` alone —
+  it would let one account touch another's data. See `actions/{cycles,doses}.ts`.
 - **Reads go through `src/lib/queries.ts`**; import the client as
   `import { prisma } from "@/lib/db"`.
 - **base-ui render prop, not `asChild`.** To compose a primitive with another
@@ -200,9 +206,10 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 
 ## Routes
 
-`/` dashboard · `/log` · `/calendar` · `/cycles` (+`/new`,`/[id]`) · `/inventory`
-(vials) · `/metrics` · `/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks`
-(+`/new`,`/[slug]`) · `/suggestions` · `/settings`.
+`/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`) · `/calendar` ·
+`/cycles` (+`/new`,`/[id]`,`/[id]/edit`) · `/inventory` (vials) · `/metrics` ·
+`/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks` (+`/new`,`/[slug]`) ·
+`/suggestions` · `/settings`. Auth routes render bare; everything else is gated.
 
 ## How to add a peptide
 
@@ -229,7 +236,7 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
 - Unit/logic: **vitest** (`npm run test`). Tests live next to the lib module
   (`src/lib/<name>.test.ts`); favor testing pure functions. Currently covered:
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
-  `adherence`, `sites`, `vials`, `stats`. Keep pure math out of components so it
+  `adherence`, `sites`, `vials`, `stats`, `mood`. Keep pure math out of components so it
   stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
@@ -240,8 +247,18 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
 
 ## Health tracking & analytics (where features live)
 
+- **Cycles & doses:** create + **edit** both. Cycle CRUD in `actions/cycles.ts`
+  (`createCycle`/`updateCycle`/`updateCycleStatus`/`deleteCycle`) with a shared
+  `components/cycles/cycle-form.tsx` (new + `/[id]/edit`). Dose CRUD in
+  `actions/doses.ts` (`logDose`/`updateDose`/`deleteDose`); row edit/delete via
+  `components/log/dose-row-actions.tsx`, edit page at `/log/[id]/edit`. Editing a
+  dose does NOT re-adjust vial inventory (documented on the form).
 - **Inventory/vials:** `/inventory`, `src/lib/actions/vials.ts`, `src/lib/vials.ts`.
   Logging a dose against a vial decrements `remainingMcg` (see `logDose`).
+- **Weight-at-dose:** the dose-log forms take an optional weight (via
+  `DoseFormFields` `weightUnit` prop, create-only); `logDose` writes it as a
+  `type:"weight"` Measurement at the dose time, so it flows into the Metrics
+  charts. Not shown on the edit form (avoids duplicate measurements).
 - **Adherence/reminders:** `src/lib/adherence.ts` + dashboard `Due/Overdue` and
   streak widgets (`src/components/dashboard/`). Visual only (no push).
 - **Labs:** `/labs`, `src/lib/actions/labs.ts`; trend charts reuse `MetricChart`.
@@ -250,6 +267,10 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
   time overlay), `ScatterCorrelation` (scatter + trend line), and
   `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
   `src/lib/stats.ts`, pairs by nearest date within 14 days).
+- **Mood visualization:** logged 1–5 mood ratings render as emoji faces via
+  `src/lib/mood.ts` (`moodFace`/`averageMood`) — on the calendar day cells +
+  detail (`dose-calendar.tsx`) and as emoji dots on the Mood `MetricChart`
+  (`mood` prop). Energy stays a plain line.
 - **Photos:** `/photos`, `src/lib/actions/photos.ts` (uploads to Vercel Blob).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
