@@ -43,7 +43,14 @@ exactly; reuse primitives instead of reinventing them.
 
 - Routes/pages: `src/app/<segment>/page.tsx` (+ `layout.tsx`, `loading.tsx`).
 - Reusable components: `src/components/`; primitives in `src/components/ui/`.
-- Shared logic: `src/lib/`.
+  Shared building blocks in `src/components/common/` (PageHeader{…,accentColor?},
+  StatCard, EmptyState, ReferenceList, badges).
+- Charts (client wrappers in `src/components/metrics/`, recharts): `MetricChart`
+  (line), `CorrelationChart` (dual-axis overlay), `ScatterCorrelation` (scatter +
+  trend line), `CorrelationExplorer` (interactive pair picker). Stats math is in
+  `src/lib/stats.ts` — don't inline regression in components.
+- Shared logic: `src/lib/` (reads in `queries.ts`, mutations in `actions/`, pure
+  helpers as their own modules with `*.test.ts` beside them).
 
 ## After writing
 

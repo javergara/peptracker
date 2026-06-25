@@ -52,6 +52,7 @@ src/
     vials.ts           # vial concentration / doses-remaining / expiry status
     adherence.ts       # computeAdherence(cycles, doseLogs, window)
     sites.ts           # INJECTION_SITES + suggestNextSite (rotation)
+    stats.ts           # linearRegression (slope/intercept/R²/Pearson r) + strength
     schedule.ts, suggestions.ts, interactions.ts
     units.ts, dates.ts, constants.ts, utils.ts  # pure helpers
   types/
@@ -190,10 +191,32 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
 
 ## Testing
 
-- Unit/logic: **vitest** (`npm run test`). Put pure-logic tests next to the lib
-  module or under a `__tests__` folder; favor testing `src/lib/*` pure functions.
-- E2E: **playwright** (`npm run test:e2e`).
-- Always run `npm run typecheck` after schema or type changes.
+- Unit/logic: **vitest** (`npm run test`). Tests live next to the lib module
+  (`src/lib/<name>.test.ts`); favor testing pure functions. Currently covered:
+  `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
+  `adherence`, `sites`, `vials`, `stats`. Keep pure math out of components so it
+  stays testable.
+- E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
+  (asserts on seeded content, resilient to markup). Covers every route incl.
+  inventory/labs/photos, the adherence widget, profile switching, and the
+  all-profiles calendar overlay. The Playwright `webServer` boots `npm run dev`;
+  kill any stray dev server on :3000 first.
+- Always run `npm run typecheck` (+ `npm run lint`) after schema or type changes.
+
+## Health tracking & analytics (where features live)
+
+- **Inventory/vials:** `/inventory`, `src/lib/actions/vials.ts`, `src/lib/vials.ts`.
+  Logging a dose against a vial decrements `remainingMcg` (see `logDose`).
+- **Adherence/reminders:** `src/lib/adherence.ts` + dashboard `Due/Overdue` and
+  streak widgets (`src/components/dashboard/`). Visual only (no push).
+- **Labs:** `/labs`, `src/lib/actions/labs.ts`; trend charts reuse `MetricChart`.
+- **Metrics & correlation:** `/metrics`. Charts are client wrappers in
+  `src/components/metrics/`: `MetricChart` (line), `CorrelationChart` (dual-axis
+  time overlay), `ScatterCorrelation` (scatter + trend line), and
+  `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
+  `src/lib/stats.ts`, pairs by nearest date within 14 days).
+- **Photos:** `/photos`, `src/lib/actions/photos.ts` (writes to `public/uploads/`).
+- **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization
 
