@@ -17,8 +17,10 @@ const EXT: Record<string, string> = {
 };
 
 /**
- * Upload a progress photo to Vercel Blob (object storage — survives serverless
- * deploys) and record a Photo row referencing the returned public Blob URL.
+ * Upload a progress photo to Vercel Blob with **private** access (these are
+ * sensitive health photos). We store the blob's pathname on `Photo.path` and
+ * serve the image through the login-gated route `/api/photos/[id]`, which streams
+ * the private blob — so photos are never on a public URL.
  * Requires BLOB_READ_WRITE_TOKEN (auto-set on Vercel; `vercel env pull` locally).
  */
 export async function uploadPhoto(formData: FormData) {
@@ -39,14 +41,14 @@ export async function uploadPhoto(formData: FormData) {
 
   const filename = `photos/${user.id}/${randomUUID()}.${EXT[file.type]}`;
   const blob = await put(filename, file, {
-    access: "public",
+    access: "private",
     contentType: file.type,
   });
 
   await prisma.photo.create({
     data: {
       userId: user.id,
-      path: blob.url,
+      path: blob.pathname, // store pathname; served via /api/photos/[id]
       caption: caption || null,
       takenAt: takenAt ? new Date(takenAt) : new Date(),
     },

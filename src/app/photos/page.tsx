@@ -96,7 +96,7 @@ export default async function PhotosPage() {
                     {label}
                   </p>
                   <img
-                    src={photo.path}
+                    src={`/api/photos/${photo.id}`}
                     alt={photo.caption ?? label}
                     className="h-64 w-full rounded-lg object-cover"
                   />
@@ -126,7 +126,7 @@ export default async function PhotosPage() {
               className="bg-card border-border group relative overflow-hidden rounded-xl border"
             >
               <img
-                src={photo.path}
+                src={`/api/photos/${photo.id}`}
                 alt={photo.caption ?? "Progress photo"}
                 className="aspect-square w-full object-cover"
               />

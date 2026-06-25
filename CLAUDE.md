@@ -97,7 +97,8 @@ Path alias: `@/*` -> `src/*`.
   `refLow`/`refHigh`, `takenAt`).
 - **Account** — auth login (`email`, `passwordHash`); owns one or more `User`
   profiles. **User** carries `accountId`.
-- **Photo** — progress photos; `path` is an absolute **Vercel Blob** URL.
+- **Photo** — progress photos; `path` is a **Vercel Blob pathname** (private store),
+  served via the gated `/api/photos/[id]` route.
 
 All profile-owned data (Cycle, DoseLog, Measurement, Vial, LabResult, Photo,
 JournalEntry) is scoped to the active profile — see the multi-profile note in
@@ -194,9 +195,12 @@ strings (Neon) — see `.env.example`.
   strokes, progress bars (via a `--pc` CSS var on
   `[data-slot=progress-indicator]`), and dose-row accents.
 - **Progress-photo storage:** `uploadPhoto` (`src/lib/actions/photos.ts`) uploads
-  to **Vercel Blob** (`put`, `access: "public"`) and stores the returned absolute
-  Blob URL on `Photo.path`. Needs `BLOB_READ_WRITE_TOKEN` (auto on Vercel;
-  `vercel env pull` locally). Photos render via plain `<img>` from that URL.
+  to **Vercel Blob** with **`access: "private"`** (sensitive health photos) and
+  stores the blob **pathname** on `Photo.path`. Images are served through the
+  login-gated, account-scoped route **`/api/photos/[id]`** (streams the private
+  blob via `get(path, { access: "private" })`); `<img src="/api/photos/<id>">`.
+  Needs `BLOB_READ_WRITE_TOKEN` (auto on Vercel; `vercel env pull` locally). The
+  Vercel Blob store must be a **private** store.
 - **Never commit secrets or `.env`** (already gitignored). The generated Prisma
   client (`src/generated`) is gitignored — regenerate, don't commit.
 - Style is enforced by prettier + eslint (+ a defensive format hook).
