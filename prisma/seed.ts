@@ -5,6 +5,8 @@
  *
  * Run via: npm run db:seed  (or automatically after `prisma migrate dev`)
  */
+import "dotenv/config";
+
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
