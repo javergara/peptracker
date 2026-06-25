@@ -1,0 +1,143 @@
+{
+  "slug": "somatropin",
+  "name": "Somatropin (HGH)",
+  "aliases": [
+    "HGH",
+    "Human Growth Hormone",
+    "rhGH",
+    "Growth Hormone",
+    "GH",
+    "Somatropin",
+    "191aa GH",
+    "Norditropin",
+    "Genotropin",
+    "Humatrope",
+    "Omnitrope"
+  ],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "Somatropin is recombinant human growth hormone (rhGH): a 191-amino-acid polypeptide identical to pituitary-derived human GH, produced via recombinant DNA technology. Unlike GH secretagogues (CJC-1295, ipamorelin, tesamorelin) that stimulate the body's own pituitary to release GH, somatropin directly supplies exogenous GH itself. It is grouped here under the GH-axis category for thematic clarity, but mechanistically it is the hormone, not a releaser of it.",
+  "mechanism": "Somatropin is a 191-amino-acid single-chain polypeptide (~22 kDa) with a sequence identical to endogenous human growth hormone, expressed recombinantly (commonly in E. coli or mammalian cells). Because it is the hormone itself, it bypasses the pituitary entirely: it does not act on the GHRH receptor or the ghrelin receptor the way secretagogues do, and it overrides the normal hypothalamic-pituitary feedback that limits endogenous GH pulses.\n\nSomatropin binds a single GH receptor (GHR) that then dimerizes in the target-cell membrane, triggering JAK2/STAT5 intracellular signaling. Effects are both direct and indirect. Directly, GHR activation on adipose and other tissues promotes lipolysis and exerts anti-insulin (diabetogenic) metabolic effects. Indirectly, GH stimulates the liver and peripheral tissues to produce insulin-like growth factor 1 (IGF-1), the main mediator of GH's anabolic and growth-promoting actions, including muscle protein synthesis, bone and connective-tissue growth, and tissue repair.\n\nBecause exogenous GH is delivered as a bolus rather than the body's natural pulsatile secretion, and because it does not respect normal negative feedback, supraphysiologic dosing can drive IGF-1 well above the physiologic range, which is the basis for both its anabolic effects and its safety concerns.",
+  "benefits": [
+    "FDA-approved replacement therapy in diagnosed GH deficiency (pediatric and adult), normalizing IGF-1 and improving body composition, bone density, and lipid profile",
+    "Increases lean body mass and reduces fat mass via lipolysis plus IGF-1-mediated protein synthesis",
+    "Approved for several growth/wasting indications: Turner syndrome, Prader-Willi syndrome, SHOX deficiency, chronic renal insufficiency, short bowel syndrome, and HIV-associated wasting",
+    "Supports connective-tissue and bone remodeling, with reported recovery and repair effects through the GH/IGF-1 axis",
+    "May improve subjective energy, sleep quality, and quality of life when correcting a true deficiency"
+  ],
+  "risks": [
+    "Directly raises IGF-1 and can push it supraphysiologic with non-medical dosing - a theoretical driver of tumor growth; contraindicated in active malignancy",
+    "Diabetogenic: reduces insulin sensitivity and can cause hyperglycemia, impaired glucose tolerance, or new-onset type 2 diabetes, especially at higher doses",
+    "Contraindicated in acute critical illness (post-open-heart/abdominal surgery, multiple trauma, acute respiratory failure) where it increased mortality in trials",
+    "Off-label/non-medical use for bodybuilding, anti-aging, or athletic performance is not FDA-approved and is widely counterfeited; product quality varies",
+    "Prohibited at all times by WADA (peptide hormones / growth factors class) in competitive sport; distribution for non-medical use is illegal in many jurisdictions",
+    "Acromegaly-like features (bone, soft-tissue, and organ overgrowth) with chronic supraphysiologic dosing"
+  ],
+  "sideEffects": [
+    "Fluid retention: peripheral edema, joint stiffness and arthralgia, myalgia",
+    "Carpal tunnel syndrome and other compression-type paresthesias",
+    "Hyperglycemia / impaired glucose tolerance and insulin resistance",
+    "Injection-site reactions; lipoatrophy or tissue atrophy if the same site is overused (rotate sites)",
+    "Headache (evaluate for intracranial hypertension if severe/persistent)",
+    "Gynecomastia",
+    "Benign intracranial hypertension (papilledema, vision changes) - typically early in therapy",
+    "Anti-GH antibody formation (usually without loss of efficacy)"
+  ],
+  "dosage": {
+    "low": "0.15-0.3",
+    "standard": "0.2-0.5",
+    "high": "1-2",
+    "unit": "mg/day",
+    "notes": "Educational reference only, not advice. Medical GH-deficiency dosing is weight-based and titrated to IGF-1: adult start is typically <=0.2 mg/day (about 0.04 mg/kg/week max early), increased every 4-8 weeks to no more than ~0.08 mg/kg/week (often 0.2-0.5 mg/day in adults), with lower weight-based but higher mg/day pediatric dosing. GH is dosed by mass (mg) and sometimes IU (1 mg approximately equals 3 IU for modern rhGH). Non-medical anti-aging/physique use of 1-2+ mg/day is supraphysiologic, unapproved, and markedly increases side-effect and IGF-1 risk; lower, IGF-1-guided dosing is the conservative educational framing."
+  },
+  "route": "SUBQ",
+  "frequency": "Once daily, commonly in the evening to loosely mimic the nocturnal GH pulse; some pediatric regimens divide or vary timing per product labeling.",
+  "halfLife": "Injected drug: terminal half-life ~20 minutes after IV, but ~2-4 hours after subcutaneous injection due to slow depot absorption. Biological effects last far longer because GH raises IGF-1, which has a half-life on the order of ~12-15 hours and sustains downstream anabolic signaling.",
+  "cycleLength": "In approved deficiency therapy it is taken continuously (often indefinitely) with periodic IGF-1 and glucose monitoring and dose titration. Non-medical users sometimes run multi-month blocks, but there is no validated 'cycle' - benefits regress off-drug and IGF-1/glucose should be monitored throughout.",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 1,
+    "notes": "Many pharmaceutical somatropin products ship as pre-filled pens or pre-mixed cartridges and do NOT require user reconstitution - follow the specific product's instructions. For lyophilized vials (commonly 5 mg or 10 mg), adding 1 mL bacteriostatic or supplied diluent to a 5 mg vial yields 5 mg/mL, so 0.2 mg = 0.04 mL (4 units on a U-100 syringe). Add diluent slowly down the vial wall and swirl gently; never shake. Dosing in mg and converting to IU (~3 IU/mg) is product-specific - verify against the label."
+  },
+  "storage": "Lyophilized vials: refrigerate at 2-8 C and protect from light. After reconstitution (and for pre-mixed pens in use), refrigerate at 2-8 C and use within the product-specified window (commonly ~14-28 days, varies by brand). Do not freeze; freezing denatures the protein. Discard if the solution is cloudy or has particulates.",
+  "contraindications": [
+    "Active malignancy (any active cancer)",
+    "Acute critical illness due to complications after open-heart or abdominal surgery, multiple accidental trauma, or acute respiratory failure",
+    "Prader-Willi syndrome in patients who are severely obese, have a history of upper-airway obstruction or sleep apnea, or have severe respiratory impairment (risk of sudden death)",
+    "Active proliferative or severe non-proliferative diabetic retinopathy",
+    "Closed epiphyses when used for growth promotion in pediatric patients",
+    "Known hypersensitivity to somatropin or excipients; benzyl-alcohol-preserved formulations should not be used in neonates/premature infants",
+    "Pregnancy and breastfeeding (use only if clearly needed; generally avoided)"
+  ],
+  "interactions": [
+    {
+      "with": "igf-1-lr3",
+      "kind": "caution",
+      "note": "Somatropin's primary downstream mediator IS IGF-1 - GH directly raises endogenous IGF-1. Stacking exogenous IGF-1 (IGF-1 LR3) on top of GH compounds IGF-1 exposure, amplifying both the anabolic effect and the risks (hypoglycemia from IGF-1, plus GH's hyperglycemia, tissue/organ overgrowth, and theoretical tumor-growth concern). Monitor IGF-1 closely; this is high-risk redundancy rather than clean synergy."
+    },
+    {
+      "with": "cjc-1295",
+      "kind": "caution",
+      "note": "CJC-1295 is a GHRH analog that works by stimulating the pituitary to release endogenous GH. Adding it to exogenous somatropin is largely redundant - you are already supplying GH directly - and stacking the two compounds IGF-1 load and GH-related side effects (fluid retention, joint symptoms, insulin resistance) with little additive benefit."
+    },
+    {
+      "with": "ipamorelin",
+      "kind": "caution",
+      "note": "Ipamorelin is a selective GH secretagogue (ghrelin-receptor agonist) that triggers the body's own GH pulse. On top of exogenous somatropin this is mechanistically redundant; the marginal endogenous pulse adds little while increasing total GH/IGF-1 exposure and side-effect burden."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Tesamorelin is a GHRH analog that raises endogenous GH/IGF-1. Combining it with exogenous somatropin is redundant and additive on IGF-1, increasing edema, arthralgia, and insulin-resistance risk without a clear rationale over choosing one approach."
+    },
+    {
+      "with": "tirzepatide",
+      "kind": "caution",
+      "note": "Opposing metabolic effects on glucose: somatropin reduces insulin sensitivity and raises blood glucose, whereas the GLP-1/GIP agonist tirzepatide improves glycemic control. The combination is not inherently dangerous but makes glucose effects harder to interpret - monitor closely, since GH may blunt incretin glycemic benefit and antidiabetic dose needs can shift."
+    },
+    {
+      "with": "retatrutide",
+      "kind": "caution",
+      "note": "Like other incretin agonists, retatrutide improves insulin sensitivity and glycemia, directly opposing somatropin's diabetogenic effect. Watch glucose carefully if combined; the two pull glycemic control in opposite directions and complicate dose titration of either."
+    },
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "GH antagonizes insulin and reduces insulin sensitivity, so insulin and oral antidiabetic requirements often rise during somatropin therapy. Monitor blood glucose and adjust antidiabetic dosing accordingly."
+    },
+    {
+      "with": "glucocorticoids",
+      "kind": "caution",
+      "note": "Somatropin can inhibit 11-beta-HSD1, lowering cortisol conversion and potentially unmasking central hypoadrenalism; conversely supraphysiologic glucocorticoids blunt GH's growth-promoting effect. Glucocorticoid replacement may need adjustment when starting GH."
+    }
+  ],
+  "references": [
+    {
+      "title": "Norditropin (somatropin) FDA Prescribing Information",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/021426s043lbl.pdf"
+    },
+    {
+      "title": "Somatropin - Health Professional Drug Record (NIH / Clinicalinfo.HIV.gov)",
+      "url": "https://clinicalinfo.hiv.gov/en/drugs/somatropin/health-professional"
+    },
+    {
+      "title": "NutropinAq (somatropin) EPAR Product Information - European Medicines Agency",
+      "url": "https://www.ema.europa.eu/en/documents/product-information/nutropinaq-epar-product-information_en.pdf"
+    },
+    {
+      "title": "NORDITROPIN (somatropin) injection, solution - DailyMed (NIH)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=aa9d3467-a450-4b06-885a-7d834dcbddff"
+    },
+    {
+      "title": "Somatropin (mammalian-derived, subcutaneous) - Mayo Clinic Drugs & Supplements",
+      "url": "https://www.mayoclinic.org/drugs-supplements/somatropin-mammalian-derived-injection-route-subcutaneous-route/description/drg-20071668"
+    }
+  ],
+  "tags": [
+    "gh-axis",
+    "muscle-growth",
+    "recovery-injury",
+    "fat-loss",
+    "longevity"
+  ],
+  "status": "research"
+}

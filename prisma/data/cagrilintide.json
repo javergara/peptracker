@@ -1,0 +1,106 @@
+{
+  "slug": "cagrilintide",
+  "name": "Cagrilintide",
+  "aliases": ["AM833", "NNC0174-0833", "long-acting amylin analog"],
+  "category": "GLP_GIP",
+  "summary": "Cagrilintide (AM833) is an investigational long-acting amylin receptor agonist developed for chronic weight management, best known as the amylin half of CagriSema (cagrilintide + semaglutide). It is NOT an incretin/GLP-1 drug; it works through a distinct amylin-based mechanism and is grouped under the metabolic (GLP-1/GIP) category here only for the shared weight-management theme. It remains investigational and is not FDA-approved.",
+  "mechanism": "Cagrilintide is a synthetic, long-acting analog of the pancreatic hormone amylin (islet amyloid polypeptide). Native amylin is co-secreted with insulin after meals and signals satiety, slows gastric emptying, and suppresses post-meal glucagon. Cagrilintide carries six amino-acid substitutions plus a fatty-acid (lipidation) side chain that promotes reversible albumin binding, dramatically extending its half-life to allow once-weekly subcutaneous dosing.\n\nUnlike GLP-1/GIP incretin agonists, cagrilintide acts as a non-selective agonist at the amylin receptors (AMY1R, AMY2R, AMY3R) and the calcitonin receptor. It engages amylin receptors in the area postrema and hypothalamus to reduce appetite and increase satiety. Because this appetite-control pathway is complementary to and distinct from incretin signaling, cagrilintide and a GLP-1 agonist (semaglutide) combined in CagriSema produce additive weight loss in trials.",
+  "benefits": [
+    "Monotherapy weight loss of ~10.8% at 26 weeks (4.5 mg) in the phase 2 dose-finding trial, exceeding liraglutide 3.0 mg",
+    "Reduced appetite and increased satiety via amylin receptor signaling, a mechanism distinct from incretins",
+    "As CagriSema (with semaglutide), mean weight loss ~20.4% at 68 weeks in REDEFINE 1, with 60% of participants losing >=20%",
+    "Improvements in waist circumference, blood pressure, lipids, and glycemic control in combination trials",
+    "Once-weekly dosing due to long half-life and albumin binding"
+  ],
+  "risks": [
+    "Investigational and not FDA-approved; long-term safety not established",
+    "Amylin/calcitonin-receptor agonists can show class-related concerns; thyroid/C-cell signals are mainly associated with the GLP-1 component when combined",
+    "Risk of hypoglycemia when combined with insulin or insulin secretagogues (e.g., sulfonylureas), especially as part of CagriSema",
+    "Gastrointestinal adverse events are common, particularly during dose escalation",
+    "Delayed gastric emptying may reduce absorption of oral medications",
+    "Gray-market/compounded research product quality and purity are not guaranteed"
+  ],
+  "sideEffects": [
+    "Nausea (most common, especially during titration)",
+    "Constipation",
+    "Diarrhea",
+    "Vomiting",
+    "Decreased appetite",
+    "Injection-site / administration-site reactions",
+    "Abdominal discomfort"
+  ],
+  "dosage": {
+    "low": "0.3-0.6",
+    "standard": "1.2-2.4",
+    "high": "4.5",
+    "unit": "mg",
+    "notes": "Common educational reference based on the phase 2 dose-finding trial, which tested once-weekly 0.3, 0.6, 1.2, 2.4, and 4.5 mg with gradual escalation to limit GI side effects. CagriSema combination trials used cagrilintide 2.4 mg paired with semaglutide 2.4 mg once weekly. Slow titration (stepping up every ~4 weeks) reduces nausea. Investigational; framed for education, not advice."
+  },
+  "route": "SUBQ",
+  "frequency": "once weekly",
+  "halfLife": "~7-9 days (supports once-weekly dosing via albumin binding)",
+  "cycleLength": "Continuous long-term use in trials (26-68 weeks); no defined off-cycle. Steady state reached after several weeks of titration. Weight regain is common after discontinuation.",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 2,
+    "notes": "For lyophilized research vials, adding 2 mL bacteriostatic water to a 5 mg vial yields 2.5 mg/mL (so 0.1 mL = 0.25 mg), useful for sub-milligram titration; 1 mL into a 5 mg vial gives 5 mg/mL for higher doses. Swirl gently, do not shake."
+  },
+  "storage": "Lyophilized: store frozen/cool (-20 C long-term, or 2-8 C). Reconstituted: refrigerate at 2-8 C and use within ~4 weeks. Protect from light; do not freeze reconstituted solution.",
+  "contraindications": [
+    "History of pancreatitis",
+    "Pregnancy and breastfeeding",
+    "Known hypersensitivity to the compound",
+    "Personal or family history of medullary thyroid carcinoma or MEN 2 (particularly relevant when combined with a GLP-1 agonist such as in CagriSema)"
+  ],
+  "interactions": [
+    {
+      "with": "semaglutide",
+      "kind": "synergy",
+      "note": "Cagrilintide (amylin) and semaglutide (GLP-1) act on complementary appetite pathways; co-administration as CagriSema produced additive weight loss in REDEFINE trials. Educational note only - combining drugs also compounds GI side effects and hypoglycemia risk and is investigational."
+    },
+    {
+      "with": "tirzepatide",
+      "kind": "caution",
+      "note": "Amylin plus a GLP-1/GIP incretin agonist targets distinct appetite mechanisms and may be additive, but stacking two appetite-suppressing agents compounds nausea, GI effects, and gastric-emptying delay. No controlled human data for this specific pairing; monitor closely. Educational only."
+    },
+    {
+      "with": "retatrutide",
+      "kind": "caution",
+      "note": "Distinct mechanism (amylin vs triple incretin/glucagon agonism) so effects may be additive, but combining two potent appetite-suppressing weight-loss agents amplifies GI side effects and hypoglycemia risk without controlled human data. Educational note, not a recommendation to stack."
+    },
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "Increased risk of hypoglycemia; insulin dose may need reduction with close glucose monitoring, especially within a CagriSema-style regimen."
+    },
+    {
+      "with": "sulfonylureas",
+      "kind": "caution",
+      "note": "Increased hypoglycemia risk when combined; secretagogue dose may need reduction."
+    }
+  ],
+  "references": [
+    {
+      "title": "Lau DCW et al. Once-weekly cagrilintide for weight management in people with overweight and obesity: a dose-finding phase 2 trial. The Lancet 2021",
+      "url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)01751-7/abstract"
+    },
+    {
+      "title": "Frias JP et al. Efficacy and safety of co-administered once-weekly cagrilintide 2.4 mg with once-weekly semaglutide 2.4 mg in type 2 diabetes: a phase 2 trial. The Lancet 2023",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0140673623011637"
+    },
+    {
+      "title": "Garvey WT et al. Coadministered Cagrilintide and Semaglutide in Adults with Overweight or Obesity (REDEFINE 1). NEJM 2025",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2502081"
+    },
+    {
+      "title": "Davies MJ et al. Cagrilintide-Semaglutide in Adults with Overweight or Obesity and Type 2 Diabetes (REDEFINE 2). NEJM 2025",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2502082"
+    },
+    {
+      "title": "Cagrilintide lowers bodyweight through brain amylin receptors 1 and 3 (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12270663/"
+    }
+  ],
+  "tags": ["fat-loss", "metabolic"],
+  "status": "research"
+}
