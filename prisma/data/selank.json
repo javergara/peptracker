@@ -33,7 +33,28 @@
     "standard": "300-500",
     "high": "900",
     "unit": "mcg",
-    "notes": "Intranasal 250-500 mcg, 1-3x daily; some need up to ~900 mcg/day in divided doses for noticeable anxiolysis. Oral bioavailability is effectively zero (gastric peptidases), so intranasal delivery is required for partial nose-to-brain transport."
+    "notes": "Intranasal 250-500 mcg, 1-3x daily; some need up to ~900 mcg/day in divided doses for noticeable anxiolysis. Oral bioavailability is effectively zero (gastric peptidases), so intranasal delivery is required for partial nose-to-brain transport.",
+    "timing": "Intranasal drops/spray 1-3x daily, typically AM and/or midday; can be taken acutely during anxious periods. Avoid late-evening dosing if the mild antiasthenic/psychostimulant effect disrupts sleep.",
+    "maxDose": "Common educational ceiling ~900 mcg/day in divided doses for Western/research use. Note: the Russian-approved 0.15% intranasal product (Selankum) is labeled higher (~900-2700 mcg/day across multiple sprays for up to 21 days); starting low and titrating is the typical educational approach.",
+    "protocols": [
+      {
+        "label": "Standard (intranasal, divided)",
+        "steps": [
+          {
+            "weeks": "1",
+            "amount": 250,
+            "unit": "mcg",
+            "note": "Start ~250 mcg 1-2x daily; assess tolerance and anxiolytic response over the first few days."
+          },
+          {
+            "weeks": "2-3",
+            "amount": 750,
+            "unit": "mcg",
+            "note": "If effect is insufficient, titrate toward 250-300 mcg 2-3x daily (~750 mcg/day total). Courses often run 2-3 weeks, mirroring Russian GAD protocols. Western status is research-only."
+          }
+        ]
+      }
+    ]
   },
   "route": "NASAL",
   "frequency": "1-3x daily",
@@ -77,6 +98,10 @@
     {
       "title": "Selank — Molecular Specifications & Research Monograph (Peptide Biologix)",
       "url": "https://peptidebiologix.com/selank"
+    },
+    {
+      "title": "Selank (Selankum) anxiolytic peptide drug — DrugBank entry",
+      "url": "https://go.drugbank.com/drugs/DB12434"
     }
   ],
   "tags": ["cognition-mood", "immune", "sleep", "longevity"],

@@ -35,7 +35,28 @@
     "standard": "250-500",
     "high": "500",
     "unit": "mcg",
-    "notes": "Common educational protocol is 250-500 mcg per day; e.g. 250 mcg twice daily = 500 mcg/day to maintain stable levels. Subcutaneous injection near the injury site is often used for localized effect; oral forms also exist for gut-focused use."
+    "notes": "Common educational protocol is 250-500 mcg per day; e.g. 250 mcg twice daily = 500 mcg/day to maintain stable levels. Subcutaneous injection near the injury site is often used for localized effect; oral forms also exist for gut-focused use.",
+    "timing": "Typically dosed once or twice daily, with no strict food requirement (can be taken with or without food). Subcutaneous injections are commonly given systemically or near the injury site for a localized effect. Unlike titrated peptides, BPC-157 is generally held at a fixed daily level rather than ramped up.",
+    "maxDose": "Community use rarely exceeds ~500-1000 mcg/day. This ceiling is anecdotal and not clinically established; no human trials have defined a safe maximum, and higher doses have not been shown to improve outcomes.",
+    "protocols": [
+      {
+        "label": "Standard (fixed, no titration)",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 250,
+            "unit": "mcg",
+            "note": "250 mcg once or twice daily (250-500 mcg/day). Human protocols are anecdotal and not clinically validated; derived from community use and extrapolated from rodent ng/kg-mcg/kg studies."
+          },
+          {
+            "weeks": "5-6",
+            "amount": 250,
+            "unit": "mcg",
+            "note": "Optional 1-2 week extension to align with the injury-recovery window; taper off or stop once healing goals are met."
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "daily (often split 1-2x daily)",
@@ -72,6 +93,10 @@
     {
       "title": "Pentadecapeptide BPC 157 Enhances Growth Hormone Receptor Expression in Tendon Fibroblasts (PMC)",
       "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6271067/"
+    },
+    {
+      "title": "Stable Gastric Pentadecapeptide BPC 157 as a Therapy for the Disable Myotendinous Junctions in Rats (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8615275/"
     },
     {
       "title": "Regeneration or Risk? A Narrative Review of BPC-157 for Musculoskeletal Healing (PMC)",

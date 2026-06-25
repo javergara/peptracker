@@ -33,7 +33,39 @@
     "standard": "1-2",
     "high": "2-3",
     "unit": "mg",
-    "notes": "Topical: 1-2% serum concentration applied daily (no cycling needed). Injectable (subcutaneous) educational protocols start at 1 mg/day, titrating to 2-3 mg/day after ~2 weeks if well tolerated."
+    "notes": "Topical: 1-2% serum concentration applied daily (no cycling needed). Injectable (subcutaneous) educational protocols start at 1 mg/day, titrating to 2-3 mg/day after ~2 weeks if well tolerated.",
+    "timing": "Topical: apply to clean, dry skin once or twice daily (AM and/or PM). Separate application from high-strength vitamin C or acidic actives, which can destabilize the copper complex. Cosmetic formulations are commonly 0.05-3%; clinical skin trials use daily application for ~12 weeks.",
+    "maxDose": "Topical formulations generally stay at or below ~3% GHK-Cu; higher concentrations raise irritation/staining risk without clear added benefit. For anecdotal injectable use, roughly 3 mg/day systemic is a commonly cited self-imposed ceiling to limit copper load - this is not an established safe limit.",
+    "protocols": [
+      {
+        "label": "Standard topical (cosmetic)",
+        "steps": [
+          {
+            "weeks": "1-12+",
+            "amount": 2,
+            "unit": "mg",
+            "note": "Representative per-application amount delivered by a ~1-2% serum (roughly 1-2 mg GHK-Cu per ~0.1 mL pump). Apply daily; continuous use, no cycling. Clinical skin studies typically run 12 weeks of daily application."
+          }
+        ]
+      },
+      {
+        "label": "Anecdotal SUBQ (not route-of-record; injectable use is not FDA-approved)",
+        "steps": [
+          {
+            "weeks": "1-2",
+            "amount": 1,
+            "unit": "mg",
+            "note": "Starting dose to assess tolerance; injectable human protocols are anecdotal and lack clinical safety data."
+          },
+          {
+            "weeks": "3-4",
+            "amount": 2,
+            "unit": "mg",
+            "note": "Titrate up if well tolerated; commonly a 30-day active block, then break."
+          }
+        ]
+      }
+    ]
   },
   "route": "TOPICAL",
   "frequency": "daily",
@@ -79,6 +111,10 @@
     {
       "title": "GHK-Cu Peptide: Skin & Healing Benefits (Paragon Sports Medicine)",
       "url": "https://www.paragonsportsmedicine.com/peptides/ghk-cu"
+    },
+    {
+      "title": "Epigenetic mechanisms activated by GHK-Cu increase skin collagen density in clinical trial (EurekAlert!)",
+      "url": "https://www.eurekalert.org/news-releases/990464"
     }
   ],
   "tags": ["skin-antiaging", "recovery-injury", "longevity"],

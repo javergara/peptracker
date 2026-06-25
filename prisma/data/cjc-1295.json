@@ -44,7 +44,39 @@
     "standard": "100-300",
     "high": "300",
     "unit": "mcg",
-    "notes": "Common educational protocols differ sharply by form. WITH DAC: a frequently cited research dose is ~1-2 mg per week (often split into 1-2 injections) because the multi-day half-life provides tonic stimulation; clinical trials studied 30, 60, and 125 mcg/kg single doses. WITHOUT DAC (Mod GRF 1-29): ~100 mcg per dose, 1-3x daily, often timed at bedtime and/or post-workout to match natural GH pulses, frequently combined 1:1 with ipamorelin (e.g. 100 mcg + 100 mcg). The numeric range above reflects the without-DAC per-dose model; for the DAC form think in mg/week instead."
+    "notes": "Common educational protocols differ sharply by form. WITH DAC: a frequently cited research dose is ~1-2 mg per week (often split into 1-2 injections) because the multi-day half-life provides tonic stimulation; clinical trials studied 30, 60, and 125 mcg/kg single doses. WITHOUT DAC (Mod GRF 1-29): ~100 mcg per dose, 1-3x daily, often timed at bedtime and/or post-workout to match natural GH pulses, frequently combined 1:1 with ipamorelin (e.g. 100 mcg + 100 mcg). The numeric range above reflects the without-DAC per-dose model; for the DAC form think in mg/week instead.",
+    "timing": "Without DAC (Mod GRF 1-29): inject SUBQ on an empty stomach (no food/fat ~2 h before and ~20-30 min after, since elevated blood glucose/fat blunts the GH pulse). Common timings are pre-sleep (to reinforce the overnight GH pulse) and/or immediately post-workout; 1-3x/day. With DAC: timing is far less critical because albumin binding produces tonic GH/IGF-1 elevation, so it is dosed roughly once or twice weekly at any convenient time.",
+    "maxDose": "Without DAC (Mod GRF 1-29): ~100 mcg per dose is considered a saturating dose at the pituitary GHRH receptor; ~300 mcg/day total (across 1-3 doses) is a common ceiling in enthusiast use. With DAC: roughly 2 mg/week is a frequently cited upper limit. Higher amounts mostly add side effects (water retention, paresthesia, reduced insulin sensitivity) without proportionally more GH. Human dosing is not clinically validated.",
+    "protocols": [
+      {
+        "label": "Standard (without DAC / Mod GRF 1-29)",
+        "steps": [
+          {
+            "weeks": "1-2",
+            "amount": 100,
+            "unit": "mcg",
+            "note": "Once daily pre-sleep, fasted, to assess tolerance"
+          },
+          {
+            "weeks": "3-12",
+            "amount": 100,
+            "unit": "mcg",
+            "note": "1-3x/day (e.g. pre-sleep and/or post-workout); often paired 1:1 with 100 mcg ipamorelin"
+          }
+        ]
+      },
+      {
+        "label": "With DAC (long-acting)",
+        "steps": [
+          {
+            "weeks": "1-8",
+            "amount": 1000,
+            "unit": "mcg",
+            "note": "~1 mg once weekly; some protocols use up to ~2 mg/week split into 2 injections. Tonic IGF-1 elevation; monitor IGF-1"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "Without DAC (Mod GRF 1-29): daily, often 1-3x/day (e.g. bedtime, post-workout). With DAC: roughly once or twice weekly.",
@@ -97,6 +129,10 @@
     {
       "title": "CJC-1295 - Wikipedia (mechanism, DAC albumin binding, half-life, FDA/WADA status)",
       "url": "https://en.wikipedia.org/wiki/CJC-1295"
+    },
+    {
+      "title": "Activation of the GH/IGF-1 axis by CJC-1295, a long-acting GHRH analog, results in serum protein profile changes in normal adult subjects (PMC full text)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2787983/"
     }
   ],
   "tags": [

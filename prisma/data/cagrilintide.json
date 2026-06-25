@@ -34,7 +34,40 @@
     "standard": "1.2-2.4",
     "high": "4.5",
     "unit": "mg",
-    "notes": "Common educational reference based on the phase 2 dose-finding trial, which tested once-weekly 0.3, 0.6, 1.2, 2.4, and 4.5 mg with gradual escalation to limit GI side effects. CagriSema combination trials used cagrilintide 2.4 mg paired with semaglutide 2.4 mg once weekly. Slow titration (stepping up every ~4 weeks) reduces nausea. Investigational; framed for education, not advice."
+    "notes": "Common educational reference based on the phase 2 dose-finding trial (Lau et al.), which tested once-weekly 0.3, 0.6, 1.2, 2.4, and 4.5 mg. To reach the 1.2/2.4/4.5 mg arms the trial escalated stepwise every ~2 weeks; the 2.4 mg target matches the dose used as the amylin component of CagriSema. Gradual titration limits GI side effects (especially nausea). Investigational; framed for education, not advice.",
+    "timing": "Once weekly on the same day each week; can be taken any time of day, with or without food.",
+    "maxDose": "~2.4 mg once weekly (the maintenance dose used in CagriSema/REDEFINE; the phase 2 trial explored up to 4.5 mg)",
+    "protocols": [
+      {
+        "label": "Standard titration to 2.4 mg weekly",
+        "steps": [
+          {
+            "weeks": "1-2",
+            "amount": 0.3,
+            "unit": "mg",
+            "note": "Starting dose to build tolerance and limit nausea"
+          },
+          {
+            "weeks": "3-4",
+            "amount": 0.6,
+            "unit": "mg",
+            "note": "Step up if well tolerated"
+          },
+          {
+            "weeks": "5-6",
+            "amount": 1.2,
+            "unit": "mg",
+            "note": "Step up if well tolerated"
+          },
+          {
+            "weeks": "7+",
+            "amount": 2.4,
+            "unit": "mg",
+            "note": "Maintenance target (CagriSema amylin dose)"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "once weekly",
@@ -99,6 +132,10 @@
     {
       "title": "Cagrilintide lowers bodyweight through brain amylin receptors 1 and 3 (PMC)",
       "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12270663/"
+    },
+    {
+      "title": "Enebo LB et al. Safety, tolerability, pharmacokinetics, and pharmacodynamics of concomitant cagrilintide and semaglutide in overweight/obesity: a phase 1b trial. The Lancet 2021",
+      "url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)00845-X/fulltext"
     }
   ],
   "tags": ["fat-loss", "metabolic"],

@@ -42,7 +42,75 @@
     "standard": "5-10",
     "high": "15",
     "unit": "mg",
-    "notes": "Common educational protocol mirrors the labeled titration: start at 2.5 mg once weekly for 4 weeks (a non-therapeutic starting dose intended to reduce GI side effects), then increase by 2.5 mg every 4 weeks as tolerated (2.5 -> 5 -> 7.5 -> 10 -> 12.5 -> 15 mg). Maximum studied dose is 15 mg weekly. Slower titration reduces nausea."
+    "notes": "Common educational protocol mirrors the labeled titration: start at 2.5 mg once weekly for 4 weeks (a non-therapeutic starting dose intended to reduce GI side effects), then increase by 2.5 mg every 4 weeks as tolerated (2.5 -> 5 -> 7.5 -> 10 -> 12.5 -> 15 mg). Per the FDA label the maintenance doses are 5, 10, or 15 mg weekly; 2.5, 7.5, and 12.5 mg are titration steps. Maximum dose is 15 mg weekly. If a dose is not tolerated, holding or stepping back one level and titrating more slowly reduces nausea. With a 10 mg vial reconstituted in 1 mL (10 mg/mL), 2.5 mg = 0.25 mL, 5 mg = 0.5 mL, 7.5 mg = 0.75 mL, 10 mg = 1.0 mL.",
+    "timing": "Once weekly on the same day each week, any time of day, with or without food. The dosing day may be changed if at least 3 days (72 h) separate two doses.",
+    "maxDose": "15 mg per week",
+    "protocols": [
+      {
+        "label": "Standard labeled titration",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 2.5,
+            "unit": "mg",
+            "note": "Starting dose for GI tolerability; not intended for glycemic/weight control"
+          },
+          {
+            "weeks": "5-8",
+            "amount": 5,
+            "unit": "mg",
+            "note": "First maintenance dose; may stay here if effective"
+          },
+          {
+            "weeks": "9-12",
+            "amount": 7.5,
+            "unit": "mg",
+            "note": "Titration step; increase only if more effect needed and tolerated"
+          },
+          {
+            "weeks": "13-16",
+            "amount": 10,
+            "unit": "mg",
+            "note": "Maintenance option"
+          },
+          {
+            "weeks": "17-20",
+            "amount": 12.5,
+            "unit": "mg",
+            "note": "Titration step"
+          },
+          {
+            "weeks": "21+",
+            "amount": 15,
+            "unit": "mg",
+            "note": "Maximum dose"
+          }
+        ]
+      },
+      {
+        "label": "Conservative / GI-sensitive (slower titration)",
+        "steps": [
+          {
+            "weeks": "1-8",
+            "amount": 2.5,
+            "unit": "mg",
+            "note": "Extended starting phase if nausea is prominent"
+          },
+          {
+            "weeks": "9-16",
+            "amount": 5,
+            "unit": "mg",
+            "note": "Hold 8 weeks before stepping up"
+          },
+          {
+            "weeks": "17+",
+            "amount": 7.5,
+            "unit": "mg",
+            "note": "Increase by 2.5 mg only every 8 weeks as tolerated, ceiling 15 mg"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "once weekly",
@@ -113,6 +181,14 @@
     {
       "title": "Schneck KB et al. Population pharmacokinetics of the GIP/GLP receptor agonist tirzepatide. CPT Pharmacometrics Syst Pharmacol 2024 (PMC)",
       "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10962491/"
+    },
+    {
+      "title": "FDA Prescribing Information: ZEPBOUND (tirzepatide) injection — Dosage and Administration",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2023/217806s000lbl.pdf"
+    },
+    {
+      "title": "Dahl D et al. Tirzepatide once weekly added to insulin glargine in type 2 diabetes (SURPASS-5). JAMA 2022",
+      "url": "https://jamanetwork.com/journals/jama/fullarticle/2790535"
     }
   ],
   "tags": ["fat-loss", "metabolic", "longevity"],

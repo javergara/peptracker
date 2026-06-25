@@ -40,7 +40,28 @@
     "standard": "20-50",
     "high": "50-100",
     "unit": "mcg",
-    "notes": "Educational reference only, not a protocol or medical advice. Research-context figures commonly cited fall in the 10-100 mcg/day range, with users often eating carbohydrate around dosing because of the hypoglycemia risk. Because IGF-1 LR3 has a long half-life and potent insulin-like activity, even small overestimates of dose can cause prolonged low blood sugar. No validated human therapeutic dose exists."
+    "notes": "Educational reference only, not a protocol or medical advice. Research-context figures commonly cited fall in the 10-100 mcg/day range, with users often eating carbohydrate around dosing because of the hypoglycemia risk. Because IGF-1 LR3 has a long half-life and potent insulin-like activity, even small overestimates of dose can cause prolonged low blood sugar. No validated human therapeutic dose exists.",
+    "timing": "Where dosed, it is typically given once daily, frequently within ~30-60 minutes post-workout on training days so the injection coincides with a planned carbohydrate-containing meal and exercise-related glucose uptake, both of which help blunt the hypoglycemia risk. Some research-context protocols split the daily amount or dose only on active/training days. The long ~20-30 hour half-life means a single daily injection sustains exposure; there is no validated human timing protocol.",
+    "maxDose": "CAUTION: there is no clinically validated maximum and no human therapeutic dose. Research-chemical figures rarely exceed ~100 mcg/day, but higher or chronic exposure markedly increases the most serious IGF-1 risks - prolonged hard-to-reverse hypoglycemia, non-selective organ/tissue overgrowth (organomegaly), and theoretical cancer promotion via sustained IGF-1R activation. More is not safer; the ceiling here is a danger threshold, not a target.",
+    "protocols": [
+      {
+        "label": "Standard (research-context; not clinically validated)",
+        "steps": [
+          {
+            "weeks": "1",
+            "amount": 20,
+            "unit": "mcg",
+            "note": "Conservative starting dose to assess tolerance and glucose response; inject post-workout with carbohydrate available and fast-acting glucose on hand."
+          },
+          {
+            "weeks": "2-4",
+            "amount": 40,
+            "unit": "mcg",
+            "note": "Representative maintenance amount if well tolerated; still within the commonly cited 20-50 mcg/day band. Once daily, post-workout on training days. Educational reference only - not a protocol or medical advice."
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "Once daily when used in research contexts; some protocols dose only on training/active days",
@@ -106,6 +127,10 @@
     {
       "title": "Recombinant Human LR3 IGF-I/IGF-1 Protein product description (R&D Systems)",
       "url": "https://www.rndsystems.com/products/recombinant-human-lr3-igf-i-igf-1-protein-cf_8335-g1"
+    },
+    {
+      "title": "Insulin-like growth factor I (IGF-I) and its binding proteins in hypoglycemia and glucose regulation (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4889871/"
     }
   ],
   "tags": ["muscle-growth", "recovery-injury", "gh-axis"],

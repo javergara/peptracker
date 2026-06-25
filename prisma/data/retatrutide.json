@@ -34,7 +34,72 @@
     "standard": "4-8",
     "high": "12",
     "unit": "mg",
-    "notes": "Investigational. Trial protocols used gradual titration every 4 weeks (e.g., 2 mg start, escalating 2 -> 4 -> 6 -> 9 -> 12 mg) to reduce GI side effects. Each step is held ~4 weeks to reach steady state. Lower starting dose (2 mg vs 4 mg) reduces nausea."
+    "notes": "Investigational research compound; framing below is an educational summary of published trial protocols, not medical advice. The phase 2 obesity trial escalated every 4 weeks, starting at 2 mg or 4 mg, to reduce GI side effects; the 2 mg start produced fewer GI events with equivalent 48-week weight loss. Each step is held ~4 weeks to reach steady state. At 5 mg/mL, 1 mg = 0.2 mL, 2 mg = 0.4 mL, 4 mg = 0.8 mL, 6 mg = 1.2 mL, 8 mg = 1.6 mL, 12 mg = 2.4 mL.",
+    "timing": "Once weekly, same day each week (subcutaneous); rotate injection sites.",
+    "maxDose": "12 mg/week (highest dose tested in the phase 2 obesity trial)",
+    "protocols": [
+      {
+        "label": "Standard (2 mg start, gentler titration)",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 2,
+            "unit": "mg",
+            "note": "Lower-GI starting dose used in trial"
+          },
+          {
+            "weeks": "5-8",
+            "amount": 4,
+            "unit": "mg"
+          },
+          {
+            "weeks": "9-12",
+            "amount": 6,
+            "unit": "mg"
+          },
+          {
+            "weeks": "13-16",
+            "amount": 8,
+            "unit": "mg",
+            "note": "Common maintenance target"
+          },
+          {
+            "weeks": "17-20",
+            "amount": 9,
+            "unit": "mg",
+            "note": "Optional further escalation"
+          },
+          {
+            "weeks": "21+",
+            "amount": 12,
+            "unit": "mg",
+            "note": "Max tested dose; hold if tolerability is poor"
+          }
+        ]
+      },
+      {
+        "label": "Aggressive (4 mg start arm)",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 4,
+            "unit": "mg",
+            "note": "Higher-start arm; more GI side effects than 2 mg start"
+          },
+          {
+            "weeks": "5-8",
+            "amount": 8,
+            "unit": "mg"
+          },
+          {
+            "weeks": "9+",
+            "amount": 12,
+            "unit": "mg",
+            "note": "Max tested dose"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "once weekly",
@@ -43,7 +108,7 @@
   "reconstitution": {
     "vialMg": 10,
     "bacWaterMl": 2,
-    "notes": "Adding 2 mL bacteriostatic water to a 10 mg vial yields 5 mg/mL. For larger vials, 6 mL into 30 mg gives 5 mg/mL for easier sub-milligram dosing. Swirl gently, do not shake."
+    "notes": "Adding 2 mL bacteriostatic water to a 10 mg vial yields 5 mg/mL (1 mg = 0.2 mL). For larger vials, 6 mL into 30 mg also gives 5 mg/mL for easier sub-milligram dosing. Swirl gently, do not shake."
   },
   "storage": "Lyophilized: store frozen/cool (-20 C long-term, or 2-8 C). Reconstituted: refrigerate at 2-8 C and use within ~4 weeks. Protect from light; do not freeze reconstituted solution.",
   "contraindications": [
@@ -90,6 +155,14 @@
     {
       "title": "Structural insights into triple agonism at GLP-1R, GIPR and GCGR by retatrutide (PMC)",
       "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11255275/"
+    },
+    {
+      "title": "Lilly phase 2 retatrutide results published in NEJM (dose-escalation design, up to 24% weight loss) - PR Newswire",
+      "url": "https://www.prnewswire.com/news-releases/lillys-phase-2-retatrutide-results-published-in-the-new-england-journal-of-medicine-show-the-investigational-molecule-achieved-up-to-17-5-mean-weight-reduction-at-24-weeks-in-adults-with-obesity-and-overweight-301863690.html"
+    },
+    {
+      "title": "Jastreboff AM et al. Triple-Hormone-Receptor Agonist Retatrutide for Obesity - A Phase 2 Trial. NEJM 2023 (PDF)",
+      "url": "https://www.nejm.org/doi/pdf/10.1056/NEJMoa2301972"
     }
   ],
   "tags": ["fat-loss", "metabolic", "longevity"],

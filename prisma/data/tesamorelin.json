@@ -34,7 +34,22 @@
     "standard": "1.4-2",
     "high": "2",
     "unit": "mg",
-    "notes": "FDA-approved dose is 2 mg SubQ once daily (original Egrifta) or 1.4 mg once daily (Egrifta SV single-vial formulation). Inject into the abdomen, rotating sites at least 2 inches from the navel. No titration required; given at a fixed daily dose."
+    "notes": "FDA-approved dose is 2 mg SubQ once daily (original Egrifta) or 1.4 mg once daily (Egrifta SV single-vial formulation). Inject into the abdomen, rotating sites at least 2 inches from the navel. No titration required; given at a fixed daily dose.",
+    "timing": "Once daily by subcutaneous injection. Commonly administered in the evening / pre-sleep to align with the body's natural nocturnal GH pulse, ideally in a fasted state. The FDA label specifies once-daily dosing without a fixed time-of-day requirement.",
+    "maxDose": "2 mg per day (labeled dose; no benefit shown above the fixed daily dose)",
+    "protocols": [
+      {
+        "label": "Standard (per FDA label)",
+        "steps": [
+          {
+            "weeks": "1+",
+            "amount": 2,
+            "unit": "mg",
+            "note": "Fixed labeled dose: 2 mg SubQ once daily into the abdomen; no titration. (Egrifta SV reconstitutes a single vial; original Egrifta uses two 1 mg vials.)"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "daily",
@@ -95,6 +110,10 @@
     {
       "title": "EGRIFTA WR (tesamorelin kit) - DailyMed (NIH)",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=839334d3-8c1d-4c26-9036-2ab524a6ea75&audience=consumer"
+    },
+    {
+      "title": "Falutz J, et al. Metabolic Effects of a Growth Hormone-Releasing Factor in Patients with HIV. N Engl J Med 2007;357:2359-2370",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa072375"
     }
   ],
   "tags": ["fat-loss", "gh-axis", "metabolic", "sleep"],

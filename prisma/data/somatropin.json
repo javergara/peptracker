@@ -47,7 +47,40 @@
     "standard": "0.2-0.5",
     "high": "1-2",
     "unit": "mg/day",
-    "notes": "Educational reference only, not advice. Medical GH-deficiency dosing is weight-based and titrated to IGF-1: adult start is typically <=0.2 mg/day (about 0.04 mg/kg/week max early), increased every 4-8 weeks to no more than ~0.08 mg/kg/week (often 0.2-0.5 mg/day in adults), with lower weight-based but higher mg/day pediatric dosing. GH is dosed by mass (mg) and sometimes IU (1 mg approximately equals 3 IU for modern rhGH). Non-medical anti-aging/physique use of 1-2+ mg/day is supraphysiologic, unapproved, and markedly increases side-effect and IGF-1 risk; lower, IGF-1-guided dosing is the conservative educational framing."
+    "notes": "Educational reference only, not advice. Medical GH-deficiency dosing is weight-based and titrated to IGF-1: adult start is typically <=0.2 mg/day (about 0.04 mg/kg/week max early), increased every 4-8 weeks to no more than ~0.08 mg/kg/week (often 0.2-0.5 mg/day in adults), with lower weight-based but higher mg/day pediatric dosing. GH is dosed by mass (mg) and sometimes IU (1 mg approximately equals 3 IU for modern rhGH). Non-medical anti-aging/physique use of 1-2+ mg/day is supraphysiologic, unapproved, and markedly increases side-effect and IGF-1 risk; lower, IGF-1-guided dosing is the conservative educational framing.",
+    "timing": "Once daily by subcutaneous injection, typically in the evening / pre-sleep to loosely mimic the body's nocturnal GH pulse. Real adult GH-deficiency dosing is individualized and clinician-supervised, started low and titrated to a serum IGF-1 target (kept within the age-adjusted reference range, below the upper limit of normal), not set to a fixed number.",
+    "maxDose": "No universal ceiling; dose is capped by the IGF-1 target rather than a fixed mg value. As a conservative educational reference, adult GH-deficiency dosing rarely needs to exceed ~1 mg/day and is usually far lower (~0.2-0.6 mg/day). Caution: somatropin is a powerful hormone - pushing dose to raise IGF-1 above the physiologic range risks acromegaly-like soft-tissue/organ overgrowth, worsening insulin resistance/hyperglycemia, fluid retention and arthralgia, and a theoretical tumor-growth concern. Higher is not better; the target is a normal IGF-1, not a maximal one.",
+    "protocols": [
+      {
+        "label": "Standard (adult GH-deficiency, IGF-1-titrated) - educational reference, clinician-individualized",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 0.2,
+            "unit": "mg",
+            "note": "Low starting dose (~0.2 mg/day; ~0.1 mg/day if >60 yrs or prone to side effects). Evening/pre-sleep SUBQ. Baseline IGF-1 and glucose before starting."
+          },
+          {
+            "weeks": "5-8",
+            "amount": 0.3,
+            "unit": "mg",
+            "note": "Titrate up by ~0.1-0.2 mg every 4-8 weeks ONLY if IGF-1 is still below target and side effects (edema, arthralgia, glucose) are tolerable. Recheck IGF-1 before each increase."
+          },
+          {
+            "weeks": "9-12",
+            "amount": 0.4,
+            "unit": "mg",
+            "note": "Continue stepwise titration guided by serum IGF-1 (age-adjusted reference range, below ULN), clinical response, and side effects - not by a fixed schedule."
+          },
+          {
+            "weeks": "13+",
+            "amount": 0.5,
+            "unit": "mg",
+            "note": "Typical adult maintenance commonly lands around ~0.4-0.6 mg/day once IGF-1 is in range. Hold or reduce dose if IGF-1 reaches target or side effects appear. Dose is the value that normalizes IGF-1, which differs per person."
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "Once daily, commonly in the evening to loosely mimic the nocturnal GH pulse; some pediatric regimens divide or vary timing per product labeling.",
@@ -130,6 +163,14 @@
     {
       "title": "Somatropin (mammalian-derived, subcutaneous) - Mayo Clinic Drugs & Supplements",
       "url": "https://www.mayoclinic.org/drugs-supplements/somatropin-mammalian-derived-injection-route-subcutaneous-route/description/drg-20071668"
+    },
+    {
+      "title": "Molitch et al. Evaluation and Treatment of Adult Growth Hormone Deficiency: An Endocrine Society Clinical Practice Guideline (J Clin Endocrinol Metab, 2011)",
+      "url": "https://academic.oup.com/jcem/article/96/6/1587/2833853"
+    },
+    {
+      "title": "AACE/ACE Guidelines for Management of Growth Hormone Deficiency in Adults and Patients Transitioning from Pediatric to Adult Care (Endocrine Practice, 2019)",
+      "url": "https://www.endocrinepractice.org/article/S1530-891X(20)35145-4/fulltext"
     }
   ],
   "tags": [

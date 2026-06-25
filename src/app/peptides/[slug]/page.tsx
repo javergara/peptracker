@@ -37,6 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ReconstitutionCalculator } from "@/components/peptides/reconstitution-calculator";
+import { calculateReconstitution } from "@/lib/reconstitution";
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -300,6 +301,109 @@ export default async function PeptideDetailPage({
                     </TableRow>
                   </TableBody>
                 </Table>
+                {(dosage.timing || dosage.maxDose) && (
+                  <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                    {dosage.timing && (
+                      <p>
+                        <span className="text-muted-foreground">Timing:</span>{" "}
+                        {dosage.timing}
+                      </p>
+                    )}
+                    {dosage.maxDose && (
+                      <p>
+                        <span className="text-muted-foreground">Max dose:</span>{" "}
+                        <span className="num">{dosage.maxDose}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {dosage.protocols && dosage.protocols.length > 0 && (
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium">Titration schedule</p>
+                    {dosage.protocols.map((proto, pi) => (
+                      <div key={pi} className="space-y-2">
+                        {proto.label && (
+                          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                            {proto.label}
+                          </p>
+                        )}
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Weeks</TableHead>
+                              <TableHead>Dose</TableHead>
+                              {reconstitution ? (
+                                <TableHead>Volume</TableHead>
+                              ) : null}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {proto.steps.map((step, si) => {
+                              const doseMcg =
+                                step.unit === "mg"
+                                  ? step.amount * 1000
+                                  : step.amount;
+                              const units = reconstitution
+                                ? calculateReconstitution({
+                                    vialMg: reconstitution.vialMg,
+                                    bacWaterMl: reconstitution.bacWaterMl,
+                                    doseMcg,
+                                  }).insulinUnits
+                                : null;
+                              return (
+                                <TableRow key={si}>
+                                  <TableCell className="num text-muted-foreground">
+                                    {step.weeks}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="num font-medium">
+                                      {step.amount} {step.unit}
+                                    </span>
+                                    {step.note ? (
+                                      <span className="text-muted-foreground ml-2 text-xs">
+                                        {step.note}
+                                      </span>
+                                    ) : null}
+                                  </TableCell>
+                                  {reconstitution ? (
+                                    <TableCell className="num text-muted-foreground">
+                                      {units ? `${units} u` : "—"}
+                                    </TableCell>
+                                  ) : null}
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ))}
+                    {reconstitution
+                      ? (() => {
+                          const c = calculateReconstitution({
+                            vialMg: reconstitution.vialMg,
+                            bacWaterMl: reconstitution.bacWaterMl,
+                            doseMcg: 100,
+                          });
+                          const mcgPerUnit = c.concentrationMcgPerMl
+                            ? Math.round(c.concentrationMcgPerMl / 100)
+                            : 0;
+                          return (
+                            <p className="text-muted-foreground text-xs">
+                              Volume (insulin-syringe units) shown for a{" "}
+                              {reconstitution.vialMg} mg vial reconstituted with{" "}
+                              {reconstitution.bacWaterMl} mL BAC water
+                              {mcgPerUnit
+                                ? ` — ≈ ${mcgPerUnit} mcg per unit on a U-100 syringe`
+                                : ""}
+                              . Recalculate for your own vial below.
+                            </p>
+                          );
+                        })()
+                      : null}
+                  </div>
+                )}
+
                 {dosage.notes && (
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     {dosage.notes}

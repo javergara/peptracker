@@ -29,7 +29,28 @@
     "standard": "2-2.5",
     "high": "2.5",
     "unit": "mg",
-    "notes": "Loading phase (weeks 1-4): 2-2.5 mg, 2-3x per week to build systemic levels. Maintenance phase (weeks 5-8): 2-2.5 mg once weekly. Dose injected subcutaneously; works systemically from any SubQ site (abdomen is convenient)."
+    "notes": "Loading phase (weeks 1-4): 2-2.5 mg, 2-3x per week to build systemic levels. Maintenance phase (weeks 5-8): 2-2.5 mg once weekly. Dose injected subcutaneously; works systemically from any SubQ site (abdomen is convenient).",
+    "timing": "Loading: split the weekly total across 2 injections per week (e.g. Mon/Thu), ~3-4 days apart. Maintenance: a single injection once weekly. Timing of day is not critical; works systemically from any SubQ site.",
+    "maxDose": "Community protocols rarely exceed ~10 mg per week during loading. Higher amounts are not better-supported and increase cost and side-effect risk; all human dosing is anecdotal and not clinically validated.",
+    "protocols": [
+      {
+        "label": "Standard (loading -> maintenance)",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 2.5,
+            "unit": "mg",
+            "note": "Loading: 2.5 mg twice weekly (~5 mg/week) to saturate tissue levels"
+          },
+          {
+            "weeks": "5-8",
+            "amount": 2,
+            "unit": "mg",
+            "note": "Maintenance: 2 mg once weekly to sustain elevated tissue levels"
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "2-3x weekly during loading, then once weekly maintenance",
@@ -70,6 +91,14 @@
     {
       "title": "TB-500 Peptide: Thymosin Beta-4 Healing Guide (Medsbase)",
       "url": "https://medsbase.com/tb-500-thymosin-beta-4-peptide-guide/"
+    },
+    {
+      "title": "TB-500 Dosage Guide: Loading Phase, Maintenance & Injection Protocol (PeptideNerds)",
+      "url": "https://peptidenerds.com/blog/tb-500-dosage"
+    },
+    {
+      "title": "TB-500 Dosing Protocol - Clinical Guidelines (Peptide Initiative)",
+      "url": "https://peptideinitiative.com/peptides/tb-500/protocol-dosing"
     }
   ],
   "tags": ["recovery-injury", "muscle-growth", "immune"],

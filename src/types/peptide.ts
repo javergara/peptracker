@@ -94,12 +94,32 @@ export type CycleStatus = (typeof CYCLE_STATUSES)[number];
 // ---------------------------------------------------------------------------
 // Zod schemas for the Json columns
 // ---------------------------------------------------------------------------
+/** One step of a titration schedule (e.g. "weeks 1–4 → 2 mg"). */
+export const titrationStepSchema = z.object({
+  weeks: z.string(), // e.g. "1–4", "1-2", "13+"
+  amount: z.number(), // numeric dose (so injection volume can be auto-computed)
+  unit: z.enum(["mg", "mcg"]),
+  note: z.string().optional(), // e.g. "split AM/PM", "pre-sleep"
+});
+export type TitrationStep = z.infer<typeof titrationStepSchema>;
+
+/** A named dosing protocol (Standard / Aggressive / Maintenance …). */
+export const dosingProtocolSchema = z.object({
+  label: z.string().optional(),
+  steps: z.array(titrationStepSchema),
+});
+export type DosingProtocol = z.infer<typeof dosingProtocolSchema>;
+
 export const dosageSchema = z.object({
   low: z.string(),
   standard: z.string(),
   high: z.string(),
   unit: z.string(),
   notes: z.string().optional().default(""),
+  // Optional enrichments (titration tables, timing, ceiling).
+  timing: z.string().optional(),
+  maxDose: z.string().optional(),
+  protocols: z.array(dosingProtocolSchema).optional(),
 });
 export type Dosage = z.infer<typeof dosageSchema>;
 

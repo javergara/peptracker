@@ -33,7 +33,28 @@
     "standard": "250-500",
     "high": "1000",
     "unit": "mcg",
-    "notes": "Typically 200-500 mcg/day. Oral capsules favored for gut/IBD (PepT1 self-targeting); SubQ used for systemic effect; topical for skin. Doses above 500 mcg are not better supported by evidence."
+    "notes": "Typically 200-500 mcg/day. Oral capsules favored for gut/IBD (PepT1 self-targeting); SubQ used for systemic effect; topical for skin. Doses above 500 mcg are not better supported by evidence.",
+    "timing": "Once daily, commonly in the morning; some protocols split into two smaller doses (AM/PM) for systemic anti-inflammatory effect.",
+    "maxDose": "Community ceiling ~500 mcg/day for SubQ use; doses above this are not supported by evidence and offer no clear added benefit. No clinically validated human maximum exists.",
+    "protocols": [
+      {
+        "label": "Standard (SubQ)",
+        "steps": [
+          {
+            "weeks": "1",
+            "amount": 200,
+            "unit": "mcg",
+            "note": "Once daily; start low to assess tolerance."
+          },
+          {
+            "weeks": "2-8",
+            "amount": 500,
+            "unit": "mcg",
+            "note": "Once daily if well tolerated. Human protocols are anecdotal and not clinically validated; most evidence is preclinical (animal/cell models)."
+          }
+        ]
+      }
+    ]
   },
   "route": "SUBQ",
   "frequency": "daily",
@@ -78,6 +99,10 @@
     {
       "title": "KPV Peptide: Benefits, Safety & Buying Advice (Innerbody)",
       "url": "https://www.innerbody.com/kpv-peptide"
+    },
+    {
+      "title": "KPV Peptide Dosage Guide: Injectable, Oral & Nasal Protocols (SeekPeptides)",
+      "url": "https://www.seekpeptides.com/blog/articles/kpv-peptide-dosage-guide"
     }
   ],
   "tags": ["immune", "recovery-injury", "skin-antiaging", "metabolic"],
