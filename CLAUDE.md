@@ -294,7 +294,10 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
 - **Mood visualization:** logged 1–5 mood ratings render as emoji faces via
   `src/lib/mood.ts` (`moodFace`/`averageMood`) on the calendar day cells + detail
   (`dose-calendar.tsx`); on `/metrics` mood is a toggleable line in `MetricsTrends`.
-- **Photos:** `/photos`, `src/lib/actions/photos.ts` (uploads to Vercel Blob).
+- **Photos:** `/photos`, `src/lib/actions/photos.ts` (private Vercel Blob, served
+  via `/api/photos/[id]`). UI is `components/photos/photo-board.tsx` (client):
+  full images (object-contain), click-to-zoom lightbox, and a Before/After with
+  selectable photos (defaults oldest→newest).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization
