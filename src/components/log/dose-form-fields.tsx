@@ -17,6 +17,8 @@ interface DoseFormFieldsProps {
   vials?: Vial[];
   suggestedSite?: string;
   lastSite?: string | null;
+  /** When set, shows an optional "weight today" field (create forms only). */
+  weightUnit?: string;
   /** Prefill values when editing an existing dose. */
   defaults?: {
     site?: string | null;
@@ -38,6 +40,7 @@ export function DoseFormFields({
   vials = [],
   suggestedSite = "",
   lastSite,
+  weightUnit,
   defaults,
 }: DoseFormFieldsProps) {
   const siteDefault = defaults?.site ?? suggestedSite;
@@ -46,6 +49,30 @@ export function DoseFormFields({
   const checkedSideEffects = new Set(defaults?.sideEffects ?? []);
   return (
     <>
+      {/* Weight today (optional) — useful for weekly GLP-1 dosing. */}
+      {weightUnit ? (
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">
+            Weight today{" "}
+            <span className="text-muted-foreground font-normal">
+              (optional, {weightUnit})
+            </span>
+          </label>
+          <input
+            name="weight"
+            type="number"
+            step="any"
+            min="0"
+            placeholder={`e.g. 82 ${weightUnit}`}
+            className={inputCls}
+          />
+          <p className="text-muted-foreground text-xs">
+            Logged as a weight measurement at this dose&apos;s time — handy for
+            weekly GLP-1 check-ins.
+          </p>
+        </div>
+      ) : null}
+
       {/* Vial selector */}
       {vials.length > 0 && (
         <div className="space-y-1.5">

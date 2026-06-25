@@ -18,6 +18,7 @@ export async function logDose(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const moodRaw = formData.get("mood");
   const energyRaw = formData.get("energy");
+  const weightRaw = formData.get("weight");
   const sideEffects = formData
     .getAll("sideEffects")
     .map(String)
@@ -26,6 +27,8 @@ export async function logDose(formData: FormData) {
   if (!peptideId || !amount) {
     throw new Error("Peptide and amount are required.");
   }
+
+  const takenAtDate = takenAt ? new Date(takenAt) : new Date();
 
   await prisma.doseLog.create({
     data: {
@@ -40,10 +43,26 @@ export async function logDose(formData: FormData) {
       mood: moodRaw != null && moodRaw !== "" ? Number(moodRaw) : null,
       energy: energyRaw != null && energyRaw !== "" ? Number(energyRaw) : null,
       sideEffects: sideEffects.length ? sideEffects : undefined,
-      takenAt: takenAt ? new Date(takenAt) : new Date(),
+      takenAt: takenAtDate,
       notes: notes || null,
     },
   });
+
+  // Optionally record bodyweight at this dose (handy for weekly GLP-1 dosing).
+  // Stored as a normal weight Measurement so it flows into the Metrics charts.
+  const weight = Number(weightRaw ?? 0);
+  if (weightRaw != null && weightRaw !== "" && weight > 0) {
+    await prisma.measurement.create({
+      data: {
+        userId: user.id,
+        type: "weight",
+        value: weight,
+        unit: user.weightUnit,
+        recordedAt: takenAtDate,
+      },
+    });
+    revalidatePath("/metrics");
+  }
 
   // Decrement the source vial (in mcg) and mark empty when depleted.
   if (vialId) {

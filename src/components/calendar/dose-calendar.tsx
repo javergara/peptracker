@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { logDose } from "@/lib/actions/doses";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { averageMood, moodFace } from "@/lib/mood";
 
 export interface CalendarDose {
   id: string;
@@ -18,6 +19,7 @@ export interface CalendarDose {
   takenAtISO: string;
   site: string | null;
   cycleName: string | null;
+  mood: number | null;
   profileName: string;
   profileColor: string | null;
 }
@@ -202,6 +204,7 @@ export function DoseCalendar({
             const isToday = isThisMonth && day === todayDate;
             const isSelected = day === selected;
             const profs = multiProfile ? profilesIn(dayDoses) : [];
+            const dayFace = moodFace(averageMood(dayDoses.map((d) => d.mood)));
             return (
               <button
                 key={day}
@@ -255,6 +258,14 @@ export function DoseCalendar({
                       </span>
                     </span>
                   )
+                ) : null}
+                {dayFace ? (
+                  <span
+                    className="text-sm leading-none"
+                    title={`Mood: ${dayFace.label}`}
+                  >
+                    {dayFace.emoji}
+                  </span>
                 ) : null}
               </button>
             );
@@ -340,8 +351,13 @@ export function DoseCalendar({
                       ) : null}
                       {d.peptideName}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
                       {d.amount} {d.unit}
+                      {moodFace(d.mood) ? (
+                        <span title={`Mood: ${moodFace(d.mood)!.label}`}>
+                          {moodFace(d.mood)!.emoji}
+                        </span>
+                      ) : null}
                     </span>
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">

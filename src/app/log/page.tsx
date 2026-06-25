@@ -135,6 +135,7 @@ export default async function LogPage() {
               vials={vialsForForm}
               suggestedSite={suggestedSite}
               lastSite={lastSite}
+              weightUnit={user.weightUnit}
             />
 
             <div className="sm:col-span-2">

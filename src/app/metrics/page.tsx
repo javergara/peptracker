@@ -313,11 +313,12 @@ export default async function MetricsPage() {
               </CardHeader>
               <CardContent>
                 {moodPoints.length > 0 ? (
-                  <MetricChart
-                    data={moodPoints}
-                    color={profileColor}
-                    unit="/ 5"
-                  />
+                  <>
+                    <MetricChart data={moodPoints} color={profileColor} mood />
+                    <p className="text-muted-foreground mt-2 text-center text-xs">
+                      😢 very low · 🙁 low · 😐 neutral · 🙂 good · 😄 great
+                    </p>
+                  </>
                 ) : (
                   <p className="text-muted-foreground py-4 text-center text-sm">
                     No mood ratings logged yet.

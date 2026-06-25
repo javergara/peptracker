@@ -59,6 +59,7 @@ export default async function CalendarPage({
       takenAtISO: d.takenAt.toISOString(),
       site: d.site,
       cycleName: d.cycle?.name ?? null,
+      mood: d.mood,
       profileName: d.user?.name ?? "Unknown",
       profileColor: d.user?.color ?? null,
     }));
@@ -73,6 +74,7 @@ export default async function CalendarPage({
       takenAtISO: d.takenAt.toISOString(),
       site: d.site,
       cycleName: d.cycle?.name ?? null,
+      mood: d.mood,
       profileName: user.name,
       profileColor: user.color,
     }));

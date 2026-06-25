@@ -172,6 +172,7 @@ export default async function CycleDetailPage({
                 vials={vialsForForm}
                 suggestedSite={suggestedSite}
                 lastSite={lastSite}
+                weightUnit={user.weightUnit}
               />
             </div>
 
