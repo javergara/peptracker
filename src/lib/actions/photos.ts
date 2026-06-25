@@ -1,15 +1,13 @@
 "use server";
 
-import { mkdir, writeFile, unlink } from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 
+import { put, del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -19,9 +17,9 @@ const EXT: Record<string, string> = {
 };
 
 /**
- * Upload a progress photo. Writes the file to public/uploads/<id>.<ext> (local
- * filesystem — for self-hosting; production should swap to object storage) and
- * records a Photo row referencing the public path.
+ * Upload a progress photo to Vercel Blob (object storage — survives serverless
+ * deploys) and record a Photo row referencing the returned public Blob URL.
+ * Requires BLOB_READ_WRITE_TOKEN (auto-set on Vercel; `vercel env pull` locally).
  */
 export async function uploadPhoto(formData: FormData) {
   const user = await getActiveUser();
@@ -39,16 +37,16 @@ export async function uploadPhoto(formData: FormData) {
     throw new Error("Image too large (max 12 MB).");
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  const id = randomUUID();
-  const filename = `${id}.${EXT[file.type]}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), bytes);
+  const filename = `photos/${user.id}/${randomUUID()}.${EXT[file.type]}`;
+  const blob = await put(filename, file, {
+    access: "public",
+    contentType: file.type,
+  });
 
   await prisma.photo.create({
     data: {
       userId: user.id,
-      path: `/uploads/${filename}`,
+      path: blob.url,
       caption: caption || null,
       takenAt: takenAt ? new Date(takenAt) : new Date(),
     },
@@ -58,13 +56,11 @@ export async function uploadPhoto(formData: FormData) {
 
 export async function deletePhoto(id: string) {
   const photo = await prisma.photo.delete({ where: { id } });
-  // Best-effort file cleanup.
+  // Best-effort blob cleanup.
   try {
-    await unlink(
-      path.join(process.cwd(), "public", photo.path.replace(/^\//, "")),
-    );
+    await del(photo.path);
   } catch {
-    // file may already be gone; ignore
+    // blob may already be gone; ignore
   }
   revalidatePath("/photos");
 }

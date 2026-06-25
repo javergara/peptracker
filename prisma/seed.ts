@@ -8,13 +8,26 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import ws from "ws";
+import bcrypt from "bcryptjs";
+import { neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 
-const DATABASE_URL = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-const adapter = new PrismaBetterSqlite3({ url: DATABASE_URL });
+if (typeof globalThis.WebSocket === "undefined") {
+  neonConfig.webSocketConstructor = ws;
+}
+
+// Seed/migrate prefer a direct (unpooled) connection.
+const DATABASE_URL =
+  process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
+const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+// Demo login for local dev / the seeded household. Override via env in prod.
+const DEMO_EMAIL = process.env.SEED_ACCOUNT_EMAIL ?? "local@peptides.app";
+const DEMO_PASSWORD = process.env.SEED_ACCOUNT_PASSWORD ?? "peptides123";
 
 type RawInteraction = { with: string; kind: string; note: string };
 type RawPeptide = {
@@ -109,19 +122,33 @@ async function main() {
   const peptides = loadPeptides();
   console.log(`Loaded ${peptides.length} peptide records from prisma/data/`);
 
-  // 1) Default profiles (multi-profile demo: "Me" + "Partner").
+  // 1) Demo login account that owns the demo household profiles.
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const account = await prisma.account.upsert({
+    where: { email: DEMO_EMAIL },
+    update: { passwordHash },
+    create: { email: DEMO_EMAIL, name: "Demo Household", passwordHash },
+  });
+
+  // Default profiles (multi-profile demo: "Me" + "Partner"), owned by the account.
   const user = await prisma.user.upsert({
     where: { email: "local@peptides.app" },
-    update: { color: "#6366f1" },
-    create: { name: "Me", email: "local@peptides.app", color: "#6366f1" },
+    update: { color: "#6366f1", accountId: account.id },
+    create: {
+      name: "Me",
+      email: "local@peptides.app",
+      color: "#6366f1",
+      accountId: account.id,
+    },
   });
   await prisma.user.upsert({
     where: { email: "partner@peptides.app" },
-    update: { color: "#ec4899" },
+    update: { color: "#ec4899", accountId: account.id },
     create: {
       name: "Partner",
       email: "partner@peptides.app",
       color: "#ec4899",
+      accountId: account.id,
     },
   });
 
@@ -295,6 +322,7 @@ async function main() {
   }
 
   console.log(`Seed complete for user "${user.name}" (${user.id})`);
+  console.log(`Demo login -> ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
 }
 
 main()

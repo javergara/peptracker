@@ -34,6 +34,12 @@ exactly; reuse primitives instead of reinventing them.
   color (`user.color`) via inline style, falling back to tokens.
 - **Data:** reads come from `src/lib/queries.ts` (add functions there, import
   `prisma` from `@/lib/db`). Mutations are **server actions** (`"use server"`).
+- **Auth:** the app is gated by login (`src/proxy.ts`). Auth pages live at
+  `/login` + `/signup` (rendered bare — the root layout only shows the sidebar
+  when `auth()` has a session). The sidebar shows the account + logout
+  (`src/components/auth/account-menu.tsx`). Profile-owned writes stamp `userId`
+  and must respect the session's `accountId` — never let one account touch
+  another's profiles/data (see `src/lib/actions/profiles.ts`).
 - **Parse Json columns** through `src/types/peptide.ts` helpers (`asStringArray`,
   `asDosage`, `asReconstitution`, `asInteractions`, `asReferences`) — never cast.
 - **Disclaimer:** any peptide/stack/suggestion surface MUST render

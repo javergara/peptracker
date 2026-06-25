@@ -1,8 +1,13 @@
 // Peptides Tracker — Prisma schema
-// NOTE: SQLite does not support Prisma `enum` or scalar list types.
-// Enum-like fields are stored as String (validated in app via zod, see src/types).
-// Arrays / structured blobs are stored as Json (no Json DB-defaults on SQLite,
-// so seed/creates always supply values; optional ones are nullable).
+// NOTE: This schema kept SQLite-friendly shapes (String "enums", Json arrays)
+// from its local-first origin; Postgres stores both natively so they carry over
+// unchanged. Enum-like fields stay String (validated in app via zod, see
+// src/types); arrays / structured blobs stay Json. src/types/peptide.ts remains
+// the single source of truth for valid values + parsing.
+//
+// Datasource url lives in prisma.config.ts (Prisma 7 driver-adapter style):
+// runtime uses the pooled DATABASE_URL (src/lib/db.ts, Neon adapter); migrate +
+// seed use the direct (unpooled) connection via prisma.config.ts.
 
 generator client {
   provider = "prisma-client"
@@ -10,11 +15,26 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
+// Auth identity (one login). Owns one or more profiles (User). All
+// profile-owned data stays scoped by userId; profiles are scoped to an Account.
+model Account {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profiles User[]
+}
+
+// A tracked person/profile (e.g. "Me", "Partner"). Belongs to an Account.
 model User {
   id         String   @id @default(cuid())
+  accountId  String?
   name       String   @default("Me")
   email      String?  @unique
   weightUnit String   @default("kg") // kg | lb
@@ -24,6 +44,7 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  account      Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
   cycles       Cycle[]
   stacks       Stack[]
   measurements Measurement[]
@@ -32,6 +53,8 @@ model User {
   vials        Vial[]
   labs         LabResult[]
   photos       Photo[]
+
+  @@index([accountId])
 }
 
 model Peptide {
@@ -197,11 +220,11 @@ model LabResult {
   @@index([userId])
 }
 
-// Progress photos (stored on local filesystem under public/uploads).
+// Progress photos (stored in Vercel Blob; path is an absolute public Blob URL).
 model Photo {
   id      String   @id @default(cuid())
   userId  String
-  path    String // public URL path, e.g. /uploads/<id>.jpg
+  path    String // absolute Blob URL, e.g. https://<id>.public.blob.vercel-storage.com/<file>
   caption String?
   takenAt DateTime @default(now())
   tags    Json? // string[]

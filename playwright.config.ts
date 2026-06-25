@@ -13,7 +13,18 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Reuse the logged-in session captured by the setup project.
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
+  ],
   webServer: {
     command: "npm run dev",
     url: baseURL,

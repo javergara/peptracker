@@ -8,7 +8,7 @@ A local-first web app to **track peptide protocols** and serve as a **cited know
 
 - **Next.js 16** (App Router, React Server Components + server actions), **TypeScript**, **Tailwind v4**
 - **shadcn/ui** (on `@base-ui/react`), dark/light theme, `lucide-react`, **Recharts**
-- **Prisma 7** ORM with a **better-sqlite3** driver adapter (local SQLite; swap to Postgres for production)
+- **Prisma 7** ORM with the **Neon Postgres** driver adapter; **Auth.js** login (email + password); **Vercel Blob** photo storage
 - **Vitest** (unit) + **Playwright** (e2e); ESLint, Prettier, husky + lint-staged
 
 ## Features
@@ -23,18 +23,25 @@ A local-first web app to **track peptide protocols** and serve as a **cited know
 - **Metrics & analytics** — weight / body-fat / sleep / recovery charts, mood & energy trends, and a **correlation explorer** (pick any two markers → scatter + trend line with Pearson r / R²).
 - **Labs** — bloodwork markers with value-vs-range flags and trend charts.
 - **Photos** — progress photo gallery (local storage) with before/after.
-- **Profiles** — multiple people (no login), each with its own data, switchable from the sidebar.
+- **Accounts & profiles** — log in with email + password; each account can hold multiple profiles (e.g. you + a partner), switchable from the sidebar, fully isolated from other accounts.
 - **Suggestions** — rule-based recommendations by goal (fat loss, recovery, cognition, GH-axis, …).
 - **Export** — JSON backup + CSV (doses / labs).
 
 ## Getting started
 
 ```bash
+cp .env.example .env     # then fill in DATABASE_URL etc. (see below)
 npm install              # also runs `prisma generate`
-npm run db:migrate       # apply migrations to local SQLite
-npm run db:seed          # load the cited peptide data + preset stacks
+npm run db:migrate       # apply migrations to your Postgres (Neon) DB
+npm run db:seed          # load cited peptide data + preset stacks + a demo login
 npm run dev              # http://localhost:3000
 ```
+
+Local dev needs a Postgres database — the easiest free option is a **Neon** dev
+branch. Point `DATABASE_URL` (pooled) and `DIRECT_DATABASE_URL` (unpooled) at it,
+set `AUTH_SECRET` (`npx auth secret`), and for photo uploads run
+`vercel env pull .env.local` to get `BLOB_READ_WRITE_TOKEN`. The seed prints a
+demo login (`local@peptides.app` / `peptides123`).
 
 ### Scripts
 
@@ -65,7 +72,7 @@ prisma/
 
 ## Data & schema notes
 
-SQLite (via Prisma) does not support enum or scalar-array columns, so enum-like fields are stored as `String` and arrays/objects as `Json`. The single source of truth for valid values and parsing is [`src/types/peptide.ts`](src/types/peptide.ts). The pure logic in `src/lib/{reconstitution,schedule,suggestions,interactions}.ts` is unit-tested.
+The schema started on SQLite (which has no enum/scalar-array columns) and keeps those shapes on Postgres: enum-like fields are stored as `String` and arrays/objects as `Json`. The single source of truth for valid values and parsing is [`src/types/peptide.ts`](src/types/peptide.ts). The pure logic in `src/lib/{reconstitution,schedule,suggestions,interactions}.ts` is unit-tested.
 
 ## Working with Claude Code
 
@@ -73,6 +80,26 @@ This repo ships a Claude Code harness in [`.claude/`](.claude/) and [`CLAUDE.md`
 
 **Add a new peptide:** run the `add-peptide` skill, or research it, write `prisma/data/<slug>.json` matching `peptideDataSchema`, and run `npm run db:seed`.
 
-## Production deployment
+## Deploy to Vercel (free)
 
-Switch the Prisma datasource `provider` to `postgresql`, set `DATABASE_URL` to a Postgres connection string, swap the adapter in `src/lib/db.ts` to a Postgres driver adapter, and run `prisma migrate deploy`. The single-user model carries a `userId` throughout so multi-user auth can be added later.
+Hosts on **Vercel** with **Neon Postgres** (DB), **Vercel Blob** (photos), and
+**Auth.js** login — all on free tiers.
+
+1. **Push to GitHub.** Commit and push the repo.
+2. **Create a Neon project.** Copy the **pooled** connection string and the
+   **direct/unpooled** one. (Optionally create a separate `dev` branch for local.)
+3. **Import the repo into Vercel** and add env vars (Project → Settings → Env):
+   - `DATABASE_URL` = Neon **pooled** URL
+   - `DIRECT_DATABASE_URL` = Neon **direct** URL
+   - `AUTH_SECRET` = `npx auth secret`
+   - `AUTH_URL` = your `https://<app>.vercel.app`
+   - Enable **Vercel Blob** (Storage tab) — it sets `BLOB_READ_WRITE_TOKEN`.
+4. **Set the build command** to:
+   `prisma migrate deploy && prisma generate && next build`
+5. **Seed once** against the prod DB (locally, with the direct URL):
+   `DIRECT_DATABASE_URL="<neon-direct>" npm run db:seed`
+6. **Deploy.** Vercel auto-redeploys on every push to the default branch — no
+   GitHub Actions required. (Optionally add a CI workflow for typecheck/lint/test.)
+
+Then open the URL, sign up, and share it with friends — each person gets their own
+isolated account. See `.env.example` and `CLAUDE.md` → "Deployment & auth".

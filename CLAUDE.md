@@ -30,7 +30,11 @@ educational "not medical advice" disclaimer** via `src/components/disclaimer.tsx
 - **shadcn/ui built on `@base-ui/react`.** IMPORTANT: base-ui uses a **`render`
   prop, NOT `asChild`.** UI primitives live in `src/components/ui/`.
 - **lucide-react** icons, **recharts** charts, **sonner** toasts, **next-themes**.
-- **Prisma 7** with the **better-sqlite3** driver adapter.
+- **Prisma 7** with the **Neon (Postgres) driver adapter** (`@prisma/adapter-neon`).
+  The schema keeps its SQLite-origin shapes (String "enums", Json arrays) — see
+  below — but the DB is Postgres (Neon) in dev and prod.
+- **Auth.js v5** (`next-auth`, Credentials + JWT) for login; **Vercel Blob** for
+  photo storage; deployed on **Vercel**. See "Deployment & auth".
 - **zod v4** for validation.
 - Tooling: vitest (unit), playwright (e2e), eslint, prettier, husky + lint-staged.
 
@@ -58,9 +62,9 @@ src/
   types/
     peptide.ts         # SOURCE OF TRUTH for valid values + zod schemas + parsers
   generated/prisma/    # generated client (gitignored; run `npx prisma generate`)
-public/uploads/        # runtime progress-photo storage (gitignored; see below)
+  auth.ts, auth.config.ts, proxy.ts   # Auth.js (login) + route gating
 prisma/
-  schema.prisma        # models; SQLite has no enum/array (see below)
+  schema.prisma        # models; String "enums" + Json arrays (SQLite-origin; see below)
   seed.ts              # idempotent seed; contains PRESET_STACKS
   data/<slug>.json     # one researched peptide per file (peptideDataSchema)
   migrations/, dev.db  # dev.db is gitignored
@@ -89,20 +93,23 @@ Path alias: `@/*` -> `src/*`.
   (sealed|active|empty|expired). Math helpers in `src/lib/vials.ts`.
 - **LabResult** — bloodwork markers over time (`marker`, `value`, `unit`,
   `refLow`/`refHigh`, `takenAt`).
-- **Photo** — progress photos; `path` is a public URL under `public/uploads/`.
+- **Account** — auth login (`email`, `passwordHash`); owns one or more `User`
+  profiles. **User** carries `accountId`.
+- **Photo** — progress photos; `path` is an absolute **Vercel Blob** URL.
 
 All profile-owned data (Cycle, DoseLog, Measurement, Vial, LabResult, Photo,
 JournalEntry) is scoped to the active profile — see the multi-profile note in
 Conventions.
 
-### SQLite constraints (read carefully)
+### Schema shapes (read carefully)
 
-SQLite **cannot store Prisma `enum` or scalar list/array types.** Therefore:
+The schema originated on SQLite (which can't store Prisma `enum` or scalar
+list/array types) and **keeps those shapes on Postgres** for continuity — don't
+"upgrade" them to native enums/arrays:
 
 - Enum-like fields (category, route, kind, status, …) are stored as **`String`**.
 - Arrays/objects (aliases, benefits, dosage, interactions, references, …) are
-  stored as **`Json`** columns. No Json DB-defaults on SQLite, so seeds/creates
-  always supply values.
+  stored as **`Json`** columns. Seeds/creates always supply values explicitly.
 - The **single source of truth** for valid values and parsing is
   `src/types/peptide.ts`. When reading Json columns, parse through its helpers:
   `asStringArray`, `asDosage`, `asReconstitution`, `asInteractions`,
@@ -127,8 +134,10 @@ npm run db:studio    # prisma studio
 ```
 
 Prisma 7 notes: the datasource block in `schema.prisma` has **no `url`** — the
-URL + seed command live in `prisma.config.ts`. `DATABASE_URL` is in `.env`
-(`file:./prisma/dev.db`).
+URL + seed command live in `prisma.config.ts`. Runtime uses the pooled
+`DATABASE_URL` (Neon adapter, `src/lib/db.ts`); `migrate`/`seed` use the direct
+`DIRECT_DATABASE_URL` (set in `prisma.config.ts`). Both are Postgres connection
+strings (Neon) — see `.env.example`.
 
 ## Conventions
 
@@ -141,12 +150,18 @@ URL + seed command live in `prisma.config.ts`. `DATABASE_URL` is in `.env`
 - **base-ui render prop, not `asChild`.** To compose a primitive with another
   element, use `render={<NextLink href="…" />}` style props.
 - **Parse Json columns** through `src/types/peptide.ts` helpers — never cast raw.
-- **Multi-profile (no login).** The active profile is stored in the
-  `activeUserId` cookie. Resolve it via `getActiveUser()` (`src/lib/active-user.ts`);
-  `getCurrentUser()` in `queries.ts` delegates to it. All profile-owned reads
-  (cycles, dose logs, measurements) MUST filter by the active user's id; the
-  peptide library, preset stacks, and interactions are global. New profile-owned
-  writes must stamp `userId`. Switching/managing profiles: `src/lib/actions/profiles.ts`.
+- **Auth + multi-profile.** Login is real (Auth.js, one `Account` per login).
+  An account **owns one or more `User` profiles** (e.g. "Me" + "Partner"); the
+  active profile within the account is stored in the `activeUserId` cookie.
+  Resolve it via `getActiveUser()` (`src/lib/active-user.ts`); `getCurrentUser()`
+  in `queries.ts` delegates to it. `getActiveUser`/`getAllUsers` scope profiles to
+  the session's `accountId` (from `auth()`), so accounts never see each other's
+  data. All profile-owned reads (cycles, dose logs, measurements, …) MUST filter
+  by the active user's id; profile **writes stamp `userId`**, and profile
+  create/switch/delete must also respect `accountId` (`src/lib/actions/profiles.ts`).
+  The peptide library, preset stacks, and interactions are global. Route gating
+  lives in `src/proxy.ts` (Next 16 renamed `middleware`→`proxy`); auth config is
+  split into edge-safe `src/auth.config.ts` + full `src/auth.ts`.
 - **Disclaimer** must appear on peptide/stack/suggestion surfaces.
 - **Design system (ReturnQueen emerald/teal).** Colors live as CSS variables in
   `src/app/globals.css` (`:root` light + `.dark`) and flow through Tailwind v4
@@ -156,12 +171,32 @@ URL + seed command live in `prisma.config.ts`. `DATABASE_URL` is in `.env`
   (`app-shell.tsx`) is grouped: Overview · Tracking · Health · Library · Settings.
   The **active profile color** (`user.color`) tints chart strokes, progress bars
   (via a `--pc` CSS var on `[data-slot=progress-indicator]`), and dose-row accents.
-- **Progress-photo storage:** `uploadPhoto` writes files to `public/uploads/`
-  (gitignored) and stores the public path on `Photo.path`. This is for
-  local/self-host; production should swap to object storage (S3/R2).
-- **Never commit secrets, `.env`, or `*.db`** (already gitignored). The generated
-  Prisma client (`src/generated`) is gitignored — regenerate, don't commit.
+- **Progress-photo storage:** `uploadPhoto` (`src/lib/actions/photos.ts`) uploads
+  to **Vercel Blob** (`put`, `access: "public"`) and stores the returned absolute
+  Blob URL on `Photo.path`. Needs `BLOB_READ_WRITE_TOKEN` (auto on Vercel;
+  `vercel env pull` locally). Photos render via plain `<img>` from that URL.
+- **Never commit secrets or `.env`** (already gitignored). The generated Prisma
+  client (`src/generated`) is gitignored — regenerate, don't commit.
 - Style is enforced by prettier + eslint (+ a defensive format hook).
+
+## Deployment & auth
+
+Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
+
+- **Env vars** (`.env` local, Vercel project settings prod): `DATABASE_URL`
+  (Neon pooled), `DIRECT_DATABASE_URL` (Neon unpooled, for migrate/seed),
+  `AUTH_SECRET`, optional `AUTH_URL`, `BLOB_READ_WRITE_TOKEN`. See `.env.example`.
+- **Build command** (Vercel): `prisma migrate deploy && prisma generate && next build`.
+- **Auth:** Credentials (email + password, bcryptjs) with JWT sessions — no DB
+  session table. `Account { email, passwordHash }` owns `User` profiles. Sign-up/
+  login/logout actions in `src/lib/actions/auth.ts`; pages at `/login`, `/signup`;
+  account + logout shown in the sidebar (`src/components/auth/account-menu.tsx`).
+  The root layout renders the app shell only when `auth()` has a session.
+- **Local dev** points `DATABASE_URL`/`DIRECT_DATABASE_URL` at a Neon dev branch.
+  Seed creates a demo login (`local@peptides.app` / `peptides123`, override via
+  `SEED_ACCOUNT_EMAIL`/`SEED_ACCOUNT_PASSWORD`).
+- **E2E** authenticates first via `e2e/auth.setup.ts` (saved storage state); needs
+  a reachable DB + seeded demo account.
 
 ## Routes
 
@@ -215,7 +250,7 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
   time overlay), `ScatterCorrelation` (scatter + trend line), and
   `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
   `src/lib/stats.ts`, pairs by nearest date within 14 days).
-- **Photos:** `/photos`, `src/lib/actions/photos.ts` (writes to `public/uploads/`).
+- **Photos:** `/photos`, `src/lib/actions/photos.ts` (uploads to Vercel Blob).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization
