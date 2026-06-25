@@ -105,7 +105,7 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
               onClick={() => toggle(s.key)}
               aria-pressed={on}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity",
+                "focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity focus-visible:ring-2 focus-visible:outline-none",
                 on ? "bg-card" : "border-transparent opacity-45",
               )}
               style={on ? { borderColor: s.color } : undefined}

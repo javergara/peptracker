@@ -4,8 +4,8 @@ import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -62,12 +62,21 @@ export default async function LogPage() {
 
       <Card className="mb-6">
         <CardContent className="p-6">
-          <form action={logDose} className="grid gap-4 sm:grid-cols-2">
+          <ActionForm
+            action={logDose}
+            success="Dose logged"
+            className="grid gap-4 sm:grid-cols-2"
+          >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="l-peptide" className="text-sm font-medium">
                 Peptide <span className="text-destructive">*</span>
               </label>
-              <select name="peptideId" required className={inputCls}>
+              <select
+                id="l-peptide"
+                name="peptideId"
+                required
+                className={inputCls}
+              >
                 {peptides.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -76,8 +85,15 @@ export default async function LogPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Cycle (optional)</label>
-              <select name="cycleId" defaultValue="" className={inputCls}>
+              <label htmlFor="l-cycle" className="text-sm font-medium">
+                Cycle (optional)
+              </label>
+              <select
+                id="l-cycle"
+                name="cycleId"
+                defaultValue=""
+                className={inputCls}
+              >
                 <option value="">— None —</option>
                 {cycles.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -87,28 +103,44 @@ export default async function LogPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="l-amount" className="text-sm font-medium">
                 Amount <span className="text-destructive">*</span>
               </label>
               <input
+                id="l-amount"
                 name="amount"
                 type="number"
                 step="any"
                 min="0"
+                inputMode="decimal"
                 required
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Unit</label>
-              <select name="unit" defaultValue="mcg" className={inputCls}>
+              <label htmlFor="l-unit" className="text-sm font-medium">
+                Unit
+              </label>
+              <select
+                id="l-unit"
+                name="unit"
+                defaultValue="mcg"
+                className={inputCls}
+              >
                 <option value="mcg">mcg</option>
                 <option value="mg">mg</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Route</label>
-              <select name="route" defaultValue="" className={inputCls}>
+              <label htmlFor="l-route" className="text-sm font-medium">
+                Route
+              </label>
+              <select
+                id="l-route"
+                name="route"
+                defaultValue=""
+                className={inputCls}
+              >
                 <option value="">— Select —</option>
                 {ROUTES.map((r) => (
                   <option key={r} value={r}>
@@ -118,16 +150,21 @@ export default async function LogPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">When</label>
+              <label htmlFor="l-when" className="text-sm font-medium">
+                When
+              </label>
               <input
+                id="l-when"
                 name="takenAt"
                 type="datetime-local"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Notes</label>
-              <input name="notes" className={inputCls} />
+              <label htmlFor="l-notes" className="text-sm font-medium">
+                Notes
+              </label>
+              <input id="l-notes" name="notes" className={inputCls} />
             </div>
 
             {/* Enriched optional fields */}
@@ -139,12 +176,12 @@ export default async function LogPage() {
             />
 
             <div className="sm:col-span-2">
-              <Button type="submit">
+              <SubmitButton>
                 <Syringe className="size-4" />
                 Log dose
-              </Button>
+              </SubmitButton>
             </div>
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 

@@ -8,7 +8,7 @@ import {
   MetricsTrends,
   type TrendSeries,
 } from "@/components/metrics/metrics-trends";
-import { Button } from "@/components/ui/button";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import {
   Card,
   CardContent,
@@ -216,13 +216,21 @@ export default async function MetricsPage() {
           <CardTitle>Add a measurement</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             action={addMeasurement}
+            success="Measurement added"
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
           >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Type</label>
-              <select name="type" defaultValue="weight" className={inputCls}>
+              <label htmlFor="m-type" className="text-sm font-medium">
+                Type
+              </label>
+              <select
+                id="m-type"
+                name="type"
+                defaultValue="weight"
+                className={inputCls}
+              >
                 {Object.entries(TYPE_LABELS).map(([v, l]) => (
                   <option key={v} value={v}>
                     {l}
@@ -231,37 +239,56 @@ export default async function MetricsPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Label</label>
-              <input name="label" placeholder="optional" className={inputCls} />
+              <label htmlFor="m-label" className="text-sm font-medium">
+                Label
+              </label>
+              <input
+                id="m-label"
+                name="label"
+                placeholder="optional"
+                className={inputCls}
+              />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="m-value" className="text-sm font-medium">
                 Value <span className="text-destructive">*</span>
               </label>
               <input
+                id="m-value"
                 name="value"
                 type="number"
                 step="any"
+                inputMode="decimal"
                 required
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Unit</label>
+              <label htmlFor="m-unit" className="text-sm font-medium">
+                Unit
+              </label>
               <input
+                id="m-unit"
                 name="unit"
                 placeholder="kg, %, hrs…"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Date</label>
-              <input name="recordedAt" type="date" className={inputCls} />
+              <label htmlFor="m-date" className="text-sm font-medium">
+                Date
+              </label>
+              <input
+                id="m-date"
+                name="recordedAt"
+                type="date"
+                className={inputCls}
+              />
             </div>
             <div className="sm:col-span-2 lg:col-span-5">
-              <Button type="submit">Add measurement</Button>
+              <SubmitButton>Add measurement</SubmitButton>
             </div>
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 

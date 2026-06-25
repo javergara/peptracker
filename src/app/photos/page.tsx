@@ -2,8 +2,8 @@ import { Camera } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { PhotoBoard } from "@/components/photos/photo-board";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { uploadPhoto } from "@/lib/actions/photos";
 import { listPhotos, getCurrentUser } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
@@ -38,15 +38,17 @@ export default async function PhotosPage() {
           <CardTitle>Add a photo</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             action={uploadPhoto}
+            success="Photo uploaded"
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
             <div className="space-y-1.5 lg:col-span-1">
-              <label className="text-sm font-medium">
+              <label htmlFor="p-file" className="text-sm font-medium">
                 Image <span className="text-destructive">*</span>
               </label>
               <input
+                id="p-file"
                 name="file"
                 type="file"
                 accept="image/*"
@@ -55,24 +57,34 @@ export default async function PhotosPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Caption</label>
+              <label htmlFor="p-caption" className="text-sm font-medium">
+                Caption
+              </label>
               <input
+                id="p-caption"
                 name="caption"
                 placeholder="e.g. Week 4 front"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Date taken</label>
-              <input name="takenAt" type="date" className={inputCls} />
+              <label htmlFor="p-date" className="text-sm font-medium">
+                Date taken
+              </label>
+              <input
+                id="p-date"
+                name="takenAt"
+                type="date"
+                className={inputCls}
+              />
             </div>
             <div className="flex items-end">
-              <Button type="submit" className="w-full sm:w-auto">
+              <SubmitButton className="w-full sm:w-auto">
                 <Camera className="size-4" />
                 Upload
-              </Button>
+              </SubmitButton>
             </div>
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 

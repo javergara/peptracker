@@ -3,7 +3,7 @@ import { Package, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { createVial } from "@/lib/actions/vials";
@@ -125,15 +125,21 @@ export default async function InventoryPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             action={createVial}
+            success="Vial added"
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="v-peptide" className="text-sm font-medium">
                 Peptide <span className="text-destructive">*</span>
               </label>
-              <select name="peptideId" required className={inputCls}>
+              <select
+                id="v-peptide"
+                name="peptideId"
+                required
+                className={inputCls}
+              >
                 <option value="">— Select peptide —</option>
                 {peptides.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -143,58 +149,68 @@ export default async function InventoryPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Label / lot</label>
+              <label htmlFor="v-label" className="text-sm font-medium">
+                Label / lot
+              </label>
               <input
+                id="v-label"
                 name="label"
                 placeholder="e.g. Lot A, Vial 1"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="v-total" className="text-sm font-medium">
                 Total amount (mcg) <span className="text-destructive">*</span>
               </label>
               <input
+                id="v-total"
                 name="totalMcg"
                 type="number"
                 step="any"
                 min="1"
+                inputMode="decimal"
                 required
                 placeholder="e.g. 5000"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="v-bac" className="text-sm font-medium">
                 BAC water (mL){" "}
                 <span className="text-muted-foreground font-normal">
                   — fill to reconstitute now
                 </span>
               </label>
               <input
+                id="v-bac"
                 name="bacWaterMl"
                 type="number"
                 step="0.1"
                 min="0"
+                inputMode="decimal"
                 placeholder="e.g. 2 (optional)"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Notes</label>
+              <label htmlFor="v-notes" className="text-sm font-medium">
+                Notes
+              </label>
               <input
+                id="v-notes"
                 name="notes"
                 placeholder="Optional notes"
                 className={inputCls}
               />
             </div>
             <div className="flex items-end">
-              <Button type="submit">
+              <SubmitButton>
                 <Plus className="size-4" />
                 Add vial
-              </Button>
+              </SubmitButton>
             </div>
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 

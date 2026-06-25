@@ -221,8 +221,9 @@ export function DoseCalendar({
                 key={day}
                 type="button"
                 onClick={() => setSelected(day)}
+                aria-label={`${monthLabel} ${day}${dayDoses.length ? `, ${dayDoses.length} doses` : ""}`}
                 className={cn(
-                  "flex min-h-[4.75rem] flex-col gap-1 rounded-lg border p-1 text-left transition-colors",
+                  "focus-visible:ring-ring flex min-h-[4.75rem] flex-col gap-1 rounded-lg border p-1 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
                   isSelected
                     ? "border-primary bg-primary/5"
                     : "hover:bg-accent border-transparent",

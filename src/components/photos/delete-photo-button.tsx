@@ -11,6 +11,8 @@ export function DeletePhotoButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
+    // Photo deletion removes the blob too — can't be undone, so confirm first.
+    if (!confirm("Delete this photo? This can't be undone.")) return;
     startTransition(async () => {
       try {
         await deletePhoto(id);

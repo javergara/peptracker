@@ -4,6 +4,23 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
+import { asStringArray } from "@/types/peptide";
+
+/** Snapshot of a deleted dose, enough to re-create it (for undo). */
+export type RestorableDose = {
+  peptideId: string;
+  cycleId: string | null;
+  vialId: string | null;
+  amount: number;
+  unit: string;
+  route: string | null;
+  site: string | null;
+  mood: number | null;
+  energy: number | null;
+  sideEffects: string[];
+  takenAt: string;
+  notes: string | null;
+};
 
 export async function logDose(formData: FormData) {
   const user = await getActiveUser();
@@ -146,11 +163,10 @@ export async function updateDose(id: string, formData: FormData) {
   }
 }
 
-export async function deleteDose(id: string) {
+export async function deleteDose(id: string): Promise<RestorableDose> {
   const user = await getActiveUser();
   const dose = await prisma.doseLog.findFirst({
     where: { id, userId: user.id },
-    select: { id: true, cycleId: true },
   });
   if (!dose) throw new Error("Dose not found.");
 
@@ -159,4 +175,46 @@ export async function deleteDose(id: string) {
   revalidatePath("/calendar");
   revalidatePath("/");
   if (dose.cycleId) revalidatePath(`/cycles/${dose.cycleId}`);
+
+  // Returned so the UI can offer Undo (re-create) without re-querying.
+  return {
+    peptideId: dose.peptideId,
+    cycleId: dose.cycleId,
+    vialId: dose.vialId,
+    amount: dose.amount,
+    unit: dose.unit,
+    route: dose.route,
+    site: dose.site,
+    mood: dose.mood,
+    energy: dose.energy,
+    sideEffects: asStringArray(dose.sideEffects),
+    takenAt: dose.takenAt.toISOString(),
+    notes: dose.notes,
+  };
+}
+
+/** Re-create a dose deleted via deleteDose (undo). Does not touch vial balance. */
+export async function restoreDose(data: RestorableDose) {
+  const user = await getActiveUser();
+  await prisma.doseLog.create({
+    data: {
+      userId: user.id,
+      peptideId: data.peptideId,
+      cycleId: data.cycleId,
+      vialId: data.vialId,
+      amount: data.amount,
+      unit: data.unit,
+      route: data.route,
+      site: data.site,
+      mood: data.mood,
+      energy: data.energy,
+      sideEffects: data.sideEffects,
+      takenAt: new Date(data.takenAt),
+      notes: data.notes,
+    },
+  });
+  revalidatePath("/log");
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  if (data.cycleId) revalidatePath(`/cycles/${data.cycleId}`);
 }

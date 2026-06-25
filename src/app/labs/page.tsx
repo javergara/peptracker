@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { DeleteLabButton } from "@/components/labs/delete-lab-button";
 import { MetricChart } from "@/components/metrics/metric-chart";
-import { Button } from "@/components/ui/button";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addLab } from "@/lib/actions/labs";
 import { listLabs, getCurrentUser } from "@/lib/queries";
@@ -82,15 +82,17 @@ export default async function LabsPage() {
           <CardTitle>Add lab result</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             action={addLab}
+            success="Lab result added"
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="lab-marker" className="text-sm font-medium">
                 Marker <span className="text-destructive">*</span>
               </label>
               <input
+                id="lab-marker"
                 name="marker"
                 required
                 placeholder="e.g. IGF-1, Free T, HbA1c"
@@ -98,61 +100,88 @@ export default async function LabsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="lab-value" className="text-sm font-medium">
                 Value <span className="text-destructive">*</span>
               </label>
               <input
+                id="lab-value"
                 name="value"
                 type="number"
                 step="any"
+                inputMode="decimal"
                 required
                 placeholder="0"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Unit</label>
+              <label htmlFor="lab-unit" className="text-sm font-medium">
+                Unit
+              </label>
               <input
+                id="lab-unit"
                 name="unit"
                 placeholder="ng/mL, pg/mL…"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Ref Low</label>
+              <label htmlFor="lab-low" className="text-sm font-medium">
+                Ref Low
+              </label>
               <input
+                id="lab-low"
                 name="refLow"
                 type="number"
                 step="any"
+                inputMode="decimal"
                 placeholder="optional"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Ref High</label>
+              <label htmlFor="lab-high" className="text-sm font-medium">
+                Ref High
+              </label>
               <input
+                id="lab-high"
                 name="refHigh"
                 type="number"
                 step="any"
+                inputMode="decimal"
                 placeholder="optional"
                 className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Date taken</label>
-              <input name="takenAt" type="date" className={inputCls} />
+              <label htmlFor="lab-date" className="text-sm font-medium">
+                Date taken
+              </label>
+              <input
+                id="lab-date"
+                name="takenAt"
+                type="date"
+                className={inputCls}
+              />
             </div>
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-              <label className="text-sm font-medium">Notes</label>
-              <input name="notes" placeholder="optional" className={inputCls} />
+              <label htmlFor="lab-notes" className="text-sm font-medium">
+                Notes
+              </label>
+              <input
+                id="lab-notes"
+                name="notes"
+                placeholder="optional"
+                className={inputCls}
+              />
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
-              <Button type="submit">
+              <SubmitButton>
                 <FlaskConical className="size-4" />
                 Add result
-              </Button>
+              </SubmitButton>
             </div>
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 
