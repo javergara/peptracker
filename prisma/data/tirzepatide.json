@@ -1,0 +1,120 @@
+{
+  "slug": "tirzepatide",
+  "name": "Tirzepatide",
+  "aliases": [
+    "LY3298176",
+    "Mounjaro",
+    "Zepbound",
+    "twincretin",
+    "GIP/GLP-1 dual agonist"
+  ],
+  "category": "GLP_GIP",
+  "summary": "Tirzepatide is a once-weekly dual GIP and GLP-1 receptor agonist used clinically for type 2 diabetes (Mounjaro) and chronic weight management (Zepbound). In phase 3 trials it produced large reductions in body weight and HbA1c. It is FDA-approved for those indications; use for other purposes is off-label or investigational.",
+  "mechanism": "Tirzepatide is a single synthetic 39-amino-acid peptide engineered from the GIP sequence with a C20 fatty-diacid moiety that promotes albumin binding and extends its half-life. It simultaneously activates two incretin hormone receptors: glucose-dependent insulinotropic polypeptide (GIP) and glucagon-like peptide-1 (GLP-1). GLP-1 receptor agonism enhances glucose-dependent insulin secretion, suppresses glucagon, slows gastric emptying, and reduces appetite through central pathways; GIP receptor agonism adds further insulinotropic effect and is thought to act synergistically with GLP-1 signaling on energy balance and adipose handling.\n\nThe net effect is improved glycemic control, reduced food intake, and substantial weight loss. Unlike triple agonists such as retatrutide, tirzepatide has no glucagon-receptor (GCGR) activity, so its weight effect derives from the combined incretin actions rather than from increased energy expenditure via glucagon.",
+  "benefits": [
+    "Mean weight loss up to ~20.9% at 72 weeks (15 mg) in SURMOUNT-1 (obesity without diabetes)",
+    "Large HbA1c reductions in type 2 diabetes (~2.0-2.4% lowering in SURPASS trials)",
+    "Clinically meaningful weight loss (~14.7% at 15 mg) in people with type 2 diabetes (SURMOUNT-2)",
+    "Reduced appetite and food intake via delayed gastric emptying and central satiety signaling",
+    "Improvements in blood pressure, lipids, and markers of hepatic steatosis (MASLD)"
+  ],
+  "risks": [
+    "Boxed warning for thyroid C-cell tumors (medullary thyroid carcinoma) based on rodent data; class effect of incretin agonists",
+    "Risk of hypoglycemia when combined with insulin or insulin secretagogues (e.g., sulfonylureas)",
+    "Possible acute pancreatitis and gallbladder disease (cholelithiasis, cholecystitis)",
+    "Dose-dependent increase in heart rate",
+    "Delayed gastric emptying may reduce absorption of oral medications and reduce efficacy of oral contraceptives",
+    "Rapid weight loss can be associated with loss of lean mass if protein intake/resistance training are inadequate",
+    "FDA-approved only for type 2 diabetes and chronic weight management; other uses are off-label. Compounded/gray-market product quality is not guaranteed"
+  ],
+  "sideEffects": [
+    "Nausea (most common, especially during dose escalation)",
+    "Diarrhea",
+    "Vomiting",
+    "Constipation",
+    "Decreased appetite",
+    "Dyspepsia / abdominal pain",
+    "Injection-site reactions",
+    "Fatigue"
+  ],
+  "dosage": {
+    "low": "2.5",
+    "standard": "5-10",
+    "high": "15",
+    "unit": "mg",
+    "notes": "Common educational protocol mirrors the labeled titration: start at 2.5 mg once weekly for 4 weeks (a non-therapeutic starting dose intended to reduce GI side effects), then increase by 2.5 mg every 4 weeks as tolerated (2.5 -> 5 -> 7.5 -> 10 -> 12.5 -> 15 mg). Maximum studied dose is 15 mg weekly. Slower titration reduces nausea."
+  },
+  "route": "SUBQ",
+  "frequency": "once weekly",
+  "halfLife": "~5 days (~120 hours)",
+  "cycleLength": "Continuous long-term use in trials (52-72 weeks); no defined off-cycle. Steady state reached after ~4 weeks. Weight regain is common after discontinuation.",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 1,
+    "notes": "Branded Mounjaro/Zepbound pens/vials come premixed and require no reconstitution. For lyophilized research vials, adding 1 mL bacteriostatic water to a 10 mg vial yields 10 mg/mL (so 0.25 mL = 2.5 mg); 2 mL into 10 mg gives 5 mg/mL for finer dosing. Swirl gently, do not shake."
+  },
+  "storage": "Branded product: refrigerate at 2-8 C; pens may be kept at room temperature (below 30 C) for limited periods per label. Lyophilized research vials: store frozen/cool (-20 C long-term, or 2-8 C); reconstituted solution refrigerate at 2-8 C and use within ~4 weeks. Protect from light; do not freeze reconstituted solution.",
+  "contraindications": [
+    "Personal or family history of medullary thyroid carcinoma",
+    "Multiple endocrine neoplasia syndrome type 2 (MEN 2)",
+    "History of pancreatitis",
+    "Pregnancy and breastfeeding",
+    "Known hypersensitivity to tirzepatide or excipients"
+  ],
+  "interactions": [
+    {
+      "with": "insulin",
+      "kind": "caution",
+      "note": "Increased risk of hypoglycemia; insulin dose may need reduction with close glucose monitoring."
+    },
+    {
+      "with": "sulfonylureas",
+      "kind": "caution",
+      "note": "Increased hypoglycemia risk when combined; secretagogue dose may need reduction."
+    },
+    {
+      "with": "retatrutide",
+      "kind": "avoid",
+      "note": "Both are overlapping incretin (GLP-1/GIP) agonists; stacking compounds GI side effects, hypoglycemia, and gastric-emptying delay without added benefit. Do not combine."
+    },
+    {
+      "with": "semaglutide",
+      "kind": "avoid",
+      "note": "Overlapping GLP-1 receptor agonism; combining two incretin agonists compounds nausea and GI risk without added benefit. Do not stack."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "GHRH analogs can worsen glucose tolerance while tirzepatide improves it; monitor glycemia closely if combined."
+    },
+    {
+      "with": "bpc-157",
+      "kind": "caution",
+      "note": "Sometimes combined anecdotally for GI discomfort during incretin titration, but there is no controlled human data supporting any benefit or safety of the combination. Educational note only — not a recommendation to stack."
+    }
+  ],
+  "references": [
+    {
+      "title": "Jastreboff AM et al. Tirzepatide Once Weekly for the Treatment of Obesity (SURMOUNT-1). NEJM 2022",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2206038"
+    },
+    {
+      "title": "Garvey WT et al. Tirzepatide once weekly for the treatment of obesity in people with type 2 diabetes (SURMOUNT-2). The Lancet 2023",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S014067362301200X"
+    },
+    {
+      "title": "Frias JP et al. Tirzepatide versus Semaglutide Once Weekly in Type 2 Diabetes (SURPASS-2). NEJM 2021",
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2107519"
+    },
+    {
+      "title": "Farzam K, Patel P. Tirzepatide. StatPearls (NCBI Bookshelf), 2024",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK585056/"
+    },
+    {
+      "title": "Schneck KB et al. Population pharmacokinetics of the GIP/GLP receptor agonist tirzepatide. CPT Pharmacometrics Syst Pharmacol 2024 (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10962491/"
+    }
+  ],
+  "tags": ["fat-loss", "metabolic", "longevity"],
+  "status": "research"
+}
