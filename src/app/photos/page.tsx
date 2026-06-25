@@ -98,7 +98,7 @@ export default async function PhotosPage() {
                   <img
                     src={`/api/photos/${photo.id}`}
                     alt={photo.caption ?? label}
-                    className="h-64 w-full rounded-lg object-cover"
+                    className="bg-muted/30 h-[30rem] w-full rounded-lg object-contain"
                   />
                   <p className="text-muted-foreground text-xs">
                     {formatDate(photo.takenAt, "MMM d, yyyy")}
