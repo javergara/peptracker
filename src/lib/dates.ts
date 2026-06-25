@@ -33,6 +33,21 @@ export function daysBetween(a: Date, b: Date): number {
   return differenceInCalendarDays(b, a);
 }
 
+/** Local `yyyy-MM-dd` string for an `<input type="date">` default value. */
+export function toDateInputValue(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return format(date, "yyyy-MM-dd");
+}
+
+/**
+ * Local `yyyy-MM-ddTHH:mm` string for an `<input type="datetime-local">`
+ * default value (uses local time, not UTC, so the displayed time matches).
+ */
+export function toDateTimeLocalValue(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return format(date, "yyyy-MM-dd'T'HH:mm");
+}
+
 /** Return a new Date `n` days after `d` (negative `n` moves backwards). */
 export function addDays(d: Date, n: number): Date {
   return dfAddDays(d, n);

@@ -2,7 +2,7 @@ import { Syringe } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
-import { DeleteDoseButton } from "@/components/log/delete-dose-button";
+import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -165,7 +165,7 @@ export default async function LogPage() {
                   <TableHead>Amount</TableHead>
                   <TableHead>When</TableHead>
                   <TableHead>Site</TableHead>
-                  <TableHead className="w-10" />
+                  <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -191,7 +191,7 @@ export default async function LogPage() {
                       {d.site ?? "—"}
                     </TableCell>
                     <TableCell>
-                      <DeleteDoseButton id={d.id} />
+                      <DoseRowActions id={d.id} />
                     </TableCell>
                   </TableRow>
                 ))}

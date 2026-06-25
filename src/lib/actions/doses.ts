@@ -68,8 +68,74 @@ export async function logDose(formData: FormData) {
   if (cycleId) revalidatePath(`/cycles/${cycleId}`);
 }
 
+/**
+ * Edit an already-logged dose. Updates the recorded fields only — it does NOT
+ * re-run vial decrement math, so the source vial link/balance is left as-is
+ * (changing a logged amount won't retroactively adjust vial inventory).
+ */
+export async function updateDose(id: string, formData: FormData) {
+  const user = await getActiveUser();
+  const existing = await prisma.doseLog.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true, cycleId: true },
+  });
+  if (!existing) throw new Error("Dose not found.");
+
+  const peptideId = String(formData.get("peptideId") ?? "");
+  const cycleId = String(formData.get("cycleId") ?? "");
+  const amount = Number(formData.get("amount") ?? 0);
+  const unit = String(formData.get("unit") ?? "mcg");
+  const route = String(formData.get("route") ?? "").trim();
+  const site = String(formData.get("site") ?? "").trim();
+  const takenAt = String(formData.get("takenAt") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim();
+  const moodRaw = formData.get("mood");
+  const energyRaw = formData.get("energy");
+  const sideEffects = formData
+    .getAll("sideEffects")
+    .map(String)
+    .filter(Boolean);
+
+  if (!peptideId || !amount) {
+    throw new Error("Peptide and amount are required.");
+  }
+
+  await prisma.doseLog.update({
+    where: { id },
+    data: {
+      peptideId,
+      cycleId: cycleId || null,
+      amount,
+      unit,
+      route: route || null,
+      site: site || null,
+      mood: moodRaw != null && moodRaw !== "" ? Number(moodRaw) : null,
+      energy: energyRaw != null && energyRaw !== "" ? Number(energyRaw) : null,
+      // Overwrite (empty array clears any previously stored side effects).
+      sideEffects,
+      takenAt: takenAt ? new Date(takenAt) : new Date(),
+      notes: notes || null,
+    },
+  });
+
+  revalidatePath("/log");
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  if (existing.cycleId) revalidatePath(`/cycles/${existing.cycleId}`);
+  if (cycleId && cycleId !== existing.cycleId) {
+    revalidatePath(`/cycles/${cycleId}`);
+  }
+}
+
 export async function deleteDose(id: string) {
-  const dose = await prisma.doseLog.delete({ where: { id } });
+  const user = await getActiveUser();
+  const dose = await prisma.doseLog.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true, cycleId: true },
+  });
+  if (!dose) throw new Error("Dose not found.");
+
+  await prisma.doseLog.delete({ where: { id } });
   revalidatePath("/log");
   revalidatePath("/calendar");
   revalidatePath("/");

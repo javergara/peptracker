@@ -17,6 +17,13 @@ interface DoseFormFieldsProps {
   vials?: Vial[];
   suggestedSite?: string;
   lastSite?: string | null;
+  /** Prefill values when editing an existing dose. */
+  defaults?: {
+    site?: string | null;
+    mood?: number | null;
+    energy?: number | null;
+    sideEffects?: string[];
+  };
 }
 
 const SIDE_EFFECTS = [
@@ -31,7 +38,12 @@ export function DoseFormFields({
   vials = [],
   suggestedSite = "",
   lastSite,
+  defaults,
 }: DoseFormFieldsProps) {
+  const siteDefault = defaults?.site ?? suggestedSite;
+  const moodDefault = defaults?.mood != null ? String(defaults.mood) : "";
+  const energyDefault = defaults?.energy != null ? String(defaults.energy) : "";
+  const checkedSideEffects = new Set(defaults?.sideEffects ?? []);
   return (
     <>
       {/* Vial selector */}
@@ -60,7 +72,7 @@ export function DoseFormFields({
         {lastSite && (
           <p className="text-muted-foreground text-xs">Last used: {lastSite}</p>
         )}
-        <select name="site" defaultValue={suggestedSite} className={inputCls}>
+        <select name="site" defaultValue={siteDefault} className={inputCls}>
           <option value="">— Select site —</option>
           {INJECTION_SITES.map((s) => (
             <option key={s} value={s}>
@@ -76,7 +88,7 @@ export function DoseFormFields({
         <label className="text-sm font-medium">
           Mood <span className="text-muted-foreground font-normal">(1–5)</span>
         </label>
-        <select name="mood" defaultValue="" className={inputCls}>
+        <select name="mood" defaultValue={moodDefault} className={inputCls}>
           <option value="">— Skip —</option>
           <option value="1">1 — Poor</option>
           <option value="2">2 — Below average</option>
@@ -92,7 +104,7 @@ export function DoseFormFields({
           Energy{" "}
           <span className="text-muted-foreground font-normal">(1–5)</span>
         </label>
-        <select name="energy" defaultValue="" className={inputCls}>
+        <select name="energy" defaultValue={energyDefault} className={inputCls}>
           <option value="">— Skip —</option>
           <option value="1">1 — Exhausted</option>
           <option value="2">2 — Low</option>
@@ -118,6 +130,7 @@ export function DoseFormFields({
                 type="checkbox"
                 name="sideEffects"
                 value={se}
+                defaultChecked={checkedSideEffects.has(se)}
                 className="border-input accent-primary size-4 rounded"
               />
               {se}

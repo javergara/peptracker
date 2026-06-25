@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { CycleActions } from "@/components/cycles/cycle-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
+import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -73,10 +74,19 @@ export default async function CycleDetailPage({
         )}${cycle.endDate ? ` → ${formatDate(cycle.endDate)}` : ""}`}
         accentColor={user.color ?? undefined}
         actions={
-          <Button variant="outline" render={<Link href="/cycles" />}>
-            <ArrowLeft className="size-4" />
-            Back
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              render={<Link href={`/cycles/${cycle.id}/edit`} />}
+            >
+              <Pencil className="size-4" />
+              Edit
+            </Button>
+            <Button variant="outline" render={<Link href="/cycles" />}>
+              <ArrowLeft className="size-4" />
+              Back
+            </Button>
+          </div>
         }
       />
 
@@ -187,6 +197,7 @@ export default async function CycleDetailPage({
                   <TableHead>Amount</TableHead>
                   <TableHead>When</TableHead>
                   <TableHead>Site</TableHead>
+                  <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -210,6 +221,9 @@ export default async function CycleDetailPage({
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {d.site ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <DoseRowActions id={d.id} />
                     </TableCell>
                   </TableRow>
                 ))}

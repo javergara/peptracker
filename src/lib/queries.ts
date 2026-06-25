@@ -84,13 +84,23 @@ export async function listCycles() {
 }
 
 export async function getCycle(id: string) {
-  return prisma.cycle.findUnique({
-    where: { id },
+  const user = await getActiveUser();
+  return prisma.cycle.findFirst({
+    where: { id, userId: user.id },
     include: {
       peptide: true,
       stack: { include: { items: { include: { peptide: true } } } },
       doseLogs: { orderBy: { takenAt: "desc" }, include: { peptide: true } },
     },
+  });
+}
+
+/** A single logged dose owned by the active profile (for the edit form). */
+export async function getDoseLog(id: string) {
+  const user = await getActiveUser();
+  return prisma.doseLog.findFirst({
+    where: { id, userId: user.id },
+    include: { peptide: true },
   });
 }
 
