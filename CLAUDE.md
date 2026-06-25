@@ -279,14 +279,17 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
   streak widgets (`src/components/dashboard/`). Visual only (no push).
 - **Labs:** `/labs`, `src/lib/actions/labs.ts`; trend charts reuse `MetricChart`.
 - **Metrics & correlation:** `/metrics`. Charts are client wrappers in
-  `src/components/metrics/`: `MetricChart` (line), `CorrelationChart` (dual-axis
-  time overlay), `ScatterCorrelation` (scatter + trend line), and
+  `src/components/metrics/`: `MetricsTrends` (the main view — ALL series in one
+  chart, toggled from a legend; each series keeps its own hidden Y axis so
+  differently-scaled series like weight vs mood overlay on a shared timeline),
+  `MetricChart` (single line; `mood` prop = emoji-face dots), `CorrelationChart`
+  (dual-axis overlay), `ScatterCorrelation` (scatter + trend line), and
   `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
-  `src/lib/stats.ts`, pairs by nearest date within 14 days).
+  `src/lib/stats.ts`, pairs by nearest date within 14 days). The page builds one
+  `TrendSeries[]` from measurement types + mood + energy + lab markers.
 - **Mood visualization:** logged 1–5 mood ratings render as emoji faces via
-  `src/lib/mood.ts` (`moodFace`/`averageMood`) — on the calendar day cells +
-  detail (`dose-calendar.tsx`) and as emoji dots on the Mood `MetricChart`
-  (`mood` prop). Energy stays a plain line.
+  `src/lib/mood.ts` (`moodFace`/`averageMood`) on the calendar day cells + detail
+  (`dose-calendar.tsx`); on `/metrics` mood is a toggleable line in `MetricsTrends`.
 - **Photos:** `/photos`, `src/lib/actions/photos.ts` (uploads to Vercel Blob).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 

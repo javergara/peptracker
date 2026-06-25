@@ -1,17 +1,21 @@
-import {
-  GitCompareArrows,
-  LineChart as LineChartIcon,
-  Smile,
-  Zap,
-} from "lucide-react";
+import { GitCompareArrows, LineChart as LineChartIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
-import { MetricChart } from "@/components/metrics/metric-chart";
 import { CorrelationChart } from "@/components/metrics/correlation-chart";
 import { CorrelationExplorer } from "@/components/metrics/correlation-explorer";
+import {
+  MetricsTrends,
+  type TrendSeries,
+} from "@/components/metrics/metrics-trends";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { addMeasurement } from "@/lib/actions/measurements";
 import {
   listMeasurements,
@@ -133,22 +137,71 @@ export default async function MetricsPage() {
     byType.set(m.type, arr);
   }
 
-  // Build mood & energy chart points from dose logs.
-  const moodPoints = doseLogs
+  // Build one combined, toggleable trend dataset: measurement types + mood +
+  // energy + lab markers. Each series keeps real values (its own hidden axis).
+  const TREND_PALETTE = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+    "#818cf8",
+    "#a855f7",
+    "#22d3ee",
+    "#f472b6",
+  ];
+  const trendSeries: TrendSeries[] = [];
+  let colorIdx = 0;
+  const nextColor = () => TREND_PALETTE[colorIdx++ % TREND_PALETTE.length];
+
+  for (const [type, rows] of byType) {
+    trendSeries.push({
+      key: `m:${type}`,
+      label: TYPE_LABELS[type] ?? type,
+      unit: rows[0]?.unit ?? null,
+      color: nextColor(),
+      points: rows
+        .map((r) => ({ t: r.recordedAt.getTime(), value: r.value }))
+        .sort((a, b) => a.t - b.t),
+    });
+  }
+
+  const moodPts = doseLogs
     .filter((d) => d.mood != null)
-    .map((d) => ({
-      date: formatDate(d.takenAt, "MMM d"),
-      value: d.mood as number,
-    }));
-
-  const energyPoints = doseLogs
+    .map((d) => ({ t: d.takenAt.getTime(), value: d.mood as number }))
+    .sort((a, b) => a.t - b.t);
+  const energyPts = doseLogs
     .filter((d) => d.energy != null)
-    .map((d) => ({
-      date: formatDate(d.takenAt, "MMM d"),
-      value: d.energy as number,
-    }));
+    .map((d) => ({ t: d.takenAt.getTime(), value: d.energy as number }))
+    .sort((a, b) => a.t - b.t);
+  if (moodPts.length > 0)
+    trendSeries.push({
+      key: "mood",
+      label: "Mood",
+      unit: "/5",
+      color: "#a855f7",
+      points: moodPts,
+    });
+  if (energyPts.length > 0)
+    trendSeries.push({
+      key: "energy",
+      label: "Energy",
+      unit: "/5",
+      color: "#22d3ee",
+      points: energyPts,
+    });
 
-  const hasMoodData = moodPoints.length > 0 || energyPoints.length > 0;
+  for (const [marker, rows] of lByMarker) {
+    trendSeries.push({
+      key: `l:${marker}`,
+      label: marker,
+      unit: rows[0]?.unit ?? null,
+      color: nextColor(),
+      points: rows
+        .map((r) => ({ t: r.takenAt.getTime(), value: r.value }))
+        .sort((a, b) => a.t - b.t),
+    });
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -212,43 +265,21 @@ export default async function MetricsPage() {
         </CardContent>
       </Card>
 
-      {byType.size === 0 ? (
-        <EmptyState
-          icon={<LineChartIcon className="size-6" />}
-          title="No measurements yet"
-          description="Add your first measurement above to see trends here."
-        />
-      ) : (
-        <div className="grid gap-6">
-          {Array.from(byType.entries()).map(([type, rows]) => {
-            const data = rows.map((r) => ({
-              date: formatDate(r.recordedAt, "MMM d"),
-              value: r.value,
-            }));
-            return (
-              <Card key={type}>
-                <CardHeader>
-                  <CardTitle>
-                    {TYPE_LABELS[type] ?? type}
-                    {rows[0]?.unit ? (
-                      <span className="text-muted-foreground ml-1 text-sm font-normal">
-                        ({rows[0].unit})
-                      </span>
-                    ) : null}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MetricChart
-                    data={data}
-                    color={profileColor}
-                    unit={rows[0]?.unit}
-                  />
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LineChartIcon className="size-4" />
+            Trends
+          </CardTitle>
+          <CardDescription>
+            Toggle any series. Lines share a timeline but keep their own scale,
+            so you can see how mood moves as your weight (or labs) change.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <MetricsTrends series={trendSeries} />
+        </CardContent>
+      </Card>
 
       {/* Bodyweight vs IGF-1 correlation */}
       <div className="mt-8">
@@ -292,72 +323,6 @@ export default async function MetricsPage() {
             <CorrelationExplorer series={corrSeries} color={profileColor} />
           </CardContent>
         </Card>
-      </div>
-
-      {/* Mood & Energy trends from dose logs (last 90 days) */}
-      <div className="mt-8">
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
-          Mood &amp; Energy (last 90 days)
-        </h2>
-        {hasMoodData ? (
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Smile className="size-4" />
-                  Mood
-                  <span className="text-muted-foreground text-sm font-normal">
-                    (1–5)
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {moodPoints.length > 0 ? (
-                  <>
-                    <MetricChart data={moodPoints} color={profileColor} mood />
-                    <p className="text-muted-foreground mt-2 text-center text-xs">
-                      😢 very low · 🙁 low · 😐 neutral · 🙂 good · 😄 great
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-muted-foreground py-4 text-center text-sm">
-                    No mood ratings logged yet.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="size-4" />
-                  Energy
-                  <span className="text-muted-foreground text-sm font-normal">
-                    (1–5)
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {energyPoints.length > 0 ? (
-                  <MetricChart
-                    data={energyPoints}
-                    color={profileColor}
-                    unit="/ 5"
-                  />
-                ) : (
-                  <p className="text-muted-foreground py-4 text-center text-sm">
-                    No energy ratings logged yet.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <EmptyState
-            icon={<Smile className="size-6" />}
-            title="No mood or energy data yet"
-            description="Rate your mood and energy (1–5) when logging a dose to see trends here."
-          />
-        )}
       </div>
     </div>
   );
