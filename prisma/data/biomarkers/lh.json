@@ -1,0 +1,69 @@
+{
+  "slug": "lh",
+  "name": "Luteinizing Hormone (LH)",
+  "aliases": ["Luteinizing hormone", "Lutropin", "LH"],
+  "system": "HORMONE",
+  "unit": "mIU/mL",
+  "summary": "Luteinizing hormone is a pituitary gonadotropin that, in men, stimulates the testicular Leydig cells to make testosterone, and in women triggers ovulation and corpus luteum formation. It is read together with FSH and the sex steroids to evaluate the gonadal axis.",
+  "whatItMeans": "LH tells you whether the pituitary is driving the gonads appropriately. Low testosterone (men) or low estradiol (women) paired with low or inappropriately normal LH suggests a central, secondary problem at the hypothalamus or pituitary; the same low sex steroids with high LH suggest a primary gonadal cause, because the pituitary is compensating. In women, LH varies dramatically across the menstrual cycle and surges at mid-cycle to trigger ovulation. This is educational context, not a diagnosis.",
+  "raises": [
+    "Primary gonadal failure (testes or ovaries underperform, so pituitary drive rises)",
+    "Menopause (loss of ovarian feedback markedly raises LH)",
+    "Mid-cycle ovulatory surge in menstruating women",
+    "GnRH agonist therapy (transient initial flare)",
+    "Polycystic ovary syndrome (often an elevated LH:FSH ratio)"
+  ],
+  "lowers": [
+    "Hypothalamic or pituitary dysfunction (secondary hypogonadism)",
+    "Exogenous testosterone or anabolic steroids suppress LH via negative feedback",
+    "Aggressive caloric deficit, low energy availability, and excessive exercise (functional hypothalamic suppression)",
+    "Opioids and glucocorticoids",
+    "Hyperprolactinemia"
+  ],
+  "confounders": [
+    "Pulsatile, episodic secretion — a single value can be misleading; trends are more informative",
+    "Menstrual cycle phase dramatically changes the reference range in women",
+    "Recent GnRH-analog or hCG treatment alters interpretation",
+    "Exogenous androgens/estrogens suppress LH and mask a primary axis assessment",
+    "Biotin supplements can interfere with some immunoassays"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "cjc-1295", "ipamorelin"],
+  "ranges": [
+    {
+      "low": 1.7,
+      "high": 8.6,
+      "unit": "mIU/mL",
+      "note": "General/default rule — adult-male interval used as the fallback when sex is unknown (Mayo Clinic Laboratories)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 18,
+      "low": 1.7,
+      "high": 8.6,
+      "unit": "mIU/mL",
+      "note": "Adult male reference interval (Mayo Clinic Laboratories)."
+    },
+    {
+      "sex": "F",
+      "ageMin": 18,
+      "low": 1.9,
+      "high": 12.5,
+      "unit": "mIU/mL",
+      "note": "Adult female, follicular phase. Mid-cycle ~8.7–76.3 and luteal ~0.5–16.9; postmenopausal ~15.9–54.0 (Mayo Clinic Laboratories) — phase strongly shifts the range."
+    }
+  ],
+  "references": [
+    {
+      "title": "Luteinizing Hormone (LH), Serum (Test LH) — Mayo Clinic Laboratories",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/602753"
+    },
+    {
+      "title": "Luteinizing Hormone (LH) Blood Test: MedlinePlus Medical Test",
+      "url": "https://medlineplus.gov/lab-tests/luteinizing-hormone-lh-levels-test/"
+    },
+    {
+      "title": "Luteinizing Hormone: Reference Range, Interpretation — Medscape",
+      "url": "https://emedicine.medscape.com/article/2089268-overview"
+    }
+  ]
+}

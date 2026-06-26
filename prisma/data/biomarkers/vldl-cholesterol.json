@@ -1,0 +1,54 @@
+{
+  "slug": "vldl-cholesterol",
+  "name": "VLDL Cholesterol (VLDL-C)",
+  "aliases": ["Very low-density lipoprotein cholesterol", "VLDL-C"],
+  "system": "LIPIDS",
+  "unit": "mg/dL",
+  "summary": "VLDL cholesterol is the cholesterol carried in very-low-density lipoprotein particles, which transport triglycerides made in the liver. There is no simple direct test for it, so labs typically estimate VLDL as about one-fifth of the triglyceride level.",
+  "whatItMeans": "Because VLDL is estimated from triglycerides, a higher VLDL value largely mirrors elevated triglycerides and is considered atherogenic — it can contribute to plaque buildup in arteries. Higher values are generally viewed as less favorable, while lower values are preferable. As a derived number it carries the same caveats as triglycerides, including sensitivity to recent food intake.",
+  "raises": [
+    "Elevated triglycerides (the value it is calculated from)",
+    "Non-fasting state / recent meal",
+    "Excess alcohol and refined carbohydrates",
+    "Obesity and insulin resistance",
+    "Poorly controlled diabetes",
+    "Hypothyroidism"
+  ],
+  "lowers": [
+    "Lowering triglycerides through diet and weight loss",
+    "Regular aerobic exercise",
+    "Omega-3 fatty acids (fish oil)",
+    "Fibrates and niacin",
+    "Limiting alcohol and added sugars"
+  ],
+  "confounders": [
+    "VLDL is usually calculated (triglycerides ÷ 5), not measured, so it inherits triglyceride confounders",
+    "The triglyceride/5 estimate is unreliable when triglycerides are ≥ 400 mg/dL",
+    "Non-fasting samples inflate the underlying triglycerides and therefore VLDL",
+    "Recent alcohol intake raises the value"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "cagrilintide", "mots-c"],
+  "ranges": [
+    {
+      "low": 2,
+      "high": 30,
+      "unit": "mg/dL",
+      "note": "Normal 2–30 mg/dL; > 30 mg/dL is considered high and may increase cardiovascular risk (MedlinePlus). Reference ranges vary slightly by lab."
+    }
+  ],
+  "references": [
+    {
+      "title": "VLDL test: MedlinePlus Medical Encyclopedia",
+      "url": "https://medlineplus.gov/ency/article/003494.htm"
+    },
+    {
+      "title": "What Is VLDL Cholesterol? (Cleveland Clinic)",
+      "url": "https://my.clevelandclinic.org/health/articles/24540-vldl-cholesterol"
+    },
+    {
+      "title": "VLDL Cholesterol Test: What the Result Means (Testing.com)",
+      "url": "https://www.testing.com/tests/vldl-cholesterol/"
+    }
+  ],
+  "direction": "high"
+}

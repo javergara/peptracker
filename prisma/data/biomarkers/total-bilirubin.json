@@ -1,0 +1,45 @@
+{
+  "slug": "total-bilirubin",
+  "name": "Total Bilirubin",
+  "aliases": ["TBIL", "Total bili", "Bilirubin, total"],
+  "system": "LIVER",
+  "unit": "mg/dL",
+  "summary": "Bilirubin is a yellow pigment produced when the body breaks down old red blood cells; the liver processes it and excretes it in bile. Total bilirubin measures both the unconjugated (indirect) and conjugated (direct) forms in blood.",
+  "whatItMeans": "An elevated total bilirubin can reflect either increased red-cell breakdown (hemolysis, raising indirect bilirubin) or reduced liver clearance/bile flow (liver disease or bile-duct obstruction, raising direct bilirubin). Fractionating into direct vs. indirect helps localize the cause; a benign inherited pattern (Gilbert syndrome) raises indirect bilirubin without true liver disease. Visible jaundice typically appears once total bilirubin exceeds roughly 2-3 mg/dL. This is educational information, not a diagnosis.",
+  "raises": [
+    "Bile-duct obstruction / cholestasis (raises direct bilirubin)",
+    "Liver disease (hepatitis, cirrhosis)",
+    "Hemolysis / increased red-cell breakdown (raises indirect bilirubin)",
+    "Gilbert syndrome (benign, raises indirect bilirubin, often with fasting or stress)",
+    "Certain medications affecting bilirubin handling"
+  ],
+  "lowers": [
+    "Resolution of the underlying liver, biliary, or hemolytic condition"
+  ],
+  "confounders": [
+    "Fasting and prolonged starvation can raise indirect bilirubin (notably in Gilbert syndrome)",
+    "Hemolyzed sample can affect measured values",
+    "Direct vs. indirect fractionation is needed to interpret an elevation",
+    "Exposure of the sample to light can falsely lower bilirubin"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide"],
+  "ranges": [
+    {
+      "low": 0.1,
+      "high": 1.2,
+      "unit": "mg/dL",
+      "note": "General adult reference range for total bilirubin; varies slightly by lab."
+    }
+  ],
+  "references": [
+    {
+      "title": "MedlinePlus: Bilirubin blood test",
+      "url": "https://medlineplus.gov/ency/article/003479.htm"
+    },
+    {
+      "title": "Cleveland Clinic: Bilirubin Test",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/17845-bilirubin"
+    }
+  ],
+  "direction": "high"
+}

@@ -1,0 +1,63 @@
+{
+  "slug": "creatine-kinase",
+  "name": "Creatine Kinase (CK)",
+  "aliases": ["CK", "CPK", "Creatine phosphokinase", "Total CK"],
+  "system": "LIVER",
+  "unit": "U/L",
+  "summary": "Creatine kinase is an enzyme found mainly in skeletal muscle, heart, and brain that helps cells generate energy. Although it is a muscle marker rather than a liver enzyme, it is grouped here because it is routinely used to determine whether an AST/transaminase elevation is coming from muscle rather than the liver.",
+  "whatItMeans": "An elevated CK most often indicates skeletal-muscle injury or stress, ranging from intense exercise to rhabdomyolysis, statin-associated myopathy, or muscle disease; the cardiac fraction (CK-MB) reflects heart muscle. When AST is high but ALT and CK help show the source, a raised CK with a high AST and normal ALT points to a muscle origin rather than liver injury. Very high CK (thousands U/L) with dark urine raises concern for rhabdomyolysis. This is educational information, not a diagnosis.",
+  "raises": [
+    "Intense or unaccustomed exercise",
+    "Rhabdomyolysis (severe muscle breakdown)",
+    "Statin-associated or other drug-induced myopathy",
+    "Muscle trauma, crush injury, or intramuscular injections",
+    "Myocardial injury (CK-MB fraction)",
+    "Inherited or inflammatory muscle disease",
+    "Hypothyroidism"
+  ],
+  "lowers": [
+    "Low muscle mass",
+    "Resolution of muscle injury or removal of the offending drug"
+  ],
+  "confounders": [
+    "Intense exercise and creatine supplementation raise CK and can mildly raise AST",
+    "Higher muscle mass and male sex raise baseline CK",
+    "Black individuals tend to have higher reference CK values than other groups",
+    "Recent intramuscular injection or muscle trauma can transiently elevate CK",
+    "Hemolyzed sample can affect the result"
+  ],
+  "relatedPeptides": ["igf-1-lr3", "somatropin", "mots-c", "tesamorelin"],
+  "ranges": [
+    {
+      "low": 24,
+      "high": 204,
+      "unit": "U/L",
+      "note": "General adult reference range; varies widely by lab, sex, muscle mass, and ancestry."
+    },
+    {
+      "sex": "M",
+      "low": 39,
+      "high": 308,
+      "unit": "U/L",
+      "note": "Typical adult male reference range (higher due to muscle mass)."
+    },
+    {
+      "sex": "F",
+      "low": 26,
+      "high": 192,
+      "unit": "U/L",
+      "note": "Typical adult female reference range."
+    }
+  ],
+  "references": [
+    {
+      "title": "What Are the Normal Serum Creatine Kinase Values for Skeletal Muscle? A Worldwide Systematic Review (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12163646/"
+    },
+    {
+      "title": "MedlinePlus: Creatine kinase blood test",
+      "url": "https://medlineplus.gov/ency/article/003503.htm"
+    }
+  ],
+  "direction": "high"
+}

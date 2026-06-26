@@ -1,0 +1,70 @@
+{
+  "slug": "hba1c",
+  "name": "Hemoglobin A1c (HbA1c)",
+  "aliases": [
+    "A1C",
+    "Glycated hemoglobin",
+    "Glycohemoglobin",
+    "HbA1c",
+    "Hemoglobin A1C"
+  ],
+  "system": "METABOLIC",
+  "unit": "%",
+  "summary": "HbA1c measures the percentage of hemoglobin that has glucose attached to it, reflecting average blood sugar over roughly the prior 2–3 months. It is a standard test for screening and monitoring diabetes.",
+  "whatItMeans": "Because red blood cells live about three months, HbA1c integrates blood glucose over that window rather than at a single moment. By the American Diabetes Association, an HbA1c below 5.7% is normal, 5.7–6.4% is in the prediabetes range, and 6.5% or higher indicates the diabetes range. Higher values generally mean higher average glucose exposure and greater long-term complication risk. This is educational information, not a diagnosis.",
+  "raises": [
+    "Chronically elevated blood glucose / insulin resistance and diabetes",
+    "Diet high in refined carbohydrates and sugar",
+    "Physical inactivity and excess body weight",
+    "Corticosteroids and other glucose-raising medications",
+    "Iron-deficiency anemia (can falsely elevate)",
+    "GH-axis peptides such as tesamorelin, somatropin, cjc-1295, and ipamorelin, which can worsen glucose tolerance"
+  ],
+  "lowers": [
+    "Weight loss and lower-glycemic, higher-fiber diet",
+    "Regular aerobic and resistance exercise",
+    "Glucose-lowering medications (metformin, SGLT2 inhibitors, etc.)",
+    "GLP-1 / GIP receptor agonists such as tirzepatide, retatrutide, and cagrilintide",
+    "Conditions that shorten red-cell lifespan (hemolysis, recent blood loss) can falsely lower it"
+  ],
+  "confounders": [
+    "Anemias and hemoglobinopathies (e.g. sickle cell trait, thalassemia) can falsely raise or lower HbA1c depending on red-cell turnover",
+    "Recent transfusion, hemolysis, or significant blood loss distorts results",
+    "Iron, B12, or folate deficiency can shift values",
+    "Pregnancy and chronic kidney disease alter red-cell lifespan and accuracy",
+    "Does not capture short-term glucose swings or hypoglycemia"
+  ],
+  "relatedPeptides": [
+    "tirzepatide",
+    "retatrutide",
+    "cagrilintide",
+    "mots-c",
+    "tesamorelin",
+    "somatropin",
+    "cjc-1295",
+    "ipamorelin"
+  ],
+  "ranges": [
+    {
+      "low": 4,
+      "high": 5.6,
+      "unit": "%",
+      "note": "Normal <5.7%; prediabetes 5.7–6.4%; diabetes ≥6.5% (American Diabetes Association). Lower bound shown as an approximate typical floor."
+    }
+  ],
+  "references": [
+    {
+      "title": "Understanding A1C Test | American Diabetes Association",
+      "url": "https://diabetes.org/about-diabetes/a1c"
+    },
+    {
+      "title": "Diabetes Diagnosis & Tests | American Diabetes Association",
+      "url": "https://diabetes.org/about-diabetes/diagnosis"
+    },
+    {
+      "title": "A1C test - Mayo Clinic",
+      "url": "https://www.mayoclinic.org/tests-procedures/a1c-test/about/pac-20384643"
+    }
+  ],
+  "direction": "high"
+}

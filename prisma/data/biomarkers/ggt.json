@@ -1,0 +1,60 @@
+{
+  "slug": "ggt",
+  "name": "Gamma-Glutamyl Transferase (GGT)",
+  "aliases": ["GGT", "Gamma-GT", "GGTP", "Gamma-glutamyl transpeptidase"],
+  "system": "LIVER",
+  "unit": "U/L",
+  "summary": "GGT is an enzyme concentrated in the liver and bile ducts (also present in kidney, pancreas, and other tissues). It is a sensitive marker of bile-duct (cholestatic) stress and is frequently elevated by alcohol and enzyme-inducing drugs.",
+  "whatItMeans": "An elevated GGT, especially together with a raised alkaline phosphatase (ALP), supports a cholestatic (bile-flow obstruction or bile-duct) pattern of liver injury. GGT is also used to confirm that an isolated ALP elevation is of liver rather than bone origin, since GGT is not raised by bone disease. Isolated GGT elevation is common with alcohol use and certain medications and is not specific by itself. This is educational information, not a diagnosis.",
+  "raises": [
+    "Alcohol consumption",
+    "Bile-duct obstruction / cholestasis",
+    "Fatty liver disease (MASLD/NAFLD) and metabolic syndrome",
+    "Enzyme-inducing medications (e.g., some anticonvulsants, barbiturates)",
+    "Hepatitis and other liver disease"
+  ],
+  "lowers": [
+    "Abstinence from alcohol",
+    "Resolution of the underlying liver or biliary condition"
+  ],
+  "confounders": [
+    "Highly sensitive but not specific; elevation can occur with many drugs and non-liver conditions",
+    "Alcohol intake in the days before testing can raise GGT",
+    "Not elevated by bone disease, so it helps localize an ALP rise to the liver",
+    "Reference upper limit differs by sex and lab"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "mots-c"],
+  "ranges": [
+    {
+      "low": 5,
+      "high": 40,
+      "unit": "U/L",
+      "note": "General adult reference range; varies by lab and sex."
+    },
+    {
+      "sex": "M",
+      "low": 8,
+      "high": 61,
+      "unit": "U/L",
+      "note": "Typical adult male reference range."
+    },
+    {
+      "sex": "F",
+      "low": 5,
+      "high": 42,
+      "unit": "U/L",
+      "note": "Typical adult female reference range."
+    }
+  ],
+  "references": [
+    {
+      "title": "UCSF Health: Gamma-glutamyl transferase (GGT) blood test",
+      "url": "https://www.ucsfhealth.org/care/medical-tests/gamma-glutamyl-transferase-ggt-blood-test"
+    },
+    {
+      "title": "Medical News Today: GGT blood test",
+      "url": "https://www.medicalnewstoday.com/articles/325199"
+    }
+  ],
+  "direction": "high"
+}

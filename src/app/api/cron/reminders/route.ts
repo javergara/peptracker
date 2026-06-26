@@ -61,7 +61,7 @@ async function handler(req: Request) {
   const eightDaysAgo = new Date(now.getTime() - 8 * 86_400_000);
 
   for (const [userId, userSubs] of byUser) {
-    const [cycles, logs] = await Promise.all([
+    const [cycles, logs, dueRechecks] = await Promise.all([
       prisma.cycle.findMany({
         where: { userId, status: "active" },
         include: { peptide: true, stack: true },
@@ -70,7 +70,17 @@ async function handler(req: Request) {
         where: { userId, takenAt: { gte: eightDaysAgo } },
         select: { takenAt: true },
       }),
+      // Lab rechecks that are due and not yet completed.
+      prisma.labReminder.findMany({
+        where: { userId, completedAt: null, dueAt: { lte: now } },
+        select: { id: true, label: true, lastNotifiedAt: true },
+      }),
     ]);
+
+    // Don't re-notify a recheck more than once per day.
+    const freshRechecks = dueRechecks.filter(
+      (r) => !r.lastNotifiedAt || !sameDay(r.lastNotifiedAt, now),
+    );
 
     const cycleLikes: CycleLike[] = cycles.map((c) => ({
       id: c.id,
@@ -94,7 +104,9 @@ async function handler(req: Request) {
       0,
     );
 
-    if (remainingToday === 0 && overdue === 0) continue;
+    if (remainingToday === 0 && overdue === 0 && freshRechecks.length === 0) {
+      continue;
+    }
 
     const parts: string[] = [];
     if (remainingToday > 0) {
@@ -103,24 +115,40 @@ async function handler(req: Request) {
       );
     }
     if (overdue > 0) parts.push(`${overdue} overdue`);
+    if (freshRechecks.length > 0) {
+      parts.push(
+        `${freshRechecks.length} lab recheck${freshRechecks.length === 1 ? "" : "s"} due`,
+      );
+    }
 
+    const hasDoses = remainingToday > 0 || overdue > 0;
     const payload: PushPayload = {
       title: "Peptra reminder",
       body: parts.join(" · "),
-      url: "/log",
+      url: hasDoses ? "/log" : "/labs",
       tag: "peptra-reminder",
     };
 
+    let delivered = false;
     for (const s of userSubs) {
       const ok = await sendPush(s, payload);
       if (ok) {
         sent++;
+        delivered = true;
       } else {
         await prisma.pushSubscription
           .delete({ where: { id: s.id } })
           .catch(() => {});
         pruned++;
       }
+    }
+
+    // Stamp rechecks as notified (only if at least one push went out).
+    if (delivered && freshRechecks.length > 0) {
+      await prisma.labReminder.updateMany({
+        where: { id: { in: freshRechecks.map((r) => r.id) } },
+        data: { lastNotifiedAt: now },
+      });
     }
   }
 

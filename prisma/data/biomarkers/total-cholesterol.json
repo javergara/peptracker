@@ -1,0 +1,57 @@
+{
+  "slug": "total-cholesterol",
+  "name": "Total Cholesterol (TC)",
+  "aliases": ["Cholesterol, total", "Serum cholesterol", "TC"],
+  "system": "LIPIDS",
+  "unit": "mg/dL",
+  "summary": "Total cholesterol is the sum of cholesterol carried in all lipoprotein particles in the blood — roughly LDL + HDL + VLDL. It is a broad screening number from a standard lipid panel.",
+  "whatItMeans": "A higher total cholesterol value is generally associated with greater long-term cardiovascular risk, but the number can be misleading on its own because it lumps together atherogenic particles (LDL, VLDL) and protective HDL. A very high total may reflect high LDL, while a high HDL can also nudge the total upward. Because of this, clinicians look at the component fractions (LDL, HDL, triglycerides) rather than the total alone.",
+  "raises": [
+    "Diet high in saturated and trans fats",
+    "Genetics (e.g. familial hypercholesterolemia)",
+    "Obesity and excess body weight",
+    "Sedentary lifestyle",
+    "Hypothyroidism",
+    "Type 2 diabetes / insulin resistance",
+    "Smoking",
+    "Excess alcohol intake"
+  ],
+  "lowers": [
+    "Statins and other lipid-lowering medications (ezetimibe, PCSK9 inhibitors)",
+    "Diet rich in fiber, unsaturated fats, and plant sterols",
+    "Regular aerobic exercise",
+    "Weight loss",
+    "Smoking cessation"
+  ],
+  "confounders": [
+    "Recent acute illness or infection can transiently lower cholesterol",
+    "Pregnancy raises cholesterol",
+    "Severe stress or recent surgery can alter values",
+    "Posture (prolonged standing) and prolonged tourniquet time can modestly elevate measured values",
+    "Seasonal variation (often slightly higher in winter)"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "cagrilintide", "mots-c"],
+  "ranges": [
+    {
+      "low": 0,
+      "high": 200,
+      "unit": "mg/dL",
+      "note": "Desirable < 200 mg/dL; 200–239 borderline high; ≥ 240 high (NCEP ATP III)."
+    }
+  ],
+  "references": [
+    {
+      "title": "NCEP ATP III Executive Summary (NHLBI/NIH)",
+      "url": "https://www.nhlbi.nih.gov/files/docs/guidelines/atp3xsum.pdf"
+    },
+    {
+      "title": "Cholesterol testing and results: MedlinePlus Medical Encyclopedia",
+      "url": "https://medlineplus.gov/ency/patientinstructions/000386.htm"
+    },
+    {
+      "title": "Mayo Clinic Q and A: Cholesterol — know your numbers",
+      "url": "https://newsnetwork.mayoclinic.org/discussion/mayo-clinic-q-and-a-cholesterol-know-your-numbers/"
+    }
+  ],
+  "direction": "high"
+}

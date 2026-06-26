@@ -1,0 +1,72 @@
+{
+  "slug": "glucose-fasting",
+  "name": "Fasting Glucose (FPG)",
+  "aliases": [
+    "Fasting blood glucose",
+    "Fasting plasma glucose",
+    "FBG",
+    "FPG",
+    "Fasting blood sugar"
+  ],
+  "system": "METABOLIC",
+  "unit": "mg/dL",
+  "summary": "Fasting glucose is the concentration of sugar in the blood after at least 8 hours without food or caloric drink. It is a core screening test for impaired glucose metabolism, prediabetes, and diabetes.",
+  "whatItMeans": "A single fasting glucose value is a snapshot of how well the body keeps blood sugar in range between meals. By the American Diabetes Association, a fasting value of 70–99 mg/dL is considered normal, 100–125 mg/dL falls in the prediabetes (impaired fasting glucose) range, and 126 mg/dL or higher on two separate occasions is in the diabetes range. Higher fasting values generally reflect greater insulin resistance or reduced insulin output, while low fasting values may signal hypoglycemia. This is educational information, not a diagnosis.",
+  "raises": [
+    "Insulin resistance and type 2 diabetes",
+    "Excess body weight and abdominal adiposity",
+    "Diet high in refined carbohydrates and sugar",
+    "Physical inactivity",
+    "Acute stress, illness, or infection (stress hyperglycemia)",
+    "Corticosteroids and some other medications",
+    "GH-axis peptides such as tesamorelin, somatropin, cjc-1295, and ipamorelin, which can worsen glucose tolerance"
+  ],
+  "lowers": [
+    "Weight loss and reduced calorie intake",
+    "Regular aerobic and resistance exercise (improved insulin sensitivity)",
+    "Higher-fiber, lower-glycemic diet",
+    "Glucose-lowering medications (metformin, SGLT2 inhibitors, etc.)",
+    "GLP-1 / GIP receptor agonists such as tirzepatide, retatrutide, and cagrilintide",
+    "Prolonged fasting or skipped meals (can drop into hypoglycemia)"
+  ],
+  "confounders": [
+    "Inadequate fasting (recent food or caloric drinks) falsely raises values",
+    "Acute illness, surgery, or stress transiently elevates glucose",
+    "Time of day and the 'dawn phenomenon' (morning cortisol/GH surge) can nudge values up",
+    "Delayed sample processing can lower measured glucose as red cells consume it (use a fluoride/oxalate tube)",
+    "Caffeine and some medications can affect readings"
+  ],
+  "relatedPeptides": [
+    "tirzepatide",
+    "retatrutide",
+    "cagrilintide",
+    "mots-c",
+    "tesamorelin",
+    "somatropin",
+    "cjc-1295",
+    "ipamorelin"
+  ],
+  "ranges": [
+    {
+      "low": 70,
+      "high": 99,
+      "unit": "mg/dL",
+      "note": "Normal fasting glucose 70–99 mg/dL; 100–125 mg/dL is prediabetes (impaired fasting glucose); ≥126 mg/dL on two occasions is in the diabetes range (American Diabetes Association)."
+    }
+  ],
+  "references": [
+    {
+      "title": "Diabetes Diagnosis & Tests | American Diabetes Association",
+      "url": "https://diabetes.org/about-diabetes/diagnosis"
+    },
+    {
+      "title": "Blood glucose test: MedlinePlus Medical Encyclopedia",
+      "url": "https://medlineplus.gov/ency/article/003482.htm"
+    },
+    {
+      "title": "Blood Glucose (Sugar) Test | Cleveland Clinic",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/12363-blood-glucose-test"
+    }
+  ],
+  "direction": "high"
+}

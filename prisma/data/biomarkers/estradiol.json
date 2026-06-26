@@ -1,0 +1,88 @@
+{
+  "slug": "estradiol",
+  "name": "Estradiol (E2)",
+  "aliases": ["Estradiol", "17-beta-estradiol", "E2"],
+  "system": "HORMONE",
+  "unit": "pg/mL",
+  "summary": "Estradiol (E2) is the most potent estrogen and the primary one in non-pregnant adults. In women it is made mainly by the ovaries and drives the menstrual cycle; in men it comes largely from aromatization of testosterone and is important for bone, libido, and metabolic health.",
+  "whatItMeans": "In women, estradiol must be read against menstrual-cycle phase: it rises through the follicular phase, peaks before ovulation, and falls to low postmenopausal levels after menopause. In men, estradiol is normally low but meaningful — too little (or too much) can affect bone density, mood, and sexual function, and elevated levels often track with higher body fat or aromatase activity. Estradiol is frequently interpreted together with testosterone, LH, and FSH. This is educational context, not a diagnosis.",
+  "raises": [
+    "Ovulatory phase / mid-cycle peak in menstruating women",
+    "Pregnancy (markedly elevated)",
+    "Higher body fat and aromatase activity (converts testosterone to estradiol)",
+    "Exogenous estrogen, hormone therapy, and some fertility treatments",
+    "Exogenous testosterone or anabolic steroids (via aromatization)",
+    "Estrogen-secreting tumors (uncommon)"
+  ],
+  "lowers": [
+    "Menopause and ovarian insufficiency",
+    "Aggressive caloric deficit / rapid weight loss and low energy availability (functional hypothalamic suppression in women)",
+    "Hypothalamic or pituitary dysfunction (low LH/FSH drive)",
+    "Aromatase inhibitor medications",
+    "Excessive exercise with low body fat"
+  ],
+  "confounders": [
+    "Menstrual cycle phase dramatically changes the female reference range — record cycle day",
+    "Assay matters — a sensitive LC-MS/MS assay is preferred for the low concentrations seen in men and postmenopausal women; immunoassays are less accurate at low levels",
+    "Pregnancy and exogenous hormones substantially shift values",
+    "Recent fertility treatment or HCG/gonadotropin therapy alters interpretation",
+    "Biotin supplements can interfere with some immunoassays"
+  ],
+  "relatedPeptides": [
+    "retatrutide",
+    "tirzepatide",
+    "cagrilintide",
+    "cjc-1295",
+    "ipamorelin"
+  ],
+  "ranges": [
+    {
+      "low": 10,
+      "high": 40,
+      "unit": "pg/mL",
+      "note": "General/default rule — adult-male interval used as the fallback when sex is unknown (Mayo Clinic Laboratories, sensitive LC-MS/MS)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 18,
+      "low": 10,
+      "high": 40,
+      "unit": "pg/mL",
+      "note": "Adult male (Mayo Clinic Laboratories, sensitive assay). LabCorp standard assay lists ~10–50 pg/mL."
+    },
+    {
+      "sex": "F",
+      "ageMin": 18,
+      "low": 15,
+      "high": 350,
+      "unit": "pg/mL",
+      "note": "Adult premenopausal female — strongly cycle-dependent: follicular ~30–100, mid-cycle peak up to ~350–400, luteal ~70–200 (LabCorp/Mayo). Record cycle day."
+    },
+    {
+      "sex": "F",
+      "ageMin": 55,
+      "low": 0,
+      "high": 32,
+      "unit": "pg/mL",
+      "note": "Postmenopausal female — typically <32 pg/mL off hormone therapy (LabCorp/Mayo)."
+    }
+  ],
+  "references": [
+    {
+      "title": "Estradiol, Serum (Test EEST) — Mayo Clinic Laboratories",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/81816"
+    },
+    {
+      "title": "004515: Estradiol | Labcorp",
+      "url": "https://www.labcorp.com/tests/004515/estradiol"
+    },
+    {
+      "title": "Estradiol Test: MedlinePlus Medical Test",
+      "url": "https://medlineplus.gov/lab-tests/estradiol-test/"
+    },
+    {
+      "title": "Estradiol: Reference Range, Interpretation — Medscape",
+      "url": "https://emedicine.medscape.com/article/2089003-overview"
+    }
+  ]
+}

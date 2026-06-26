@@ -1,0 +1,49 @@
+{
+  "slug": "cystatin-c",
+  "name": "Cystatin C (Cys-C)",
+  "aliases": ["cystatin-C", "Cys-C", "serum cystatin C"],
+  "system": "RENAL",
+  "unit": "mg/L",
+  "summary": "Cystatin C is a small protein produced by virtually all nucleated cells at a steady rate, freely filtered by the kidneys, and used as a marker of kidney filtration. Because its production is largely independent of muscle mass, diet, age, and sex, it can be a more reliable filtration marker than creatinine in certain people.",
+  "whatItMeans": "Rising cystatin C suggests the kidneys are filtering less, and it often detects early decline 1–2 years sooner than creatinine because it begins climbing once filtration has fallen by roughly a quarter. It is especially useful when creatinine is unreliable — for example in people with unusually high or low muscle mass, the elderly, or those on creatine supplements. A cystatin-C-based eGFR can be calculated and is sometimes combined with creatinine for a more accurate estimate. This is educational information, not medical advice.",
+  "raises": [
+    "Reduced kidney filtration (acute or chronic kidney disease)",
+    "Hyperthyroid states (increased cell turnover)",
+    "High-dose corticosteroid therapy",
+    "Obesity, smoking, and chronic inflammation (modest effects)"
+  ],
+  "lowers": [
+    "Improved or preserved kidney filtration",
+    "Hypothyroidism (reduced production)"
+  ],
+  "confounders": [
+    "Unlike creatinine, cystatin C is independent of muscle mass and creatine supplementation, so it does not falsely rise in muscular or supplementing individuals",
+    "Thyroid dysfunction and high-dose glucocorticoids can shift cystatin C independent of true kidney function",
+    "Inflammation and obesity may modestly raise it without filtration loss",
+    "Pairing cystatin C with creatinine (combined eGFR) generally outperforms either marker alone"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 0.5,
+      "high": 1.0,
+      "unit": "mg/L",
+      "note": "General adult reference range; reported intervals vary by assay (e.g., ~0.57–1.05 or ~0.62–1.15 mg/L). Values trend slightly higher with age. Source: clinical laboratory references (LabCorp; PMC reviews of cystatin C as a CKD marker)."
+    }
+  ],
+  "references": [
+    {
+      "title": "PMC — Cystatin C as a biomarker of chronic kidney disease",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7657956/"
+    },
+    {
+      "title": "MedlinePlus — Cystatin C Test",
+      "url": "https://medlineplus.gov/lab-tests/cystatin-c-test/"
+    },
+    {
+      "title": "NIDDK — Estimating GFR (eGFR) and Kidney Function",
+      "url": "https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating"
+    }
+  ],
+  "direction": "high"
+}

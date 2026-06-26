@@ -1,0 +1,68 @@
+{
+  "slug": "creatinine",
+  "name": "Creatinine (Cr)",
+  "aliases": ["serum creatinine", "Cr", "SCr"],
+  "system": "RENAL",
+  "unit": "mg/dL",
+  "summary": "Creatinine is a waste product of normal muscle metabolism that the kidneys filter out of the blood. Because production is fairly steady, serum creatinine is a widely used surrogate for kidney filtration (it feeds the eGFR calculation).",
+  "whatItMeans": "Higher serum creatinine generally suggests the kidneys are filtering less efficiently, since less is being cleared from the blood. However, the value reflects muscle mass and diet as much as kidney health, so it is interpreted alongside eGFR, age, sex, and trend over time rather than in isolation. A single elevated reading is far less informative than a sustained change. This is educational information, not medical advice.",
+  "raises": [
+    "Reduced kidney filtration (acute kidney injury or chronic kidney disease)",
+    "Dehydration / low blood volume",
+    "High muscle mass or recent intense exercise",
+    "Large dietary intake of cooked meat",
+    "Creatine supplementation",
+    "Some medications (e.g., trimethoprim, cimetidine, certain NSAIDs)"
+  ],
+  "lowers": [
+    "Low muscle mass or muscle wasting",
+    "Pregnancy (increased filtration and plasma volume)",
+    "Liver disease (reduced creatine production)",
+    "Overhydration"
+  ],
+  "confounders": [
+    "High muscle mass raises serum creatinine WITHOUT meaning kidney damage — muscular individuals can run above the reference range with normal kidney function",
+    "Creatine supplementation raises serum creatinine independent of any change in kidney function",
+    "A high-protein or cooked-meat meal before the draw can transiently raise creatinine",
+    "Estimating equations (eGFR) adjust for age and sex but not muscle mass, so they over- or under-estimate filtration at body-composition extremes",
+    "Cystatin C is an alternative marker that is largely independent of muscle mass and diet"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 0.59,
+      "high": 1.35,
+      "unit": "mg/dL",
+      "note": "General adult reference span (combines male and female ranges); sex-specific rules are more precise. Source: Mayo Clinic Laboratories."
+    },
+    {
+      "sex": "M",
+      "low": 0.74,
+      "high": 1.35,
+      "unit": "mg/dL",
+      "note": "Adult male reference range. Source: Mayo Clinic Laboratories."
+    },
+    {
+      "sex": "F",
+      "low": 0.59,
+      "high": 1.04,
+      "unit": "mg/dL",
+      "note": "Adult female reference range. Source: Mayo Clinic Laboratories."
+    }
+  ],
+  "references": [
+    {
+      "title": "Mayo Clinic — Creatinine test: Results",
+      "url": "https://www.mayoclinic.org/tests-procedures/creatinine-test/about/pac-20384646"
+    },
+    {
+      "title": "MedlinePlus — Creatinine Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/creatinine-test/"
+    },
+    {
+      "title": "NIDDK — Estimating GFR (eGFR) and Kidney Function",
+      "url": "https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating"
+    }
+  ],
+  "direction": "high"
+}

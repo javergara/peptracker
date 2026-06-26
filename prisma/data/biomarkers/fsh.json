@@ -1,0 +1,69 @@
+{
+  "slug": "fsh",
+  "name": "Follicle-Stimulating Hormone (FSH)",
+  "aliases": ["Follicle-stimulating hormone", "Follitropin", "FSH"],
+  "system": "HORMONE",
+  "unit": "mIU/mL",
+  "summary": "Follicle-stimulating hormone is a pituitary gonadotropin that supports sperm production (via Sertoli cells) in men and ovarian follicle development in women. It is interpreted together with LH and the sex steroids to assess the gonadal axis and fertility.",
+  "whatItMeans": "Like LH, FSH reflects pituitary drive on the gonads. Low sex steroids with low or inappropriately normal FSH suggest a central (secondary) cause, whereas high FSH alongside low sex steroids points to a primary gonadal cause as the pituitary tries to compensate. A markedly elevated FSH in men can indicate impaired spermatogenesis or testicular failure, and a rising FSH in women signals declining ovarian reserve and the menopausal transition. This is educational context, not a diagnosis.",
+  "raises": [
+    "Primary gonadal failure (testicular or ovarian) raises FSH via lost negative feedback",
+    "Menopause and declining ovarian reserve",
+    "Impaired spermatogenesis / Sertoli cell dysfunction in men",
+    "Klinefelter syndrome and other primary hypogonadal conditions",
+    "GnRH agonist therapy (transient initial flare)"
+  ],
+  "lowers": [
+    "Hypothalamic or pituitary dysfunction (secondary hypogonadism)",
+    "Exogenous testosterone or anabolic steroids suppress FSH via negative feedback",
+    "Aggressive caloric deficit, low energy availability, and excessive exercise",
+    "Hyperprolactinemia",
+    "Some exogenous estrogen/progestin exposure"
+  ],
+  "confounders": [
+    "Menstrual cycle phase changes the female reference range; a cycle-day-specific FSH is used for ovarian reserve",
+    "Pulsatile secretion makes single values less reliable than trends",
+    "Recent GnRH-analog or gonadotropin therapy alters interpretation",
+    "Exogenous sex steroids suppress FSH and can mask the underlying axis",
+    "Biotin supplements can interfere with some immunoassays"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "cjc-1295", "ipamorelin"],
+  "ranges": [
+    {
+      "low": 1.5,
+      "high": 12.4,
+      "unit": "mIU/mL",
+      "note": "General/default rule — adult-male interval used as the fallback when sex is unknown (Mayo Clinic Laboratories)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 18,
+      "low": 1.5,
+      "high": 12.4,
+      "unit": "mIU/mL",
+      "note": "Adult male reference interval (Mayo Clinic Laboratories)."
+    },
+    {
+      "sex": "F",
+      "ageMin": 18,
+      "low": 3.5,
+      "high": 12.5,
+      "unit": "mIU/mL",
+      "note": "Adult female, follicular phase. Mid-cycle ~4.7–21.5 and luteal ~1.7–7.7; postmenopausal ~25.8–134.8 (Mayo Clinic Laboratories) — phase strongly shifts the range."
+    }
+  ],
+  "references": [
+    {
+      "title": "Follicle-Stimulating Hormone (FSH), Serum (Test FSH) — Mayo Clinic Laboratories",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/602752"
+    },
+    {
+      "title": "Follicle-Stimulating Hormone (FSH) Levels Test: MedlinePlus Medical Test",
+      "url": "https://medlineplus.gov/lab-tests/follicle-stimulating-hormone-fsh-levels-test/"
+    },
+    {
+      "title": "Follicle-Stimulating Hormone (FSH): Reference Range, Interpretation — Medscape",
+      "url": "https://emedicine.medscape.com/article/2089048-overview"
+    }
+  ]
+}

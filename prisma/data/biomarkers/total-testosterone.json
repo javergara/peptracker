@@ -1,0 +1,89 @@
+{
+  "slug": "total-testosterone",
+  "name": "Total Testosterone (T)",
+  "aliases": ["Testosterone, total", "Serum testosterone", "Total T", "T"],
+  "system": "HORMONE",
+  "unit": "ng/dL",
+  "summary": "Total testosterone measures all testosterone in the blood — the small free fraction plus the portions bound to SHBG and albumin. It is the primary screening test for androgen status, especially when male hypogonadism is being evaluated.",
+  "whatItMeans": "Testosterone is interpreted alongside the pituitary gonadotropins LH and FSH to localize a problem. Low testosterone with low or inappropriately normal LH/FSH suggests a central (secondary) cause at the hypothalamus or pituitary, while low testosterone with elevated LH/FSH points to a primary testicular cause. Because total T includes protein-bound hormone, a high or low SHBG can pull the total up or down without the biologically active free fraction changing as much. This is educational context, not a diagnosis.",
+  "raises": [
+    "Exogenous testosterone or anabolic-androgenic steroids",
+    "hCG and gonadotropin-stimulating therapies",
+    "High SHBG states (raises the bound, total fraction)",
+    "Resistance training and adequate sleep (modest, physiologic)",
+    "Some androgen-secreting tumors (uncommon)"
+  ],
+  "lowers": [
+    "Aggressive caloric deficit / rapid weight loss can transiently lower testosterone",
+    "Obesity and insulin resistance (via increased aromatization and lower SHBG)",
+    "Chronic opioid use, glucocorticoids, and some other medications",
+    "Poor or insufficient sleep and chronic overtraining",
+    "Aging (gradual age-related decline)",
+    "Acute illness, major stress, or systemic disease",
+    "Pituitary or hypothalamic disorders (lowers via reduced LH/FSH drive)"
+  ],
+  "confounders": [
+    "Diurnal variation — measure fasting, typically 7–9am when levels peak; afternoon draws read lower",
+    "SHBG strongly affects total vs free testosterone, so total can mislead when SHBG is high or low",
+    "Recent acute illness, fever, or intense exercise can transiently depress levels",
+    "Assay differences — immunoassay vs LC-MS/MS can give different values; harmonized ranges assume a standardized method",
+    "Single low values should be confirmed with a repeat morning fasting draw"
+  ],
+  "relatedPeptides": [
+    "retatrutide",
+    "tirzepatide",
+    "cjc-1295",
+    "ipamorelin",
+    "somatropin"
+  ],
+  "ranges": [
+    {
+      "low": 264,
+      "high": 916,
+      "unit": "ng/dL",
+      "note": "General/default rule — CDC-harmonized adult-male reference interval (~19–39 y nonobese men), used as the fallback when sex is unknown."
+    },
+    {
+      "sex": "M",
+      "ageMin": 19,
+      "low": 264,
+      "high": 916,
+      "unit": "ng/dL",
+      "note": "Adult male (CDC Hormone Standardization / harmonized range; basis for ~264–916 ng/dL widely cited by the Endocrine Society)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 50,
+      "low": 215,
+      "high": 878,
+      "unit": "ng/dL",
+      "note": "Older adult male — total testosterone declines with age; example age-banded interval (Mayo/age-specific reporting). Values vary by lab and assay."
+    },
+    {
+      "sex": "F",
+      "ageMin": 19,
+      "low": 8,
+      "high": 60,
+      "unit": "ng/dL",
+      "note": "Adult female reference interval (Mayo Clinic Laboratories)."
+    }
+  ],
+  "references": [
+    {
+      "title": "Testosterone, Total, Bioavailable, and Free, Serum (Test TTFB) — Mayo Clinic Laboratories",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/83686"
+    },
+    {
+      "title": "Testosterone Therapy in Men With Hypogonadism: An Endocrine Society Clinical Practice Guideline",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29562364/"
+    },
+    {
+      "title": "Testosterone: MedlinePlus Medical Test",
+      "url": "https://medlineplus.gov/lab-tests/testosterone-levels-test/"
+    },
+    {
+      "title": "CDC Hormone Standardization Program (HoSt) — Testosterone",
+      "url": "https://www.cdc.gov/labstandards/hs.html"
+    }
+  ]
+}

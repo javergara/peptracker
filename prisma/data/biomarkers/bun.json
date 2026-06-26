@@ -1,0 +1,53 @@
+{
+  "slug": "bun",
+  "name": "Blood Urea Nitrogen (BUN)",
+  "aliases": ["urea nitrogen", "serum urea nitrogen", "BUN"],
+  "system": "RENAL",
+  "unit": "mg/dL",
+  "summary": "BUN measures the nitrogen portion of urea, the protein-breakdown waste that the kidneys excrete. In the US, the nitrogen fraction (BUN) is reported rather than the whole urea molecule.",
+  "whatItMeans": "A rising BUN can signal reduced kidney clearance, but it is heavily shaped by protein intake, hydration, and renal blood flow, so it is rarely interpreted alone. Clinicians often look at the BUN-to-creatinine ratio to help distinguish dehydration or pre-renal causes from intrinsic kidney problems. As with other renal markers, the trend over time matters more than any single value. This is educational information, not medical advice.",
+  "raises": [
+    "Reduced kidney filtration",
+    "Dehydration / reduced renal blood flow",
+    "High-protein diet",
+    "Gastrointestinal bleeding",
+    "Catabolic stress, fever, corticosteroids",
+    "Heart failure or shock (low renal perfusion)"
+  ],
+  "lowers": [
+    "Low-protein diet or malnutrition",
+    "Overhydration",
+    "Advanced liver disease (reduced urea synthesis)",
+    "Pregnancy"
+  ],
+  "confounders": [
+    "A high-protein meal raises BUN without any change in kidney function",
+    "Hydration status moves BUN substantially in either direction independent of filtration",
+    "BUN reports only the nitrogen fraction — it is roughly half the serum urea value (serum urea ≈ BUN x 2.14); do not compare the two directly",
+    "An elevated BUN-to-creatinine ratio often reflects dehydration rather than kidney damage"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 7,
+      "high": 20,
+      "unit": "mg/dL",
+      "note": "General adult reference range. Some labs report 6–24 mg/dL and values rise modestly with age. Source: Mayo Clinic / NCBI Clinical Methods."
+    }
+  ],
+  "references": [
+    {
+      "title": "Mayo Clinic — Blood urea nitrogen (BUN) test",
+      "url": "https://www.mayoclinic.org/tests-procedures/blood-urea-nitrogen/about/pac-20384821"
+    },
+    {
+      "title": "MedlinePlus — BUN (Blood Urea Nitrogen)",
+      "url": "https://medlineplus.gov/lab-tests/bun-blood-urea-nitrogen/"
+    },
+    {
+      "title": "NCBI Clinical Methods — BUN and Creatinine",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK305/"
+    }
+  ],
+  "direction": "high"
+}

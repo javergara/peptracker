@@ -2,6 +2,10 @@ import "server-only";
 
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
+import {
+  buildInterventionBands,
+  type InterventionInput,
+} from "@/lib/interventions";
 
 /**
  * Central read-side data access. Server Components and server actions import
@@ -206,6 +210,86 @@ export async function listLabs() {
     where: { userId: user.id },
     orderBy: { takenAt: "asc" },
   });
+}
+
+/** Lab results for a single biomarker (by its catalog slug), oldest first. */
+export async function listLabsForBiomarker(slug: string) {
+  const user = await getActiveUser();
+  return prisma.labResult.findMany({
+    where: { userId: user.id, biomarkerSlug: slug },
+    orderBy: { takenAt: "asc" },
+  });
+}
+
+// --- Biomarker catalog (global) --------------------------------------------
+
+export async function listBiomarkers() {
+  return prisma.biomarker.findMany({ orderBy: { name: "asc" } });
+}
+
+export async function getBiomarker(slug: string) {
+  return prisma.biomarker.findUnique({ where: { slug } });
+}
+
+// --- Supplements -----------------------------------------------------------
+
+export async function listSupplements() {
+  const user = await getActiveUser();
+  return prisma.supplement.findMany({
+    where: { userId: user.id },
+    orderBy: [{ status: "asc" }, { startDate: "desc" }],
+  });
+}
+
+export async function getActiveSupplements() {
+  const user = await getActiveUser();
+  return prisma.supplement.findMany({
+    where: { userId: user.id, status: "active" },
+    orderBy: { startDate: "desc" },
+  });
+}
+
+// --- Lab recheck reminders -------------------------------------------------
+
+export async function listLabReminders() {
+  const user = await getActiveUser();
+  return prisma.labReminder.findMany({
+    where: { userId: user.id },
+    orderBy: [{ completedAt: "asc" }, { dueAt: "asc" }],
+  });
+}
+
+// --- Intervention bands (timeline overlay) ---------------------------------
+
+/** Cycles + supplements overlapping [start, end], as shaded timeline bands. */
+export async function getInterventionBands(start: Date, end: Date) {
+  const user = await getActiveUser();
+  const [cycles, supplements] = await Promise.all([
+    prisma.cycle.findMany({
+      where: { userId: user.id },
+      include: { peptide: true, stack: true },
+    }),
+    prisma.supplement.findMany({ where: { userId: user.id } }),
+  ]);
+
+  const items: InterventionInput[] = [
+    ...cycles.map((c) => ({
+      id: c.id,
+      kind: "cycle" as const,
+      label: c.peptide?.name ?? c.stack?.name ?? c.name,
+      start: c.startDate,
+      end: c.endDate,
+    })),
+    ...supplements.map((s) => ({
+      id: s.id,
+      kind: "supplement" as const,
+      label: s.name,
+      start: s.startDate,
+      end: s.endDate,
+    })),
+  ];
+
+  return buildInterventionBands(items, start, end);
 }
 
 // --- Photos ----------------------------------------------------------------

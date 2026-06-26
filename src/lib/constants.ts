@@ -1,3 +1,4 @@
+import type { BiomarkerSystem } from "@/types/biomarker";
 import type {
   PeptideCategory,
   GoalTag,
@@ -28,6 +29,27 @@ export const CATEGORY_BADGE: Record<PeptideCategory, string> = {
     "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30",
   IMMUNE_ANTIINFLAMMATORY:
     "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
+};
+
+/** Tailwind class fragments for biomarker system (panel) badges. */
+export const SYSTEM_BADGE: Record<BiomarkerSystem, string> = {
+  LIPIDS:
+    "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30",
+  LIVER:
+    "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  RENAL: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
+  METABOLIC:
+    "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
+  HORMONE:
+    "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30",
+  THYROID: "bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30",
+  HEMATOLOGY:
+    "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
+  VITAMIN: "bg-lime-500/15 text-lime-700 dark:text-lime-300 border-lime-500/30",
+  INFLAMMATION:
+    "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/30",
+  OTHER:
+    "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };
 
 export const GOAL_BADGE: Partial<Record<GoalTag, string>> = {

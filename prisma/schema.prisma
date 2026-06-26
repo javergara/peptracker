@@ -41,6 +41,8 @@ model User {
   doseUnit   String   @default("mcg") // mcg | mg
   theme      String   @default("system") // system | light | dark
   color      String? // hex accent for the profile switcher / calendar
+  sex        String? // M | F | other — used for sex-aware biomarker reference ranges
+  birthYear  Int? // used to derive age for age-aware reference ranges
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -54,6 +56,8 @@ model User {
   labs         LabResult[]
   photos       Photo[]
   pushSubscriptions PushSubscription[]
+  supplements       Supplement[]
+  labReminders      LabReminder[]
 
   @@index([accountId])
 }
@@ -222,17 +226,18 @@ model Vial {
 
 // Bloodwork / lab markers over time.
 model LabResult {
-  id      String   @id @default(cuid())
-  userId  String
-  marker  String // e.g. "IGF-1", "Free T", "HbA1c"
-  value   Float
-  unit    String?
-  refLow  Float?
-  refHigh Float?
-  takenAt DateTime @default(now())
-  cycleId String?
-  notes   String?
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  userId        String
+  marker        String // e.g. "IGF-1", "Free T", "HbA1c" (display label)
+  biomarkerSlug String? // optional link to the global Biomarker catalog (KB + panel grouping)
+  value         Float
+  unit          String?
+  refLow        Float? // reference range snapshotted at entry (stable flagging)
+  refHigh       Float?
+  takenAt       DateTime @default(now())
+  cycleId       String?
+  notes         String?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -269,4 +274,65 @@ model JournalEntry {
   tags    Json? // string[]
   cycleId String?
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Global biomarker catalog + cited knowledge base (the labs analog of Peptide).
+// Like Peptide, enum-like fields are String and arrays/objects are Json; the
+// source of truth for valid values + parsing is src/types/biomarker.ts.
+model Biomarker {
+  id              String   @id @default(cuid())
+  slug            String   @unique // e.g. "alt", "ldl-cholesterol", "creatinine"
+  name            String // e.g. "ALT (alanine aminotransferase)"
+  aliases         Json // string[]  e.g. ["GPT","SGPT"]
+  system          String // LIPIDS | LIVER | RENAL | METABOLIC | HORMONE | THYROID | HEMATOLOGY | VITAMIN | INFLAMMATION | OTHER
+  unit            String // default display unit, e.g. "U/L", "mg/dL", "ng/dL"
+  summary         String
+  whatItMeans     String
+  raises          Json // string[]
+  lowers          Json // string[]
+  confounders     Json // string[]
+  relatedPeptides Json // string[] peptide slugs
+  ranges          Json // RefRange[]: { sex?, ageMin?, ageMax?, low?, high?, unit?, note? }
+  references      Json // { title, url }[]
+  direction       String? // "high" = higher is worse, "low" = lower is worse, null = context-dependent
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Continuous supplements (vitamins, minerals, omega-3, creatine, …). Tracked as
+// date ranges — they overlay the biomarker timeline as confounder bands. No
+// per-dose logging (these are taken continuously).
+model Supplement {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  category  String? // vitamin | mineral | omega | amino | herbal | other
+  dose      String? // free-form, e.g. "5 g", "2000 IU"
+  frequency String? // free-form, e.g. "daily"
+  startDate DateTime
+  endDate   DateTime?
+  status    String    @default("active") // active | paused | stopped
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// One-off lab-recheck action items (e.g. "Recheck ALT", "Cistatin C off creatine").
+// Surfaced as a daily push via the existing reminders cron when dueAt <= now.
+model LabReminder {
+  id             String    @id @default(cuid())
+  userId         String
+  biomarkerSlug  String? // optional link to the catalog
+  label          String // e.g. "Recheck ALT/AST"
+  dueAt          DateTime
+  note           String?
+  completedAt    DateTime?
+  lastNotifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -10,14 +10,27 @@ export async function updateUserSettings(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim() || "Me";
   const weightUnit = String(formData.get("weightUnit") ?? "kg");
   const doseUnit = String(formData.get("doseUnit") ?? "mcg");
+  // Sex + birth year drive sex/age-aware biomarker reference ranges.
+  const sexRaw = String(formData.get("sex") ?? "").trim();
+  const sex =
+    sexRaw === "M" || sexRaw === "F" || sexRaw === "other" ? sexRaw : null;
+  const birthYearRaw = String(formData.get("birthYear") ?? "").trim();
+  const birthYearNum = birthYearRaw ? Number(birthYearRaw) : NaN;
+  const birthYear =
+    Number.isInteger(birthYearNum) &&
+    birthYearNum > 1900 &&
+    birthYearNum <= new Date().getFullYear()
+      ? birthYearNum
+      : null;
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { name, weightUnit, doseUnit },
+    data: { name, weightUnit, doseUnit, sex, birthYear },
   });
 
   revalidatePath("/settings");
   revalidatePath("/");
+  revalidatePath("/labs");
 }
 
 /** Export all user-owned data as a JSON-serializable object (local backup). */

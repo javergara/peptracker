@@ -1,0 +1,49 @@
+{
+  "slug": "alkaline-phosphatase",
+  "name": "Alkaline Phosphatase (ALP)",
+  "aliases": ["ALP", "ALK PHOS", "Alk Phos"],
+  "system": "LIVER",
+  "unit": "U/L",
+  "summary": "ALP is an enzyme found mainly in the bile ducts of the liver and in bone. Because both tissues contribute, ALP is interpreted in the context of other markers to determine whether an elevation is hepatic or skeletal.",
+  "whatItMeans": "An elevated ALP, particularly together with a raised GGT, suggests a cholestatic (bile-flow obstruction) pattern of liver injury such as bile-duct blockage, primary biliary cholangitis, or infiltrative liver disease. When GGT is normal, an isolated ALP rise more likely reflects a bone source (growth, healing fractures, Paget disease) or pregnancy. ALP normally runs higher in children, adolescents, and pregnancy due to bone growth and the placenta. This is educational information, not a diagnosis.",
+  "raises": [
+    "Bile-duct obstruction / cholestasis",
+    "Liver disease (cirrhosis, hepatitis, infiltrative disease)",
+    "Bone disorders (Paget disease, healing fractures, osteomalacia, bone tumors)",
+    "Pregnancy (placental ALP)",
+    "Hyperparathyroidism",
+    "Childhood and adolescence (active bone growth)"
+  ],
+  "lowers": [
+    "Malnutrition",
+    "Zinc or magnesium deficiency",
+    "Hypothyroidism",
+    "Hypophosphatasia (rare genetic condition)"
+  ],
+  "confounders": [
+    "Bone vs. liver source must be distinguished (GGT or ALP isoenzymes help)",
+    "Physiologically high in children, teens, and pregnancy",
+    "Recently eaten fatty meal can transiently raise intestinal ALP in some blood types",
+    "Reference range varies by age, sex, and lab"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide"],
+  "ranges": [
+    {
+      "low": 44,
+      "high": 147,
+      "unit": "U/L",
+      "note": "Common adult reference range; some labs use 30-120 U/L. Varies with age and sex, and is higher in children and pregnancy."
+    }
+  ],
+  "references": [
+    {
+      "title": "Cleveland Clinic: Alkaline Phosphatase (ALP)",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/22029-alkaline-phosphatase-alp"
+    },
+    {
+      "title": "MedlinePlus: ALP blood test",
+      "url": "https://medlineplus.gov/lab-tests/alp-alkaline-phosphatase/"
+    }
+  ],
+  "direction": "high"
+}

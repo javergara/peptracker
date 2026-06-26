@@ -66,6 +66,34 @@ function loadPeptides(): RawPeptide[] {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+type RawBiomarker = {
+  slug: string;
+  name: string;
+  aliases: string[];
+  system: string;
+  unit: string;
+  summary: string;
+  whatItMeans: string;
+  raises: string[];
+  lowers: string[];
+  confounders: string[];
+  relatedPeptides: string[];
+  ranges: Record<string, unknown>[];
+  references: { title: string; url: string }[];
+  direction?: string;
+};
+
+function loadBiomarkers(): RawBiomarker[] {
+  const dir = path.join(process.cwd(), "prisma", "data", "biomarkers");
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".json"))
+    .map(
+      (f) =>
+        JSON.parse(readFileSync(path.join(dir, f), "utf8")) as RawBiomarker,
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 // Preset stacks (curated). Each item references a peptide by slug.
@@ -182,6 +210,34 @@ async function main() {
       where: { slug: p.slug },
       update: data,
       create: { slug: p.slug, ...data },
+    });
+  }
+
+  // 2b) Upsert the biomarker catalog (global reference + knowledge base).
+  const biomarkers = loadBiomarkers();
+  console.log(
+    `Loaded ${biomarkers.length} biomarker records from prisma/data/biomarkers/`,
+  );
+  for (const b of biomarkers) {
+    const data = {
+      name: b.name,
+      aliases: b.aliases ?? [],
+      system: b.system,
+      unit: b.unit,
+      summary: b.summary,
+      whatItMeans: b.whatItMeans,
+      raises: b.raises ?? [],
+      lowers: b.lowers ?? [],
+      confounders: b.confounders ?? [],
+      relatedPeptides: b.relatedPeptides ?? [],
+      ranges: (b.ranges ?? []) as object,
+      references: b.references ?? [],
+      direction: b.direction ?? null,
+    };
+    await prisma.biomarker.upsert({
+      where: { slug: b.slug },
+      update: data,
+      create: { slug: b.slug, ...data },
     });
   }
 

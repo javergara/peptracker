@@ -1,0 +1,59 @@
+{
+  "slug": "ast",
+  "name": "Aspartate Aminotransferase (AST)",
+  "aliases": ["AST", "GOT", "SGOT", "Aspartate transaminase"],
+  "system": "LIVER",
+  "unit": "U/L",
+  "summary": "AST is an enzyme found in the liver, but also in heart, skeletal muscle, kidney, and red blood cells. Tissue injury releases AST into the bloodstream, so it is a sensitive but less liver-specific marker than ALT.",
+  "whatItMeans": "Elevated AST suggests cell injury that can originate in liver, heart, or muscle. Because it is not liver-specific, AST is interpreted alongside ALT: an AST-to-ALT ratio greater than 2 classically suggests alcoholic liver disease, while a ratio greater than 1 can also indicate advanced fibrosis/cirrhosis. An isolated AST rise with a normal ALT may point to a muscle or red-cell (hemolysis) source rather than the liver, which is why creatine kinase is often checked alongside it. This is educational information, not a diagnosis.",
+  "raises": [
+    "Liver injury (hepatitis, fatty liver, alcohol, drug toxicity)",
+    "Alcoholic liver disease (often AST greater than ALT)",
+    "Myocardial injury (heart muscle)",
+    "Skeletal muscle injury, rhabdomyolysis, or intense exercise",
+    "Hemolysis (red blood cell breakdown)"
+  ],
+  "lowers": [
+    "Vitamin B6 (pyridoxine) deficiency can lower measured AST activity",
+    "Resolution of the underlying tissue injury"
+  ],
+  "confounders": [
+    "Intense or unaccustomed exercise raises AST (muscle source)",
+    "Creatine supplementation and high muscle mass can mildly raise AST",
+    "Hemolyzed blood samples falsely elevate AST",
+    "Vitamin B6 deficiency falsely lowers AST",
+    "AST is found in many tissues, so elevation is not liver-specific"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "mots-c"],
+  "ranges": [
+    {
+      "low": 10,
+      "high": 40,
+      "unit": "U/L",
+      "note": "General adult reference range; varies by lab, age, and sex."
+    },
+    {
+      "sex": "M",
+      "high": 40,
+      "unit": "U/L",
+      "note": "Typical adult male upper limit (~35-40 U/L)."
+    },
+    {
+      "sex": "F",
+      "high": 30,
+      "unit": "U/L",
+      "note": "Typical adult female upper limit (~25-30 U/L)."
+    }
+  ],
+  "references": [
+    {
+      "title": "Mayo Clinic Press: My liver enzymes are elevated, now what?",
+      "url": "https://mcpress.mayoclinic.org/healthygut/my-liver-enzymes-are-elevated-now-what/"
+    },
+    {
+      "title": "MedlinePlus: AST blood test",
+      "url": "https://medlineplus.gov/lab-tests/aspartate-aminotransferase-ast-blood-test/"
+    }
+  ],
+  "direction": "high"
+}

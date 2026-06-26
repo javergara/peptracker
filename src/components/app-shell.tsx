@@ -8,6 +8,7 @@ import {
   BookOpen,
   CalendarDays,
   CalendarRange,
+  HeartPulse,
   Images,
   LayoutDashboard,
   Layers,
@@ -15,6 +16,7 @@ import {
   Menu,
   Moon,
   Package,
+  Pill,
   Settings,
   Sparkles,
   Sun,
@@ -49,6 +51,7 @@ const NAV: NavGroup[] = [
       { href: "/calendar", label: "Calendar", icon: CalendarDays },
       { href: "/cycles", label: "Cycles", icon: CalendarRange },
       { href: "/inventory", label: "Inventory", icon: Package },
+      { href: "/supplements", label: "Supplements", icon: Pill },
     ],
   },
   {
@@ -63,6 +66,7 @@ const NAV: NavGroup[] = [
     label: "Library",
     items: [
       { href: "/peptides", label: "Peptides", icon: BookOpen },
+      { href: "/biomarkers", label: "Biomarkers", icon: HeartPulse },
       { href: "/stacks", label: "Stacks", icon: Layers },
       { href: "/suggestions", label: "Suggestions", icon: Sparkles },
     ],

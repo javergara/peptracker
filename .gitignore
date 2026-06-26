@@ -61,3 +61,6 @@ prisma/*.db-journal
 # user-uploaded progress photos (runtime, local storage)
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# private personal medical documents — never commit
+/javergara_medical_metrics

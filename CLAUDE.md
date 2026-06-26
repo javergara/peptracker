@@ -79,8 +79,18 @@ Path alias: `@/*` -> `src/*`.
 
 `prisma/schema.prisma` models:
 
-- **User** — single local user; weight/dose units, theme.
+- **User** — a profile; weight/dose units, theme, and optional `sex`/`birthYear`
+  (drive sex/age-aware biomarker reference ranges).
 - **Peptide** — the library entry (slug, name, category, dosage, route, etc.).
+- **Biomarker** — global lab-marker catalog + cited knowledge base (the labs
+  analog of Peptide): `slug`, `name`, `system` (panel group), `unit`, `summary`,
+  `whatItMeans`, `raises`/`lowers`/`confounders`/`relatedPeptides` (Json string[]),
+  `ranges` (Json `RefRange[]`, sex/age-aware), `references`, `direction`. Source of
+  truth = `src/types/biomarker.ts` (`resolveRange`, `asRefRanges`, `SYSTEM_LABELS`).
+- **Supplement** — continuous compounds tracked as date ranges (overlay the
+  biomarker timeline as confounder bands; no per-dose logging).
+- **LabReminder** — one-off lab-recheck action items (`label`, `dueAt`,
+  `biomarkerSlug?`, `completedAt?`); surfaced via the daily reminders cron.
 - **PeptideInteraction** — peptide↔peptide edges (synergy | caution | avoid),
   derived at seed time from each peptide's `interactions`.
 - **Stack** / **StackItem** — curated or user stacks of peptides.
@@ -94,15 +104,18 @@ Path alias: `@/*` -> `src/*`.
   `remainingMcg`, `reconstitutedAt`, `expiresAt`, `status`
   (sealed|active|empty|expired). Math helpers in `src/lib/vials.ts`.
 - **LabResult** — bloodwork markers over time (`marker`, `value`, `unit`,
-  `refLow`/`refHigh`, `takenAt`).
+  `refLow`/`refHigh`, `takenAt`, optional `biomarkerSlug` → catalog). Ranges are
+  **snapshotted** at entry so flags stay stable; `biomarkerSlug` drives KB linking
+  - panel grouping.
 - **Account** — auth login (`email`, `passwordHash`); owns one or more `User`
   profiles. **User** carries `accountId`.
 - **Photo** — progress photos; `path` is a **Vercel Blob pathname** (private store),
   served via the gated `/api/photos/[id]` route.
 
 All profile-owned data (Cycle, DoseLog, Measurement, Vial, LabResult, Photo,
-JournalEntry) is scoped to the active profile — see the multi-profile note in
-Conventions.
+JournalEntry, Supplement, LabReminder, PushSubscription) is scoped to the active
+profile — see the multi-profile note in Conventions. **Biomarker is global**
+(reference data), like Peptide / preset stacks.
 
 ### Schema shapes (read carefully)
 
@@ -114,9 +127,10 @@ list/array types) and **keeps those shapes on Postgres** for continuity — don'
 - Arrays/objects (aliases, benefits, dosage, interactions, references, …) are
   stored as **`Json`** columns. Seeds/creates always supply values explicitly.
 - The **single source of truth** for valid values and parsing is
-  `src/types/peptide.ts`. When reading Json columns, parse through its helpers:
-  `asStringArray`, `asDosage`, `asReconstitution`, `asInteractions`,
-  `asReferences` (never trust raw Json as typed).
+  `src/types/peptide.ts` (peptides) and `src/types/biomarker.ts` (biomarkers).
+  When reading Json columns, parse through their helpers: `asStringArray`,
+  `asDosage`, `asReconstitution`, `asInteractions`, `asReferences`, `asRefRanges`
+  (never trust raw Json as typed).
 
 ## Common commands
 
@@ -245,7 +259,8 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 `/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`) · `/calendar` ·
 `/cycles` (+`/new`,`/[id]`,`/[id]/edit`) · `/inventory` (vials) · `/metrics` ·
 `/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks` (+`/new`,`/[slug]`) ·
-`/suggestions` · `/settings`. Auth routes render bare; everything else is gated.
+`/suggestions` · `/supplements` · `/biomarkers` (+`/[slug]`) · `/settings`. Auth
+routes render bare; everything else is gated.
 
 ## Mobile / PWA (iPhone)
 
@@ -310,6 +325,18 @@ Preset stacks live in `PRESET_STACKS` in `prisma/seed.ts`. Add an entry
 (`slug`, `name`, `goal`, `description`, `tags`, `items[]` referencing peptides by
 slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
 
+## How to add a biomarker
+
+Mirrors "add a peptide". Write `prisma/data/biomarkers/<slug>.json` matching
+`biomarkerDataSchema` in `src/types/biomarker.ts` (`system` ∈ `BIOMARKER_SYSTEMS`,
+`ranges` = `RefRange[]` with optional `sex`/`ageMin`/`ageMax`/`low`/`high`/`note` —
+**always include one sex/age-agnostic default rule** so `resolveRange` resolves
+when the profile has no sex/age; `relatedPeptides` are peptide slugs; cite every
+range in `references`). Then `npm run db:seed` (idempotent upsert; the loader reads
+`prisma/data/biomarkers/*.json`). Author with cited reference ranges (Mayo /
+MedlinePlus / labtestsonline / guideline bodies) — treat ranges as **educational /
+typical**, not authoritative (they vary by lab/assay).
+
 ## Testing
 
 - Unit/logic: **vitest** (`npm run test`). Tests live next to the lib module
@@ -340,7 +367,23 @@ slug/name/alias), then `npm run db:seed`. Use the **`/add-stack`** skill.
   charts. Not shown on the edit form (avoids duplicate measurements).
 - **Adherence/reminders:** `src/lib/adherence.ts` + dashboard `Due/Overdue` and
   streak widgets (`src/components/dashboard/`). Visual only (no push).
-- **Labs:** `/labs`, `src/lib/actions/labs.ts`; trend charts reuse `MetricChart`.
+- **Labs & biomarkers:** `/labs` (`src/lib/actions/labs.ts`) groups results by
+  biomarker **system** (Lipids/Liver/Renal/…), supports **panel entry**
+  (`addLabPanel`: one date, many catalog markers via parallel `slug[]`/`value[]`)
+  and biomarker-linked single entry (`addLab` with `biomarkerSlug` → auto unit +
+  sex/age-aware range via `resolveRange`, snapshotted). Each marker renders a
+  `MarkerTimelineChart` (`src/components/metrics/marker-timeline-chart.tsx`) — its
+  trend with **intervention bands** (cycles + supplements) from
+  `getInterventionBands` (`src/lib/interventions.ts`, pure + tested) and a shaded
+  reference-range band. The **biomarker library/KB** is `/biomarkers`
+  (+`/[slug]`): cited reference, profile-resolved range, raises/lowers/confounders,
+  related peptides, and the profile's own history chart.
+- **Supplements:** `/supplements`, `src/lib/actions/supplements.ts` — continuous
+  compounds as date ranges; they overlay the biomarker timeline as confounder bands.
+- **Lab-recheck reminders:** `src/lib/actions/labReminders.ts` + a "Schedule a
+  recheck" form on `/labs`; due, uncompleted reminders ride the **existing daily
+  reminders cron** (`src/app/api/cron/reminders/route.ts`) into the push (no second
+  Vercel cron).
 - **Metrics & correlation:** `/metrics`. Charts are client wrappers in
   `src/components/metrics/`: `MetricsTrends` (the main view — ALL series in one
   chart, toggled from a legend; each series keeps its own hidden Y axis so

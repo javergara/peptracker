@@ -1,0 +1,60 @@
+{
+  "slug": "alt",
+  "name": "Alanine Aminotransferase (ALT)",
+  "aliases": ["ALT", "GPT", "SGPT", "Alanine transaminase"],
+  "system": "LIVER",
+  "unit": "U/L",
+  "summary": "ALT is an enzyme found mostly inside liver cells that helps convert proteins into energy. When liver cells are injured, ALT leaks into the bloodstream, making it one of the most liver-specific markers of hepatocellular injury.",
+  "whatItMeans": "An elevated ALT generally suggests hepatocellular (liver-cell) injury, such as from fatty liver disease (MASLD/NAFLD), viral hepatitis, alcohol, or medications. Because ALT is more liver-specific than AST, an ALT-predominant pattern (ALT greater than AST) classically points to liver-cell damage rather than cholestasis or muscle injury. Very high values (hundreds to thousands U/L) suggest acute hepatocellular processes, while mild persistent elevations are common in metabolic/fatty liver disease. This is educational information, not a diagnosis.",
+  "raises": [
+    "Fatty liver disease (MASLD/NAFLD) and metabolic syndrome",
+    "Viral hepatitis (A, B, C)",
+    "Alcohol use",
+    "Hepatotoxic medications (e.g., acetaminophen, statins, some antibiotics)",
+    "Obesity and insulin resistance",
+    "Ischemic or toxic liver injury"
+  ],
+  "lowers": [
+    "Vitamin B6 (pyridoxine) deficiency can lower measured ALT activity",
+    "Weight loss and resolution of fatty liver",
+    "Treatment of the underlying liver condition"
+  ],
+  "confounders": [
+    "Strenuous exercise can transiently raise ALT",
+    "Vitamin B6 deficiency falsely lowers ALT",
+    "Lab method and upper-limit definitions vary; many hepatologists use stricter thresholds (~30 U/L men, ~19 U/L women) than standard lab ranges",
+    "Day-to-day biological variation"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "mots-c"],
+  "ranges": [
+    {
+      "low": 7,
+      "high": 56,
+      "unit": "U/L",
+      "note": "General adult reference range; varies by lab, age, and sex."
+    },
+    {
+      "sex": "M",
+      "high": 40,
+      "unit": "U/L",
+      "note": "Typical adult male upper limit (~35-40 U/L); some hepatologists use ~30 U/L as a stricter threshold."
+    },
+    {
+      "sex": "F",
+      "high": 30,
+      "unit": "U/L",
+      "note": "Typical adult female upper limit (~25-30 U/L); some hepatologists use ~19 U/L as a stricter threshold."
+    }
+  ],
+  "references": [
+    {
+      "title": "Mayo Clinic Press: My liver enzymes are elevated, now what?",
+      "url": "https://mcpress.mayoclinic.org/healthygut/my-liver-enzymes-are-elevated-now-what/"
+    },
+    {
+      "title": "MedlinePlus: ALT blood test",
+      "url": "https://medlineplus.gov/lab-tests/alt-blood-test/"
+    }
+  ],
+  "direction": "high"
+}

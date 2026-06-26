@@ -1,0 +1,70 @@
+{
+  "slug": "hdl-cholesterol",
+  "name": "HDL Cholesterol (HDL-C)",
+  "aliases": [
+    "High-density lipoprotein cholesterol",
+    "HDL-C",
+    "\"Good\" cholesterol"
+  ],
+  "system": "LIPIDS",
+  "unit": "mg/dL",
+  "summary": "HDL cholesterol is the cholesterol carried by high-density lipoprotein particles, often called \"good\" cholesterol because HDL helps transport cholesterol away from artery walls back to the liver. It is reported directly on a standard lipid panel.",
+  "whatItMeans": "For HDL, higher is generally considered protective and lower is associated with greater cardiovascular risk — the opposite direction from LDL and triglycerides. Low HDL frequently accompanies insulin resistance, obesity, and high triglycerides. Very high HDL does not necessarily add further protection, and extremely high levels have been linked in some studies to atypical risk, so context matters.",
+  "raises": [
+    "Regular aerobic exercise",
+    "Moderate alcohol intake (not recommended solely to raise HDL)",
+    "Weight loss",
+    "Smoking cessation",
+    "Healthy unsaturated fats (e.g. olive oil, fatty fish)",
+    "Estrogen (e.g. in premenopausal women)"
+  ],
+  "lowers": [
+    "Smoking",
+    "Obesity and sedentary lifestyle",
+    "Type 2 diabetes and insulin resistance",
+    "High triglycerides / high-carbohydrate diets",
+    "Anabolic steroids",
+    "Some medications (certain beta-blockers, progestins)"
+  ],
+  "confounders": [
+    "High triglycerides can interfere with some HDL assay methods",
+    "Recent acute illness or inflammation can transiently alter HDL",
+    "Pregnancy and hormonal changes shift HDL",
+    "HDL is relatively stable in the non-fasting state compared with triglycerides"
+  ],
+  "relatedPeptides": ["retatrutide", "tirzepatide", "cagrilintide", "mots-c"],
+  "ranges": [
+    {
+      "low": 40,
+      "unit": "mg/dL",
+      "note": "General: < 40 mg/dL is considered low; ≥ 60 mg/dL is considered protective (NCEP ATP III)."
+    },
+    {
+      "sex": "M",
+      "low": 40,
+      "unit": "mg/dL",
+      "note": "Men: < 40 mg/dL is low; ≥ 60 mg/dL is optimal/protective."
+    },
+    {
+      "sex": "F",
+      "low": 50,
+      "unit": "mg/dL",
+      "note": "Women: < 50 mg/dL is low; ≥ 60 mg/dL is optimal/protective."
+    }
+  ],
+  "references": [
+    {
+      "title": "NCEP ATP III Executive Summary (NHLBI/NIH)",
+      "url": "https://www.nhlbi.nih.gov/files/docs/guidelines/atp3xsum.pdf"
+    },
+    {
+      "title": "HDL Cholesterol: The Good Cholesterol (WebMD)",
+      "url": "https://www.webmd.com/cholesterol-management/hdl-cholesterol-the-good-cholesterol"
+    },
+    {
+      "title": "Cholesterol testing and results: MedlinePlus Medical Encyclopedia",
+      "url": "https://medlineplus.gov/ency/patientinstructions/000386.htm"
+    }
+  ],
+  "direction": "low"
+}

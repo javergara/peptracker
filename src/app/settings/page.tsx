@@ -63,7 +63,42 @@ export default async function SettingsPage() {
                   <option value="mg">mg</option>
                 </select>
               </div>
+              <div className="space-y-1.5">
+                <label htmlFor="set-sex" className="text-sm font-medium">
+                  Sex
+                </label>
+                <select
+                  id="set-sex"
+                  name="sex"
+                  defaultValue={user.sex ?? ""}
+                  className={inputCls}
+                >
+                  <option value="">Prefer not to say</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="set-birthyear" className="text-sm font-medium">
+                  Birth year
+                </label>
+                <input
+                  id="set-birthyear"
+                  name="birthYear"
+                  type="number"
+                  min={1900}
+                  max={new Date().getFullYear()}
+                  defaultValue={user.birthYear ?? ""}
+                  placeholder="e.g. 1990"
+                  className={inputCls}
+                />
+              </div>
             </div>
+            <p className="text-muted-foreground text-xs">
+              Sex and birth year are used to show sex- and age-appropriate
+              biomarker reference ranges. Optional.
+            </p>
             <Button type="submit">Save settings</Button>
           </form>
         </CardContent>

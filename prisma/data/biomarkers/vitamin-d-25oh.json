@@ -1,0 +1,59 @@
+{
+  "slug": "vitamin-d-25oh",
+  "name": "Vitamin D, 25-Hydroxy (25-OH-D)",
+  "aliases": [
+    "25-hydroxyvitamin D",
+    "25(OH)D",
+    "Calcidiol",
+    "25-OH vitamin D",
+    "Vitamin D 25-hydroxy"
+  ],
+  "system": "VITAMIN",
+  "unit": "ng/mL",
+  "summary": "Serum 25-hydroxyvitamin D is the main circulating form of vitamin D and the standard indicator of overall vitamin D status. It reflects intake from sun exposure, diet, and supplements over the preceding weeks.",
+  "whatItMeans": "25-OH-D is the storage form the body builds up before converting it to the active hormone, so it is the best single marker of vitamin D stores. The NIH Food and Nutrition Board considers levels of 20 ng/mL (50 nmol/L) or more adequate for bone and general health for most people, levels below 12 ng/mL at risk of deficiency, and the older Endocrine Society framework labeled <20 ng/mL deficient, 20–29 ng/mL insufficient, and ≥30 ng/mL sufficient. Both very low and very high values can be unfavorable, so this marker is interpreted in context. This is educational information, not a diagnosis.",
+  "raises": [
+    "Sunlight (UVB) exposure on skin",
+    "Vitamin D supplementation (D3 or D2)",
+    "Dietary sources (fatty fish, fortified milk, egg yolk)",
+    "Lower body fat (less sequestration of vitamin D in adipose tissue)"
+  ],
+  "lowers": [
+    "Limited sun exposure (indoor lifestyle, sunscreen, high latitude, winter)",
+    "Darker skin pigmentation (reduced cutaneous synthesis)",
+    "Obesity (vitamin D sequestered in fat)",
+    "Malabsorption (celiac, Crohn's, bariatric surgery) and fat-malabsorption states",
+    "Chronic kidney or liver disease impairing hydroxylation",
+    "Older age (reduced skin synthesis)"
+  ],
+  "confounders": [
+    "Assays differ in how they measure D2 vs D3, causing between-lab variability",
+    "Recent high-dose supplementation can transiently raise levels",
+    "Marked seasonal variation (higher in late summer, lower in late winter)",
+    "Obesity dilutes/sequesters 25-OH-D, complicating interpretation",
+    "Total 25-OH-D may not reflect bioavailable vitamin D in conditions altering vitamin D-binding protein (e.g. pregnancy)"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 20,
+      "high": 50,
+      "unit": "ng/mL",
+      "note": "NIH/FNB: ≥20 ng/mL (50 nmol/L) adequate for most; <12 ng/mL at risk of deficiency. Older Endocrine Society framework: <20 deficient, 20–29 insufficient, ≥30 sufficient; >150 ng/mL risks toxicity. Upper bound shown reflects a commonly used adequacy ceiling."
+    }
+  ],
+  "references": [
+    {
+      "title": "Vitamin D - Health Professional Fact Sheet | NIH Office of Dietary Supplements",
+      "url": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+    },
+    {
+      "title": "Vitamin D Deficiency - StatPearls (NCBI Bookshelf)",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK532266/"
+    },
+    {
+      "title": "Vitamin D Deficiency | Cleveland Clinic",
+      "url": "https://my.clevelandclinic.org/health/diseases/15050-vitamin-d-vitamin-d-deficiency"
+    }
+  ]
+}

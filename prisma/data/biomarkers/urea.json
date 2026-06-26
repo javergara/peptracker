@@ -1,0 +1,53 @@
+{
+  "slug": "urea",
+  "name": "Serum Urea",
+  "aliases": ["blood urea", "urea nitrogen (whole molecule)", "carbamide"],
+  "system": "RENAL",
+  "unit": "mg/dL",
+  "summary": "Urea is the main nitrogen-containing waste product of protein metabolism, made in the liver and excreted by the kidneys. Serum urea measures the whole urea molecule (as commonly reported outside the US), whereas BUN measures only its nitrogen fraction.",
+  "whatItMeans": "Elevated serum urea can reflect reduced kidney clearance, but it is also strongly influenced by protein intake, hydration, and how quickly blood is flowing through the kidneys. Because it responds to so many non-renal factors, it is most useful alongside creatinine and eGFR rather than alone. Note that serum urea (mg/dL) is roughly 2.14 times the BUN value, so the two are not interchangeable. This is educational information, not medical advice.",
+  "raises": [
+    "Reduced kidney filtration",
+    "Dehydration / reduced renal blood flow",
+    "High-protein diet",
+    "Gastrointestinal bleeding (protein load from digested blood)",
+    "Catabolic states, fever, or corticosteroid use",
+    "Heart failure (low renal perfusion)"
+  ],
+  "lowers": [
+    "Low-protein diet or malnutrition",
+    "Overhydration / fluid overload",
+    "Advanced liver disease (reduced urea synthesis)",
+    "Pregnancy (increased filtration)"
+  ],
+  "confounders": [
+    "A high-protein meal raises serum urea (and BUN) without any change in kidney function",
+    "Hydration status shifts the value substantially in either direction independent of filtration",
+    "Serum urea and BUN report different things — multiply BUN by ~2.14 to approximate serum urea; do not compare them directly",
+    "Liver disease can lower urea even when kidney function is impaired"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 15,
+      "high": 45,
+      "unit": "mg/dL",
+      "note": "General adult serum urea reference range (whole-molecule urea). Approximately BUN x 2.14. Source: clinical laboratory references (e.g., Medanta, NCBI Clinical Methods)."
+    }
+  ],
+  "references": [
+    {
+      "title": "NCBI Clinical Methods — BUN and Creatinine",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK305/"
+    },
+    {
+      "title": "MedlinePlus — BUN (Blood Urea Nitrogen)",
+      "url": "https://medlineplus.gov/lab-tests/bun-blood-urea-nitrogen/"
+    },
+    {
+      "title": "Cleveland Clinic — Blood Urea Nitrogen (BUN) Test",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/17684-blood-urea-nitrogen-bun-test"
+    }
+  ],
+  "direction": "high"
+}

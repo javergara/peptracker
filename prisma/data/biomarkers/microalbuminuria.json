@@ -1,0 +1,57 @@
+{
+  "slug": "microalbuminuria",
+  "name": "Microalbuminuria (Urine Albumin)",
+  "aliases": [
+    "urine albumin",
+    "microalbumin",
+    "urinary albumin excretion",
+    "albuminuria"
+  ],
+  "system": "RENAL",
+  "unit": "mg/L",
+  "summary": "Microalbuminuria is a small amount of albumin (a blood protein) leaking into the urine, detectable before standard dipstick protein tests turn positive. It is an early marker of kidney damage, especially from diabetes and high blood pressure, and a recognized cardiovascular risk signal.",
+  "whatItMeans": "Healthy kidneys keep albumin in the blood, so finding it in the urine suggests the filtering membranes are becoming leaky. Persistently elevated urine albumin is one of the earliest detectable signs of diabetic or hypertensive kidney disease, often appearing while creatinine and eGFR are still normal. Because single samples vary, it is typically confirmed with repeat testing and is most reliably reported as the urine albumin-to-creatinine ratio (UACR). This is educational information, not medical advice.",
+  "raises": [
+    "Diabetic kidney disease (diabetic nephropathy)",
+    "Hypertension / hypertensive kidney damage",
+    "Glomerular disease",
+    "Urinary tract infection",
+    "Recent vigorous exercise",
+    "Fever or acute illness",
+    "Heart failure"
+  ],
+  "lowers": [
+    "Good glycemic and blood-pressure control",
+    "RAAS-blocking therapy (ACE inhibitors / ARBs) reducing intraglomerular pressure",
+    "Resolution of transient causes (infection, exercise, fever)"
+  ],
+  "confounders": [
+    "Recent vigorous exercise, fever, infection, menstruation, or dehydration can transiently raise urine albumin without chronic kidney damage",
+    "A single positive result should be confirmed on repeat testing before being considered persistent",
+    "Reporting as a urine albumin-to-creatinine ratio (mg/g) corrects for urine concentration and is preferred over a raw concentration (mg/L) from a spot sample",
+    "Very dilute or very concentrated urine skews the raw mg/L concentration"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "high": 20,
+      "unit": "mg/L",
+      "note": "Spot urine albumin concentration below ~20 mg/L is generally considered normal; ~20–200 mg/L suggests microalbuminuria. Equivalent UACR thresholds: normal <30 mg/g, microalbuminuria 30–300 mg/g, macroalbuminuria >300 mg/g. Source: Medscape Microalbumin reference range; KDIGO."
+    }
+  ],
+  "references": [
+    {
+      "title": "Medscape — Microalbumin: Reference Range, Interpretation",
+      "url": "https://emedicine.medscape.com/article/2088184-overview"
+    },
+    {
+      "title": "NIDDK — Albuminuria: Albumin in the Urine",
+      "url": "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis/albuminuria-albumin-urine"
+    },
+    {
+      "title": "MedlinePlus — Albumin Urine Test",
+      "url": "https://medlineplus.gov/lab-tests/albumin-urine-test/"
+    }
+  ],
+  "direction": "high"
+}

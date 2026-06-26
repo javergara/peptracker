@@ -1,0 +1,100 @@
+{
+  "slug": "shbg",
+  "name": "Sex Hormone-Binding Globulin (SHBG)",
+  "aliases": [
+    "Sex hormone-binding globulin",
+    "Testosterone-estradiol binding globulin",
+    "TeBG",
+    "SHBG"
+  ],
+  "system": "HORMONE",
+  "unit": "nmol/L",
+  "summary": "SHBG is a liver-made carrier protein that binds testosterone and estradiol in the blood, regulating how much hormone is free and biologically available. It is measured to interpret total testosterone correctly and to estimate free/bioavailable testosterone.",
+  "whatItMeans": "SHBG is the key to reading total testosterone in context: when SHBG is high, more hormone is protein-bound, so total testosterone can look normal or high even though the free, active fraction is lower; when SHBG is low, total testosterone may read low while the free fraction is relatively preserved. For this reason clinicians often calculate free or bioavailable testosterone from total T, SHBG, and albumin rather than relying on the total alone. This is educational context, not a diagnosis.",
+  "raises": [
+    "Aging",
+    "Higher estrogen states and exogenous estrogen / oral contraceptives",
+    "Hyperthyroidism",
+    "Liver disease and cirrhosis",
+    "Caloric restriction and significant weight loss",
+    "Anorexia nervosa"
+  ],
+  "lowers": [
+    "Obesity, insulin resistance, and type 2 diabetes",
+    "Exogenous androgens / anabolic steroids",
+    "Hypothyroidism",
+    "Glucocorticoids",
+    "High insulin / metabolic syndrome and nonalcoholic fatty liver disease",
+    "Acromegaly (excess growth hormone / IGF-1)"
+  ],
+  "confounders": [
+    "SHBG affects total vs free testosterone — interpret total T together with SHBG and a calculated free T",
+    "Thyroid status shifts SHBG (high in hyperthyroid, low in hypothyroid)",
+    "Estrogen-containing medications and pregnancy raise SHBG substantially",
+    "Insulin resistance is a major driver of low SHBG independent of weight",
+    "Reference intervals differ by sex, age, and assay"
+  ],
+  "relatedPeptides": [
+    "retatrutide",
+    "tirzepatide",
+    "cagrilintide",
+    "somatropin",
+    "igf-1-lr3"
+  ],
+  "ranges": [
+    {
+      "low": 16.5,
+      "high": 55.9,
+      "unit": "nmol/L",
+      "note": "General/default rule — adult-male interval (20–49 y) used as the fallback when sex is unknown (LabCorp)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 20,
+      "ageMax": 49,
+      "low": 16.5,
+      "high": 55.9,
+      "unit": "nmol/L",
+      "note": "Adult male 20–49 y (LabCorp)."
+    },
+    {
+      "sex": "M",
+      "ageMin": 50,
+      "low": 19.3,
+      "high": 76.4,
+      "unit": "nmol/L",
+      "note": "Adult male >49 y — SHBG tends to rise with age (LabCorp)."
+    },
+    {
+      "sex": "F",
+      "ageMin": 20,
+      "ageMax": 49,
+      "low": 24.6,
+      "high": 122.0,
+      "unit": "nmol/L",
+      "note": "Adult female 20–49 y, non-pregnant (LabCorp)."
+    },
+    {
+      "sex": "F",
+      "ageMin": 50,
+      "low": 17.3,
+      "high": 125.0,
+      "unit": "nmol/L",
+      "note": "Adult female >49 y (LabCorp)."
+    }
+  ],
+  "references": [
+    {
+      "title": "082016: Sex Hormone-binding Globulin (SHBG), Serum | Labcorp",
+      "url": "https://www.labcorp.com/tests/082016/sex-hormone-binding-globulin-shbg-serum"
+    },
+    {
+      "title": "Sex Hormone Binding Globulin (SHBG), Serum (Test SHBG1) — Mayo Clinic Laboratories",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/9285"
+    },
+    {
+      "title": "SHBG Blood Test: MedlinePlus Medical Test",
+      "url": "https://medlineplus.gov/lab-tests/shbg-blood-test/"
+    }
+  ]
+}

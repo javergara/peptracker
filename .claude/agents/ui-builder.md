@@ -71,8 +71,16 @@ exactly; reuse primitives instead of reinventing them.
 - Charts (client wrappers in `src/components/metrics/`, recharts): `MetricChart`
   (line; pass `mood` for emoji-face dots), `CorrelationChart` (dual-axis overlay),
   `ScatterCorrelation` (scatter + trend line), `CorrelationExplorer` (interactive
-  pair picker). Stats math is in `src/lib/stats.ts`; mood→emoji mapping is in
-  `src/lib/mood.ts` (`moodFace`/`averageMood`) — reuse, don't inline either.
+  pair picker), `MarkerTimelineChart` (a biomarker trend with cycle/supplement
+  **intervention bands** + a reference-range band — pass epoch-ms numbers, not
+  Dates). Stats math is in `src/lib/stats.ts`; mood→emoji mapping is in
+  `src/lib/mood.ts` (`moodFace`/`averageMood`); intervention bands come from
+  `getInterventionBands` (queries) over `src/lib/interventions.ts` — reuse, don't
+  inline any of these.
+- **Biomarkers** mirror the peptide library: catalog/KB is global (`/biomarkers`,
+  `/biomarkers/[slug]`), parsed via `src/types/biomarker.ts` helpers
+  (`resolveRange`, `asRefRanges`, `SYSTEM_LABELS`, `asReferences`); badges via
+  `SYSTEM_BADGE` in `constants.ts`. Lab/biomarker surfaces carry the `Disclaimer`.
 - Create/edit forms reuse shared pieces: `components/cycles/cycle-form.tsx`
   (new + `/[id]/edit`), `components/log/dose-form-fields.tsx` (enriched dose
   fields; `weightUnit` prop adds an optional weight input on create forms, omit

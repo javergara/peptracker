@@ -1,0 +1,53 @@
+{
+  "slug": "tsh",
+  "name": "Thyroid-Stimulating Hormone (TSH)",
+  "aliases": ["Thyrotropin", "TSH", "Thyroid stimulating hormone"],
+  "system": "THYROID",
+  "unit": "µIU/mL",
+  "summary": "TSH is a pituitary hormone that signals the thyroid gland to make thyroid hormones (T4 and T3). It is the primary screening test for thyroid function.",
+  "whatItMeans": "TSH works on a feedback loop: when thyroid hormone is low, the pituitary releases more TSH to push the thyroid, and when thyroid hormone is high, TSH falls. Because of this inverse relationship, a high TSH often points toward an underactive thyroid (hypothyroidism) and a low TSH toward an overactive thyroid (hyperthyroidism). A commonly cited adult reference range is about 0.4–4.0 µIU/mL, though laboratories and age groups vary. This is educational information, not a diagnosis.",
+  "raises": [
+    "Primary hypothyroidism (underactive thyroid, e.g. Hashimoto's thyroiditis)",
+    "Iodine deficiency",
+    "Recovery phase after acute illness",
+    "Certain medications (e.g. amiodarone, lithium)",
+    "Older age (reference range tends to shift slightly upward)"
+  ],
+  "lowers": [
+    "Hyperthyroidism (overactive thyroid, e.g. Graves' disease, toxic nodule)",
+    "Excess thyroid hormone replacement (over-replacement)",
+    "Early or non-thyroidal acute illness",
+    "Pituitary or hypothalamic dysfunction (central hypothyroidism)",
+    "First trimester of pregnancy (hCG cross-stimulation)"
+  ],
+  "confounders": [
+    "Biotin supplements can interfere with immunoassays, producing falsely low (or sometimes altered) TSH results — pause biotin before testing",
+    "TSH varies with time of day (typically higher overnight/early morning, lower in the afternoon)",
+    "Acute or severe non-thyroidal illness can transiently suppress or distort TSH (sick euthyroid)",
+    "Pregnancy requires trimester-specific reference ranges",
+    "Reference intervals rise with age, so a fixed cutoff may misclassify older adults"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 0.4,
+      "high": 4.0,
+      "unit": "µIU/mL",
+      "note": "Common adult reference range ~0.4–4.0 µIU/mL (equivalent to mIU/L). Laboratory- and age-specific ranges vary; pregnancy uses trimester-specific intervals."
+    }
+  ],
+  "references": [
+    {
+      "title": "TSH (Thyroid-Stimulating Hormone) Test | Cleveland Clinic",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/17556-tsh-test"
+    },
+    {
+      "title": "TSH test: MedlinePlus Medical Encyclopedia",
+      "url": "https://medlineplus.gov/lab-tests/tsh-thyroid-stimulating-hormone-test/"
+    },
+    {
+      "title": "Aberrant Thyroid Function Tests in a Patient Taking Biotin Supplements (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6768618/"
+    }
+  ]
+}

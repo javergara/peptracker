@@ -21,7 +21,9 @@
 - **Calendar** — month view of logged doses, profile-colored, with **mood emoji** per day, an all-profiles overlay, and per-day quick-log.
 - **Dashboard** — today's doses, adherence % + streak, and due/overdue reminders.
 - **Metrics & analytics** — weight / body-fat / sleep / recovery charts, **mood (emoji faces)** & energy trends, and a **correlation explorer** (pick any two markers → scatter + trend line with Pearson r / R²).
-- **Labs** — bloodwork markers with value-vs-range flags and trend charts.
+- **Labs & biomarkers** — log bloodwork by **panel** (many markers, one date); a cited **biomarker knowledge base** auto-fills sex/age-aware reference ranges and flags out-of-range values; each marker's trend is overlaid with **intervention bands** (peptide cycles + supplements) so you can see exams move with what you took.
+- **Supplements** — track continuous supplements (vitamins, creatine, omega-3…) as date ranges that overlay the biomarker timeline.
+- **Lab-recheck reminders** — schedule one-off "recheck X" items that ride the daily push reminders.
 - **Photos** — progress photo gallery (local storage) with before/after.
 - **Accounts & profiles** — log in with email + password; each account can hold multiple profiles (e.g. you + a partner), switchable from the sidebar, fully isolated from other accounts.
 - **Suggestions** — rule-based recommendations by goal (fat loss, recovery, cognition, GH-axis, …).
