@@ -55,6 +55,9 @@ export default async function PhotosPage() {
                 required
                 className={inputCls}
               />
+              <p className="text-muted-foreground text-xs">
+                On a phone you can take a photo or pick one from your library.
+              </p>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="p-caption" className="text-sm font-medium">

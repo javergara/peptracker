@@ -53,8 +53,24 @@ model User {
   vials        Vial[]
   labs         LabResult[]
   photos       Photo[]
+  pushSubscriptions PushSubscription[]
 
   @@index([accountId])
+}
+
+// Web Push subscription for PWA dose reminders. One row per browser/device push
+// endpoint, scoped to the profile that subscribed. iOS delivers web push only to
+// a PWA installed to the home screen (iOS 16.4+).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String // client public key (subscription.keys.p256dh)
+  auth      String // client auth secret (subscription.keys.auth)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Peptide {

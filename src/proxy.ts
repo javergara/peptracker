@@ -11,6 +11,9 @@ export const { auth: proxy } = NextAuth(authConfig);
 export default proxy;
 
 export const config = {
-  // Protect everything except Next internals, the auth API, and static files.
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // Protect everything except Next internals, the auth API, the cron API (which
+  // self-protects with a Bearer secret), and static files.
+  matcher: [
+    "/((?!api/auth|api/cron|_next/static|_next/image|favicon.ico|.*\\..*).*)",
+  ],
 };

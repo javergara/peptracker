@@ -247,6 +247,44 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 `/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks` (+`/new`,`/[slug]`) ·
 `/suggestions` · `/settings`. Auth routes render bare; everything else is gated.
 
+## Mobile / PWA (iPhone)
+
+The app ships as an **installable PWA** (Phase 1 — free, no App Store). The app
+**cannot be statically exported** (RSC + server actions + Prisma + Auth.js
+cookies), so the future native path (Phase 2) is a thin **Capacitor** shell whose
+WKWebView points at the live Vercel deployment (`server.url`) — not a bundled
+export. See `DEPLOYMENT.md`/the plan for Phase 2.
+
+- **Install metadata:** `src/app/manifest.ts` (id/scope/icons incl. 192/512 +
+  maskable PNGs in `public/icons/`), plus `metadata`/`viewport` in
+  `src/app/layout.tsx` (`appleWebApp`, `viewportFit:"cover"`, dual `themeColor`,
+  legacy `apple-mobile-web-app-capable`). Apple touch icon is
+  `src/app/apple-icon.png` (180, generated from `src/app/icon.svg` via `sips`).
+- **Safe areas:** with `viewport-fit=cover`, chrome clears the notch/home
+  indicator via `env(safe-area-inset-*)` Tailwind arbitraries in
+  `app-shell.tsx` (mobile header, brand-rail aside, mobile `SheetContent`, main
+  bottom padding). In a normal browser the insets resolve to 0 — desktop is
+  unaffected. Use `pt-[env(safe-area-inset-top)]` / `pb-[calc(...+env(...))]`.
+- **Service worker:** hand-written `public/sw.js` (no bundler step — robust under
+  Turbopack), registered by `src/components/pwa/service-worker-register.tsx`
+  (production only). Offline = precache + SWR for static assets + the PUBLIC
+  `/peptides` library + `public/offline.html` navigation fallback. **PRIVACY: the
+  SW never caches `/api/*` or authenticated per-profile pages** — only the global
+  library + static assets.
+- **Web-push dose reminders:** `PushSubscription` model (profile-scoped); subscribe
+  UI = `src/components/pwa/reminder-settings.tsx` (standalone-only; iOS needs the
+  PWA added to the home screen first); actions in `src/lib/actions/notifications.ts`
+  (`save/removePushSubscription`, ownership-scoped); sender = `src/lib/push.ts`
+  (VAPID via `web-push`); the SW has `push`/`notificationclick` handlers. The
+  **daily** cron is `src/app/api/cron/reminders/route.ts` (Bearer `CRON_SECRET`,
+  excluded from the proxy matcher, self-protects) scheduled in `vercel.json`
+  `crons` — it reuses `getTodaysDoses` + `computeOverdue` (now in
+  `src/lib/adherence.ts`). **Vercel Hobby = once-daily cron**; iOS web push is
+  flakier than native (subscriptions can drop) — native APNs is the Phase-2 fix.
+- **Env:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`,
+  `CRON_SECRET` (see `.env.example`; generate keys with
+  `npx web-push generate-vapid-keys`). Set them in Vercel for prod.
+
 ## How to add a peptide
 
 Preferred: run the **`/add-peptide`** skill (delegates to the `peptide-researcher`

@@ -157,7 +157,7 @@ export function AppShell({
         Skip to content
       </a>
       {/* Desktop sidebar */}
-      <aside className="brand-rail hidden w-64 shrink-0 flex-col border-r lg:flex">
+      <aside className="brand-rail hidden w-64 shrink-0 flex-col border-r pt-[env(safe-area-inset-top)] lg:flex">
         <Brand />
         {profileSlot ? <div className="px-3 pb-2">{profileSlot}</div> : null}
         <div className="mt-2 flex-1 overflow-y-auto pb-4">
@@ -171,7 +171,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="bg-background/80 sticky top-0 z-20 flex h-14 items-center gap-2 border-b px-4 backdrop-blur">
+        <header className="bg-background/80 sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b px-4 pt-[env(safe-area-inset-top)] backdrop-blur">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               render={
@@ -185,7 +185,10 @@ export function AppShell({
             >
               <Menu className="size-5" />
             </SheetTrigger>
-            <SheetContent side="left" className="brand-rail w-72 p-0">
+            <SheetContent
+              side="left"
+              className="brand-rail w-72 overflow-y-auto p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+            >
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <Brand />
               {profileSlot ? (
@@ -198,7 +201,10 @@ export function AppShell({
           <ThemeToggle />
         </header>
 
-        <main id="main-content" className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main
+          id="main-content"
+          className="flex-1 px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8"
+        >
           {children}
         </main>
       </div>

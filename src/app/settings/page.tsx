@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/common/page-header";
 import { DataControls } from "@/components/settings/data-controls";
 import { ProfilesCard } from "@/components/profiles/profiles-card";
+import { ReminderSettings } from "@/components/pwa/reminder-settings";
 import { Disclaimer } from "@/components/disclaimer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,8 @@ export default async function SettingsPage() {
       <div className="mb-6">
         <ProfilesCard />
       </div>
+
+      <ReminderSettings />
 
       <Card className="mb-6">
         <CardHeader>

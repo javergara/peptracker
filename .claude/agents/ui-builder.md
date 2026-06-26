@@ -61,6 +61,13 @@ exactly; reuse primitives instead of reinventing them.
   state in the URL (wrap `useSearchParams` users in `<Suspense>`); add a route
   `loading.tsx` with `PageSkeleton`; keep the a11y baseline (`label htmlFor`,
   heading elements, `focus-visible` rings).
+- **PWA / mobile (iPhone):** the app is an installable PWA. For fixed/sticky
+  chrome that meets a screen edge, clear the notch/home indicator with
+  `env(safe-area-inset-*)` Tailwind arbitraries (e.g.
+  `pt-[env(safe-area-inset-top)]`, `pb-[calc(1.5rem+env(safe-area-inset-bottom))]`)
+  — they resolve to 0 in a normal browser, so desktop is unaffected. The service
+  worker (`public/sw.js`) must **never cache `/api/*` or authenticated per-profile
+  pages** (privacy) — only the global `/peptides` library + static assets.
 - Charts (client wrappers in `src/components/metrics/`, recharts): `MetricChart`
   (line; pass `mood` for emoji-face dots), `CorrelationChart` (dual-axis overlay),
   `ScatterCorrelation` (scatter + trend line), `CorrelationExplorer` (interactive

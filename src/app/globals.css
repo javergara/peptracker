@@ -161,6 +161,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Avoid the grey flash on tap and rubber-band scroll-chaining when the app
+     * is installed to the iOS home screen (standalone). No effect in a normal
+     * browser tab. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
   }
   html {
     @apply font-sans;

@@ -26,6 +26,7 @@
 - **Accounts & profiles** — log in with email + password; each account can hold multiple profiles (e.g. you + a partner), switchable from the sidebar, fully isolated from other accounts.
 - **Suggestions** — rule-based recommendations by goal (fat loss, recovery, cognition, GH-axis, …).
 - **Export** — JSON backup + CSV (doses / labs).
+- **Install on iPhone (PWA)** — installable to the home screen (Add to Home Screen) with standalone chrome, safe-area handling, offline shell, and opt-in **daily push reminders** for due/overdue doses (iOS 16.4+, once installed).
 
 ## Getting started
 
@@ -94,6 +95,9 @@ Hosts on **Vercel** with **Neon Postgres** (DB), **Vercel Blob** (photos), and
    - `AUTH_SECRET` = `npx auth secret`
    - `AUTH_URL` = your `https://<app>.vercel.app`
    - Enable **Vercel Blob** (Storage tab) — it sets `BLOB_READ_WRITE_TOKEN`.
+   - For PWA push reminders: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+     `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`), and a random
+     `CRON_SECRET`. The daily reminder cron is defined in `vercel.json`.
 4. **Set the build command** to:
    `prisma migrate deploy && prisma generate && next build`
 5. **Seed once** against the prod DB (locally, with the direct URL):

@@ -77,3 +77,34 @@ export function computeAdherence(
 
   return { expected, logged, percent, streak };
 }
+
+export interface OverdueDay {
+  date: Date;
+  missed: number;
+}
+
+/**
+ * For each of the past 7 days (excluding today), count scheduled doses that were
+ * not covered by logged doses. A day is "overdue" when expected > logged. Shared
+ * by the dashboard Due/Overdue card and the reminder cron.
+ */
+export function computeOverdue(
+  cycles: CycleLike[],
+  logs: AdherenceLog[],
+  now: Date = new Date(),
+): OverdueDay[] {
+  const result: OverdueDay[] = [];
+
+  for (let i = 1; i <= 7; i++) {
+    const day = startOfDay(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() - i),
+    );
+    const expected = expectedForDay(cycles, day);
+    if (expected === 0) continue;
+    const logged = logs.filter((l) => sameDay(l.takenAt, day)).length;
+    const missed = expected - logged;
+    if (missed > 0) result.push({ date: day, missed });
+  }
+
+  return result;
+}

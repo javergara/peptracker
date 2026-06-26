@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Offline · Peptra</title>
+    <link rel="icon" href="/peptra-icon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --ink: #16102e;
+        --mist: #efebfa;
+        --slate: #a8a2cc;
+        --violet: #7c3aed;
+        --orchid: #a855f7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem
+          calc(env(safe-area-inset-bottom) + 2rem);
+        text-align: center;
+        background: var(--ink);
+        color: var(--mist);
+        font-family:
+          "IBM Plex Sans",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mark {
+        width: 72px;
+        height: 72px;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+      p {
+        max-width: 22rem;
+        margin: 0;
+        color: var(--slate);
+        line-height: 1.5;
+      }
+      button {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        padding: 0.7rem 1.4rem;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed, #a855f7);
+      }
+      button:active {
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <svg
+      class="mark"
+      viewBox="0 0 64 64"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Peptra"
+    >
+      <defs>
+        <linearGradient
+          id="g"
+          x1="16"
+          y1="10"
+          x2="48"
+          y2="56"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stop-color="#4F46E5" />
+          <stop offset="0.5" stop-color="#7C3AED" />
+          <stop offset="1" stop-color="#A855F7" />
+        </linearGradient>
+        <mask id="m">
+          <rect width="64" height="64" fill="white" />
+          <circle cx="34" cy="26" r="7" fill="black" />
+        </mask>
+      </defs>
+      <rect width="64" height="64" rx="14.5" fill="url(#g)" />
+      <g mask="url(#m)" fill="#fff">
+        <rect x="18" y="12" width="12" height="42" rx="6" />
+        <circle cx="32" cy="26" r="14" />
+      </g>
+    </svg>
+    <h1>You're offline</h1>
+    <p>
+      Peptra needs a connection to load your tracker. Your data is safe —
+      reconnect and try again.
+    </p>
+    <button onclick="location.reload()">Try again</button>
+  </body>
+</html>
