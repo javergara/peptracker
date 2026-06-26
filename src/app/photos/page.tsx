@@ -3,6 +3,7 @@ import { Camera } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { PhotoBoard } from "@/components/photos/photo-board";
+import { PhotoFileInput } from "@/components/photos/photo-file-input";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { uploadPhoto } from "@/lib/actions/photos";
 import { listPhotos, getCurrentUser } from "@/lib/queries";
@@ -53,16 +54,10 @@ export default async function PhotosPage() {
               <label htmlFor="p-file" className="text-sm font-medium">
                 Image <span className="text-destructive">*</span>
               </label>
-              <input
-                id="p-file"
-                name="file"
-                type="file"
-                accept="image/*"
-                required
-                className={inputCls}
-              />
+              <PhotoFileInput id="p-file" className={inputCls} />
               <p className="text-muted-foreground text-xs">
                 On a phone you can take a photo or pick one from your library.
+                Large images are optimized before upload.
               </p>
             </div>
             <div className="space-y-1.5">

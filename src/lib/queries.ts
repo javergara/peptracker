@@ -1,11 +1,22 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
 import {
   buildInterventionBands,
   type InterventionInput,
 } from "@/lib/interventions";
+
+/**
+ * The peptide library, preset stacks, biomarker catalog, and interaction edges
+ * are GLOBAL reference data that only change on `npm run db:seed`. We wrap their
+ * reads in `unstable_cache` so they're served from Next's data cache instead of
+ * hitting Neon on every page view (Neon's free tier is compute/CU-hour bound).
+ * `revalidate` re-pulls hourly; nothing user-scoped is cached here.
+ */
+const CATALOG_REVALIDATE = 3600; // seconds (catalog is effectively static)
 
 /**
  * Central read-side data access. Server Components and server actions import
@@ -21,41 +32,57 @@ export async function getCurrentUser() {
   return getActiveUser();
 }
 
-export async function listPeptides() {
-  return prisma.peptide.findMany({ orderBy: { name: "asc" } });
-}
+export const listPeptides = unstable_cache(
+  async () => prisma.peptide.findMany({ orderBy: { name: "asc" } }),
+  ["peptides:list"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["peptides"] },
+);
 
-export async function getPeptideBySlug(slug: string) {
-  return prisma.peptide.findUnique({ where: { slug } });
-}
+export const getPeptideBySlug = unstable_cache(
+  async (slug: string) => prisma.peptide.findUnique({ where: { slug } }),
+  ["peptide:by-slug"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["peptides"] },
+);
 
-export async function getPeptideInteractions(peptideId: string) {
-  const rows = await prisma.peptideInteraction.findMany({
-    where: {
-      OR: [{ peptideAId: peptideId }, { peptideBId: peptideId }],
-    },
-    include: { peptideA: true, peptideB: true },
-  });
-  // Normalize so `other` is always the counterpart peptide.
-  return rows.map((r) => ({
-    id: r.id,
-    kind: r.kind,
-    note: r.note,
-    other: r.peptideAId === peptideId ? r.peptideB : r.peptideA,
-  }));
-}
+export const getPeptideInteractions = unstable_cache(
+  async (peptideId: string) => {
+    const rows = await prisma.peptideInteraction.findMany({
+      where: {
+        OR: [{ peptideAId: peptideId }, { peptideBId: peptideId }],
+      },
+      include: { peptideA: true, peptideB: true },
+    });
+    // Normalize so `other` is always the counterpart peptide.
+    return rows.map((r) => ({
+      id: r.id,
+      kind: r.kind,
+      note: r.note,
+      other: r.peptideAId === peptideId ? r.peptideB : r.peptideA,
+    }));
+  },
+  ["peptide:interactions"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["interactions"] },
+);
 
 /** Flat peptide-to-peptide interaction rows (for the stack builder / checks). */
-export async function getAllInteractionRows() {
-  const rows = await prisma.peptideInteraction.findMany();
-  return rows.map((r) => ({
-    peptideAId: r.peptideAId,
-    peptideBId: r.peptideBId,
-    kind: r.kind,
-    note: r.note,
-  }));
-}
+export const getAllInteractionRows = unstable_cache(
+  async () => {
+    const rows = await prisma.peptideInteraction.findMany();
+    return rows.map((r) => ({
+      peptideAId: r.peptideAId,
+      peptideBId: r.peptideBId,
+      kind: r.kind,
+      note: r.note,
+    }));
+  },
+  ["interactions:all"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["interactions"] },
+);
 
+// NOTE: stacks are NOT cached. Unlike the peptide/biomarker catalogs (seed-only),
+// `Stack` can be user-created via the custom stack builder, and these reads
+// return user stacks too — caching them cross-request could hide a freshly built
+// stack until the TTL elapsed. Keep them live.
 export async function listStacks() {
   return prisma.stack.findMany({
     orderBy: [{ isPreset: "desc" }, { name: "asc" }],
@@ -223,13 +250,17 @@ export async function listLabsForBiomarker(slug: string) {
 
 // --- Biomarker catalog (global) --------------------------------------------
 
-export async function listBiomarkers() {
-  return prisma.biomarker.findMany({ orderBy: { name: "asc" } });
-}
+export const listBiomarkers = unstable_cache(
+  async () => prisma.biomarker.findMany({ orderBy: { name: "asc" } }),
+  ["biomarkers:list"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["biomarkers"] },
+);
 
-export async function getBiomarker(slug: string) {
-  return prisma.biomarker.findUnique({ where: { slug } });
-}
+export const getBiomarker = unstable_cache(
+  async (slug: string) => prisma.biomarker.findUnique({ where: { slug } }),
+  ["biomarker:by-slug"],
+  { revalidate: CATALOG_REVALIDATE, tags: ["biomarkers"] },
+);
 
 // --- Supplements -----------------------------------------------------------
 
