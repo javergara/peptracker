@@ -23,6 +23,42 @@ import {
   Syringe,
   TestTube,
 } from "lucide-react";
+
+const TAB_BAR_TABS = [
+  { href: "/", label: "Home", icon: LayoutDashboard, exact: true },
+  { href: "/log", label: "Log", icon: Syringe, exact: false },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays, exact: false },
+  { href: "/metrics", label: "Metrics", icon: LineChart, exact: false },
+] as const;
+
+function MobileTabBar() {
+  const pathname = usePathname();
+  return (
+    <nav
+      aria-label="Primary navigation"
+      className="brand-rail fixed inset-x-0 bottom-0 z-30 flex items-center pt-2.5 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      style={{ background: "var(--gradient-ink-bar)", height: "78px" }}
+    >
+      {TAB_BAR_TABS.map(({ href, label, icon: Icon, exact }) => {
+        const active = exact ? pathname === href : isActive(pathname, href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              "flex flex-1 flex-col items-center gap-1 rounded-lg py-1 text-[10px] font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none",
+              active ? "text-white" : "text-white/55",
+            )}
+            aria-current={active ? "page" : undefined}
+          >
+            <Icon className="size-5 shrink-0" />
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 import { useTheme } from "next-themes";
 
 import { DISCLAIMER_SHORT } from "@/lib/constants";
@@ -207,11 +243,13 @@ export function AppShell({
 
         <main
           id="main-content"
-          className="flex-1 px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8"
+          className="flex-1 px-4 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8 lg:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
         >
           {children}
         </main>
       </div>
+
+      <MobileTabBar />
     </div>
   );
 }

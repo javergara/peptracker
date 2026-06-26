@@ -4,7 +4,6 @@ import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { DoseCalendar } from "@/components/calendar/dose-calendar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getAllUsers } from "@/lib/active-user";
 import {
   getAllDoseLogsInRange,
@@ -109,13 +108,13 @@ export default async function CalendarPage({
         }
       />
 
-      <div className="mb-4 inline-flex rounded-lg border p-0.5 text-sm">
+      <div className="mb-4 inline-flex rounded-[10px] border border-[#ECE8F7] bg-white p-0.5 text-sm [box-shadow:var(--shadow-card)]">
         {toggle.map((t) => (
           <Link
             key={t.label}
             href={t.href}
             className={cn(
-              "rounded-md px-3 py-1.5 font-medium transition-colors",
+              "rounded-[8px] px-3 py-1.5 font-medium transition-colors",
               t.on
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",
@@ -126,21 +125,19 @@ export default async function CalendarPage({
         ))}
       </div>
 
-      <Card>
-        <CardContent className="p-4 sm:p-6">
-          <DoseCalendar
-            year={year}
-            monthIndex={monthIndex}
-            doses={doses}
-            multiProfile={isAll}
-            legend={legend}
-            view={isAll ? "all" : undefined}
-            accentColor={user.color}
-            profileName={user.name}
-            peptides={peptides.map((p) => ({ id: p.id, name: p.name }))}
-          />
-        </CardContent>
-      </Card>
+      <div className="card-surface rounded-[20px] p-4 [box-shadow:var(--shadow-card)] sm:p-6">
+        <DoseCalendar
+          year={year}
+          monthIndex={monthIndex}
+          doses={doses}
+          multiProfile={isAll}
+          legend={legend}
+          view={isAll ? "all" : undefined}
+          accentColor={user.color}
+          profileName={user.name}
+          peptides={peptides.map((p) => ({ id: p.id, name: p.name }))}
+        />
+      </div>
     </div>
   );
 }

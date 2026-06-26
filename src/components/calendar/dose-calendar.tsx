@@ -161,7 +161,9 @@ export function DoseCalendar({
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h2 className="text-lg font-semibold">{monthLabel}</h2>
+            <h2 className="font-display text-foreground text-[17px] font-semibold">
+              {monthLabel}
+            </h2>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               {legend.map((p) => (
                 <span
@@ -200,10 +202,7 @@ export function DoseCalendar({
 
         <div className="hidden grid-cols-7 gap-1 sm:grid">
           {WEEKDAYS.map((w) => (
-            <div
-              key={w}
-              className="text-muted-foreground py-1 text-center text-xs font-medium"
-            >
+            <div key={w} className="eyebrow py-1 text-center text-[#9A95B8]">
               {w}
             </div>
           ))}
@@ -223,19 +222,20 @@ export function DoseCalendar({
                 onClick={() => setSelected(day)}
                 aria-label={`${monthLabel} ${day}${dayDoses.length ? `, ${dayDoses.length} doses` : ""}`}
                 className={cn(
-                  "focus-visible:ring-ring flex min-h-[4.75rem] flex-col gap-1 rounded-lg border p-1 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                  "focus-visible:ring-ring flex min-h-[4.75rem] flex-col gap-1 rounded-[10px] border p-1.5 text-left transition-shadow focus-visible:ring-2 focus-visible:outline-none",
                   isSelected
-                    ? "border-primary bg-primary/5"
-                    : "hover:bg-accent border-transparent",
+                    ? "border-primary bg-primary/5 [box-shadow:var(--shadow-card)]"
+                    : "hover:border-border border-transparent hover:[box-shadow:var(--shadow-card-hover)]",
                   isToday && !isSelected && "border-border",
                 )}
               >
                 <div className="flex items-center justify-between gap-1">
                   <span
                     className={cn(
-                      "flex size-6 items-center justify-center rounded-full text-xs",
-                      isToday &&
-                        "bg-primary text-primary-foreground font-semibold",
+                      "num flex size-6 items-center justify-center rounded-full text-xs",
+                      isToday
+                        ? "bg-primary text-primary-foreground font-semibold"
+                        : "text-foreground",
                     )}
                   >
                     {day}
@@ -331,7 +331,7 @@ export function DoseCalendar({
                   )}
                 >
                   <div className="flex w-9 shrink-0 flex-col items-center">
-                    <span className="text-muted-foreground text-[10px] uppercase">
+                    <span className="eyebrow text-[#9A95B8]">
                       {new Date(year, monthIndex, day).toLocaleString(
                         undefined,
                         { weekday: "short" },
@@ -340,7 +340,7 @@ export function DoseCalendar({
                     <span
                       className={cn(
                         "num text-lg font-semibold",
-                        isToday && "text-primary",
+                        isToday ? "text-primary" : "text-foreground",
                       )}
                     >
                       {day}
@@ -384,13 +384,16 @@ export function DoseCalendar({
 
       <aside className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">
-            {new Date(year, monthIndex, selected).toLocaleString(undefined, {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-            })}
-          </h3>
+          <div>
+            <div className="eyebrow text-[#9A95B8]">SELECTED DAY</div>
+            <h3 className="font-display text-foreground mt-0.5 text-[15px] font-semibold">
+              {new Date(year, monthIndex, selected).toLocaleString(undefined, {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+              })}
+            </h3>
+          </div>
           {!multiProfile ? (
             <Button
               type="button"
@@ -407,7 +410,7 @@ export function DoseCalendar({
         {showLog && !multiProfile ? (
           <form
             action={handleQuickLog}
-            className="bg-muted/30 space-y-2 rounded-lg border p-3"
+            className="card-surface space-y-2 rounded-[14px] p-3"
           >
             <input type="hidden" name="takenAt" value={selectedTakenAt} />
             <select name="peptideId" required className={inputCls}>
@@ -444,7 +447,7 @@ export function DoseCalendar({
         ) : null}
 
         {selectedDoses.length === 0 ? (
-          <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+          <p className="text-muted-foreground rounded-[10px] border border-dashed p-4 text-sm">
             No doses logged on this day.
           </p>
         ) : (
@@ -457,16 +460,21 @@ export function DoseCalendar({
                   a.id.localeCompare(b.id),
               )
               .map((d) => (
-                <li key={d.id} className="rounded-lg border p-3 text-sm">
+                <li
+                  key={d.id}
+                  className="card-surface rounded-[14px] p-3 text-sm [box-shadow:var(--shadow-card)]"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="text-foreground flex items-center gap-1.5 font-medium">
                       {multiProfile ? (
                         <ProfileDot color={d.profileColor} />
                       ) : null}
                       {d.peptideName}
                     </span>
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      {d.amount} {d.unit}
+                    <span className="flex items-center gap-1.5">
+                      <span className="num text-foreground text-[13px]">
+                        {d.amount} {d.unit}
+                      </span>
                       {moodFace(d.mood) ? (
                         <span title={`Mood: ${moodFace(d.mood)!.label}`}>
                           {moodFace(d.mood)!.emoji}
@@ -476,10 +484,12 @@ export function DoseCalendar({
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">
                     {multiProfile ? `${d.profileName} · ` : ""}
-                    {new Date(d.takenAtISO).toLocaleTimeString(undefined, {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
+                    <span className="num">
+                      {new Date(d.takenAtISO).toLocaleTimeString(undefined, {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
                     {d.site ? ` · ${d.site}` : ""}
                     {d.cycleName ? ` · ${d.cycleName}` : ""}
                   </div>

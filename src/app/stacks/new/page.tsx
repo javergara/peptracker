@@ -22,7 +22,7 @@ export default async function NewStackPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
         title="Build a Stack"
         description="Combine peptides into a custom stack. Interaction warnings update live as you select."
@@ -34,7 +34,9 @@ export default async function NewStackPage() {
         }
       />
       <Disclaimer className="mb-6" />
-      <StackBuilder peptides={options} interactionRows={interactionRows} />
+      <div className="card-surface rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <StackBuilder peptides={options} interactionRows={interactionRows} />
+      </div>
     </div>
   );
 }

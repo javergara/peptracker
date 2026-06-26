@@ -5,12 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  CategoryBadge,
-  RouteBadge,
-  GoalBadges,
-} from "@/components/common/badges";
+import { RouteBadge, GoalBadges } from "@/components/common/badges";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { EmptyState } from "@/components/common/empty-state";
 import { asStringArray } from "@/types/peptide";
 import {
@@ -103,7 +99,8 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
 
       {/* Results count */}
       <p className="text-muted-foreground text-sm">
-        {filtered.length} peptide{filtered.length !== 1 ? "s" : ""}
+        <span className="num">{filtered.length}</span> peptide
+        {filtered.length !== 1 ? "s" : ""}
         {(query || category !== "all") && (
           <button
             onClick={() => {
@@ -135,25 +132,36 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
                 href={`/peptides/${peptide.slug}`}
                 className="group block focus-visible:outline-none"
               >
-                <Card className="group-focus-visible:ring-ring h-full transition-shadow duration-150 group-hover:shadow-md group-focus-visible:ring-2">
-                  <CardHeader>
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <CardTitle className="text-base leading-snug">
-                        {peptide.name}
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-1.5">
-                        <CategoryBadge category={peptide.category} />
-                        <RouteBadge route={peptide.route} />
-                      </div>
+                <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-3 rounded-[18px] p-5 [box-shadow:var(--shadow-card)] transition-shadow duration-150 group-hover:[box-shadow:var(--shadow-card-hover)] group-focus-visible:ring-2">
+                  {/* Category eyebrow */}
+                  <Eyebrow className="text-[#8B86AD]">
+                    {CATEGORY_LABELS[peptide.category as PeptideCategory] ??
+                      peptide.category}
+                  </Eyebrow>
+
+                  {/* Name + badges */}
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <h2 className="font-display text-foreground text-base leading-snug font-semibold">
+                      {peptide.name}
+                    </h2>
+                    <div className="flex flex-wrap gap-1.5">
+                      <RouteBadge route={peptide.route} />
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
-                      {peptide.summary}
-                    </p>
-                    {tags.length > 0 && <GoalBadges tags={tags} />}
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  {/* Summary */}
+                  <p className="text-muted-foreground line-clamp-3 flex-1 text-sm leading-relaxed">
+                    {peptide.summary}
+                  </p>
+
+                  {/* Goal badges */}
+                  {tags.length > 0 && <GoalBadges tags={tags} />}
+
+                  {/* Footer caret */}
+                  <span className="text-primary mt-auto text-xs font-medium">
+                    View details →
+                  </span>
+                </div>
               </Link>
             );
           })}

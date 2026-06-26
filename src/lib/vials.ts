@@ -36,5 +36,42 @@ export function vialExpiryStatus(
   return "ok";
 }
 
+/** Remaining fill as a 0–100 percent of the vial's total. */
+export function vialFillPercent(
+  remainingMcg: number,
+  totalMcg: number,
+): number {
+  if (totalMcg <= 0) return 0;
+  return Math.max(
+    0,
+    Math.min(100, Math.round((remainingMcg / totalMcg) * 100)),
+  );
+}
+
+/**
+ * Visual gauge status for the inventory `VialGauge`. Collapses the stored vial
+ * `status` (sealed|active|empty|expired) and the expiry bucket into the five
+ * states the gauge renders: an active vial expiring within 7 days becomes
+ * `soon` (amber fill) so the gauge signals it before the date passes.
+ */
+export type VialGaugeStatus =
+  | "active"
+  | "soon"
+  | "sealed"
+  | "expired"
+  | "empty";
+
+export function vialGaugeStatus(
+  vial: { status: string; expiresAt?: Date | null },
+  now: Date = new Date(),
+): VialGaugeStatus {
+  if (vial.status === "expired") return "expired";
+  if (vial.status === "empty") return "empty";
+  if (vial.status === "sealed") return "sealed";
+  // active: surface an imminent expiry
+  if (vialExpiryStatus(vial.expiresAt, now) === "soon") return "soon";
+  return "active";
+}
+
 /** Default reconstituted-peptide shelf life. */
 export const RECONSTITUTED_SHELF_LIFE_DAYS = 28;

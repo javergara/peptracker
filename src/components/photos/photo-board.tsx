@@ -4,7 +4,7 @@ import * as React from "react";
 import { ImageIcon, X, ZoomIn } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { DeletePhotoButton } from "@/components/photos/delete-photo-button";
 
 export interface PhotoItem {
@@ -50,11 +50,14 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
   return (
     <>
       {showBeforeAfter ? (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Before &amp; After</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="card-surface mb-8 rounded-2xl">
+          <div className="border-border border-b px-5 pt-4 pb-3">
+            <Eyebrow className="mb-1">Comparison</Eyebrow>
+            <h2 className="text-base font-semibold tracking-tight">
+              Before &amp; After
+            </h2>
+          </div>
+          <div className="px-5 py-4">
             <div className="grid gap-4 sm:grid-cols-2">
               {(
                 [
@@ -74,9 +77,7 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
               ).map(({ label, photo, value, set }) => (
                 <div key={label} className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                      {label}
-                    </span>
+                    <Eyebrow>{label}</Eyebrow>
                     <select
                       value={value ?? ""}
                       onChange={(e) => set(e.target.value)}
@@ -100,15 +101,15 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
                     />
                   ) : null}
                   {photo ? (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-muted-foreground num text-xs">
                       {photo.dateLabel}
                     </p>
                   ) : null}
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       {photos.length === 0 ? (
@@ -122,7 +123,7 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="bg-card border-border group relative overflow-hidden rounded-xl border"
+              className="card-surface group relative overflow-hidden rounded-xl transition-shadow hover:[box-shadow:var(--shadow-card-hover)]"
             >
               <ZoomButton
                 id={photo.id}
@@ -130,8 +131,8 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
                 onZoom={() => setZoomId(photo.id)}
                 className="bg-muted/20 h-64"
               />
-              <div className="p-2">
-                <p className="text-xs font-medium">{photo.dateLabel}</p>
+              <div className="p-3">
+                <p className="num text-xs font-medium">{photo.dateLabel}</p>
                 {photo.caption ? (
                   <p className="text-muted-foreground truncate text-xs">
                     {photo.caption}

@@ -23,6 +23,16 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  /* Clinical status semantics (Labs / Inventory only — NOT brand surfaces). */
+  --color-ok: var(--ok);
+  --color-ok-wash: var(--ok-wash);
+  --color-warn: var(--warn);
+  --color-warn-foreground: var(--warn-foreground);
+  --color-warn-wash: var(--warn-wash);
+  --color-bad: var(--bad);
+  --color-bad-wash: var(--bad-wash);
+  --color-sealed: var(--sealed);
+  --color-sealed-wash: var(--sealed-wash);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -50,7 +60,7 @@
 
 :root {
   /* Peptra — violet on violet-tinted white. */
-  --background: #fbfafe;
+  --background: #f7f6fb; /* warmer violet-tinted off-white (clinical field) */
   --foreground: #16102e;
   --card: #ffffff;
   --card-foreground: #16102e;
@@ -65,14 +75,39 @@
   --accent: #ede9fe; /* Lilac wash */
   --accent-foreground: #4c1d95;
   --destructive: #dc2626; /* red — destructive actions (delete) */
-  --border: #e7e2f6;
-  --input: #e7e2f6;
+  --border: #ece8f7; /* cooler hairline */
+  --input: #ece8f7;
   --ring: #7c3aed;
   --chart-1: #7c3aed; /* Violet */
   --chart-2: #818cf8; /* Periwinkle */
   --chart-3: #4f46e5; /* Indigo */
   --chart-4: #a855f7; /* Orchid */
   --chart-5: #f59e0b; /* Amber (functional) */
+  /* Clinical status semantics — used ONLY for Labs/Inventory in/out-of-range
+   * signalling, never on brand surfaces. Amber stays reserved for warnings. */
+  --ok: #16a06a; /* in range / good */
+  --ok-wash: #e7f6ef;
+  --warn: #f59e0b; /* borderline / expires soon (marker) */
+  --warn-foreground: #b97608; /* borderline text */
+  --warn-wash: #fcefd2;
+  --bad: #c8474b; /* out of range / expired */
+  --bad-wash: #fbe3e3;
+  --sealed: #5b6794; /* unopened vial */
+  --sealed-wash: #eef1f9;
+  /* Layered-surface helpers (Ink panels, gauges, card depth). */
+  --gradient-ink-panel:
+    radial-gradient(
+      130% 150% at 88% -30%,
+      rgba(168, 85, 247, 0.55),
+      transparent 55%
+    ),
+    linear-gradient(155deg, #241a4e 0%, #16102e 70%);
+  --gradient-ink-strip: linear-gradient(155deg, #241a4e, #16102e);
+  --gradient-ink-bar: linear-gradient(180deg, #1c1442, #16102e);
+  --gradient-gauge: linear-gradient(180deg, #a855f7, #6d28d9);
+  --shadow-card:
+    0 1px 2px rgba(22, 16, 46, 0.04), 0 12px 28px -20px rgba(22, 16, 46, 0.18);
+  --shadow-card-hover: 0 8px 24px -12px rgba(22, 16, 46, 0.16);
   --radius: 0.75rem;
   /* Sidebar = dark Ink brand rail (same in light & dark). */
   --sidebar: #16102e;
@@ -105,6 +140,19 @@
   --border: rgb(255 255 255 / 10%);
   --input: rgb(255 255 255 / 15%);
   --ring: #818cf8;
+  /* Clinical status — lifted for contrast on Ink; washes are translucent. */
+  --ok: #34d399;
+  --ok-wash: rgb(52 211 153 / 14%);
+  --warn: #fbbf24;
+  --warn-foreground: #fbbf24;
+  --warn-wash: rgb(251 191 36 / 14%);
+  --bad: #f48a8d;
+  --bad-wash: rgb(244 138 141 / 16%);
+  --sealed: #94a3d8;
+  --sealed-wash: rgb(148 163 216 / 16%);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 28px -20px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 8px 24px -12px rgba(0, 0, 0, 0.45);
   --chart-1: #a855f7; /* Orchid */
   --chart-2: #818cf8; /* Periwinkle */
   --chart-3: #6366f1; /* Indigo (lifted) */
@@ -153,6 +201,23 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+
+/* Small mono-uppercase section labels ("eyebrows") above stats/cards. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.65625rem; /* 10.5px */
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8b86ad;
+}
+
+/* Layered card surface: white card, cool hairline, soft depth; hover lifts. */
+@utility card-surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 
 @layer base {

@@ -1,10 +1,10 @@
 import { Pill, Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SupplementRow } from "@/components/supplements/supplement-row";
 import { addSupplement } from "@/lib/actions/supplements";
 import { listSupplements, getCurrentUser } from "@/lib/queries";
@@ -40,14 +40,19 @@ export default async function SupplementsPage() {
       <Disclaimer className="mb-6" />
 
       {/* Add supplement form */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <div className="card-surface mb-8 rounded-2xl">
+        <div className="border-border border-b px-5 pt-4 pb-3">
+          <Eyebrow className="mb-1">New supplement</Eyebrow>
+          <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight">
             <Plus className="size-4" />
             Add supplement
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Track continuous supplements as date ranges alongside your
+            protocols.
+          </p>
+        </div>
+        <div className="px-5 py-4">
           <ActionForm
             action={addSupplement}
             success="Supplement added"
@@ -165,8 +170,8 @@ export default async function SupplementsPage() {
               </SubmitButton>
             </div>
           </ActionForm>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Supplement list */}
       {supplements.length === 0 ? (
@@ -178,11 +183,13 @@ export default async function SupplementsPage() {
       ) : (
         <div className="space-y-6">
           {active.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-base font-semibold">
-                Active ({active.length})
-              </h2>
-              <div className="space-y-2">
+            <section aria-labelledby="active-supps-heading">
+              <div className="mb-3 flex items-center gap-2">
+                <Eyebrow id="active-supps-heading">
+                  Active &mdash; <span className="num">{active.length}</span>
+                </Eyebrow>
+              </div>
+              <div className="card-surface divide-y divide-[#F4F1FA] rounded-2xl dark:divide-white/5">
                 {active.map((s) => (
                   <SupplementRow
                     key={s.id}
@@ -194,11 +201,14 @@ export default async function SupplementsPage() {
             </section>
           )}
           {inactive.length > 0 && (
-            <section>
-              <h2 className="text-muted-foreground mb-3 text-base font-semibold">
-                Paused & Stopped ({inactive.length})
-              </h2>
-              <div className="space-y-2">
+            <section aria-labelledby="inactive-supps-heading">
+              <div className="mb-3 flex items-center gap-2">
+                <Eyebrow id="inactive-supps-heading">
+                  Paused &amp; Stopped &mdash;{" "}
+                  <span className="num">{inactive.length}</span>
+                </Eyebrow>
+              </div>
+              <div className="card-surface divide-y divide-[#F4F1FA] rounded-2xl dark:divide-white/5">
                 {inactive.map((s) => (
                   <SupplementRow
                     key={s.id}

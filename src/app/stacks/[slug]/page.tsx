@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 
 import { getStackBySlug, getPeptideInteractions } from "@/lib/queries";
 import { PageHeader } from "@/components/common/page-header";
 import { GoalBadges, InteractionBadge } from "@/components/common/badges";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { Disclaimer } from "@/components/disclaimer";
 import { Badge } from "@/components/ui/badge";
 import { asStringArray } from "@/types/peptide";
@@ -52,7 +54,16 @@ export default async function StackDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6">
+      {/* Back nav */}
+      <Link
+        href="/stacks"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+      >
+        <ChevronLeft className="size-3.5" />
+        Stacks
+      </Link>
+
       <PageHeader
         title={stack.name}
         description={stack.description ?? undefined}
@@ -65,36 +76,40 @@ export default async function StackDetailPage({ params }: Props) {
 
       {/* Goal & tags */}
       {(stack.goal || tags.length > 0) && (
-        <section className="space-y-2">
-          {stack.goal && (
-            <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
-              Goal: {stack.goal}
-            </p>
-          )}
+        <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+          {stack.goal && <Eyebrow className="mb-3">{stack.goal}</Eyebrow>}
           {tags.length > 0 && <GoalBadges tags={tags} />}
-        </section>
+        </div>
       )}
 
-      {/* Schedule / timing table */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Protocol Schedule</h2>
-        <div className="border-border overflow-x-auto rounded-xl border">
+      {/* Protocol schedule table */}
+      <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+        <Eyebrow className="mb-4">PROTOCOL SCHEDULE</Eyebrow>
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-muted/50 border-border border-b text-left">
-                <th className="px-4 py-3 font-medium">Peptide</th>
-                <th className="px-4 py-3 font-medium">Dose</th>
-                <th className="px-4 py-3 font-medium">Frequency</th>
-                <th className="px-4 py-3 font-medium">Timing</th>
+              <tr className="border-border border-b text-left">
+                <th className="text-muted-foreground eyebrow pr-4 pb-3 font-normal">
+                  PEPTIDE
+                </th>
+                <th className="text-muted-foreground eyebrow pr-4 pb-3 font-normal">
+                  DOSE
+                </th>
+                <th className="text-muted-foreground eyebrow pr-4 pb-3 font-normal">
+                  FREQUENCY
+                </th>
+                <th className="text-muted-foreground eyebrow pb-3 font-normal">
+                  TIMING
+                </th>
               </tr>
             </thead>
             <tbody>
               {stack.items.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-border hover:bg-muted/30 border-b transition-colors last:border-0"
+                  className="border-border hover:bg-accent/30 border-b transition-colors last:border-0"
                 >
-                  <td className="px-4 py-3 font-medium">
+                  <td className="py-3 pr-4 font-medium">
                     <Link
                       href={`/peptides/${item.peptide.slug}`}
                       className="text-primary hover:underline"
@@ -102,13 +117,13 @@ export default async function StackDetailPage({ params }: Props) {
                       {item.peptide.name}
                     </Link>
                   </td>
-                  <td className="text-muted-foreground px-4 py-3">
+                  <td className="text-muted-foreground num py-3 pr-4">
                     {item.dose ?? "—"}
                   </td>
-                  <td className="text-muted-foreground px-4 py-3">
+                  <td className="text-muted-foreground py-3 pr-4">
                     {item.frequency ?? "—"}
                   </td>
-                  <td className="text-muted-foreground px-4 py-3">
+                  <td className="text-muted-foreground py-3">
                     {item.timing ?? "—"}
                   </td>
                 </tr>
@@ -116,13 +131,13 @@ export default async function StackDetailPage({ params }: Props) {
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
       {/* Interactions panel */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Interactions Within Stack</h2>
+      <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+        <Eyebrow className="mb-4">INTERACTIONS WITHIN STACK</Eyebrow>
         {interactions.length === 0 ? (
-          <p className="text-muted-foreground rounded-xl border border-dashed px-4 py-8 text-center text-sm">
+          <p className="text-muted-foreground rounded-xl border border-dashed px-4 py-6 text-center text-sm">
             No known interactions among the members of this stack.
           </p>
         ) : (
@@ -130,13 +145,13 @@ export default async function StackDetailPage({ params }: Props) {
             {interactions.map((ix, i) => (
               <div
                 key={i}
-                className="border-border bg-card flex flex-col gap-1.5 rounded-xl border p-4 sm:flex-row sm:items-start sm:gap-4"
+                className="border-border bg-background flex flex-col gap-1.5 rounded-xl border p-4 sm:flex-row sm:items-start sm:gap-4"
               >
                 <div className="shrink-0">
                   <InteractionBadge kind={ix.kind} />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium">
+                  <p className="text-foreground text-sm font-medium">
                     {ix.peptideAName} × {ix.peptideBName}
                   </p>
                   {ix.note && (
@@ -147,7 +162,7 @@ export default async function StackDetailPage({ params }: Props) {
             ))}
           </div>
         )}
-      </section>
+      </div>
     </div>
   );
 }

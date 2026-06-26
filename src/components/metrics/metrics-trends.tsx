@@ -4,9 +4,10 @@ import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LineChart as LineChartIcon } from "lucide-react";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -30,6 +31,9 @@ export interface TrendSeries {
  * the series share a timeline but not a scale (weight ~80kg vs mood 1–5), each
  * line gets its own hidden Y axis so the *shapes* line up over time; the tooltip
  * shows the real values. Series logged at the same time land on the same row.
+ *
+ * The primary series (weight if present, else first active) gets a soft
+ * area-gradient fill under its line per the Clinical Instrument design spec.
  */
 export function MetricsTrends({ series }: { series: TrendSeries[] }) {
   const usable = React.useMemo(
@@ -110,8 +114,14 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
 
   const activeSeries = usable.filter((s) => active.has(s.key));
 
+  // Primary series = weight if active, else first active series.
+  const primaryKey =
+    activeSeries.find((s) => /weight/i.test(s.label))?.key ??
+    activeSeries[0]?.key;
+
   return (
     <div className="space-y-4">
+      {/* Legend chips — toggle series visibility */}
       <div className="flex flex-wrap gap-2">
         {usable.map((s) => {
           const on = active.has(s.key);
@@ -144,15 +154,33 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart
+          <ComposedChart
             data={rows}
             margin={{ top: 8, right: 12, bottom: 0, left: -8 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            {/* Gradient definition for the primary series area fill */}
+            <defs>
+              {activeSeries.map((s) => (
+                <linearGradient
+                  key={`grad-${s.key}`}
+                  id={`grad-${s.key}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="0%" stopColor={s.color} stopOpacity={0.16} />
+                  <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+                </linearGradient>
+              ))}
+            </defs>
+
+            {/* Lighter gridlines per design spec */}
+            <CartesianGrid strokeDasharray="0" stroke="var(--border)" />
             <XAxis
               dataKey="date"
               tick={{
-                fontSize: 12,
+                fontSize: 11,
                 fill: "var(--muted-foreground)",
                 fontFamily: "var(--font-mono)",
               }}
@@ -180,21 +208,39 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
                 name,
               ]}
             />
-            {activeSeries.map((s) => (
-              <Line
-                key={s.key}
-                yAxisId={s.key}
-                type="monotone"
-                dataKey={s.key}
-                name={s.label}
-                stroke={s.color}
-                strokeWidth={2}
-                dot={{ r: 2.5, fill: s.color }}
-                activeDot={{ r: 5 }}
-                connectNulls
-              />
-            ))}
-          </LineChart>
+
+            {/* Primary series: Area with gradient fill + Line on top */}
+            {activeSeries.map((s) =>
+              s.key === primaryKey ? (
+                <Area
+                  key={s.key}
+                  yAxisId={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={s.color}
+                  strokeWidth={2.5}
+                  fill={`url(#grad-${s.key})`}
+                  dot={{ r: 2.5, fill: s.color, strokeWidth: 0 }}
+                  activeDot={{ r: 5, strokeWidth: 0 }}
+                  connectNulls
+                />
+              ) : (
+                <Line
+                  key={s.key}
+                  yAxisId={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5, fill: s.color, strokeWidth: 0 }}
+                  activeDot={{ r: 5, strokeWidth: 0 }}
+                  connectNulls
+                />
+              ),
+            )}
+          </ComposedChart>
         </ResponsiveContainer>
       )}
     </div>

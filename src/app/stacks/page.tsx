@@ -6,6 +6,7 @@ import { deleteStack } from "@/lib/actions/stacks";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { GoalBadges } from "@/components/common/badges";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { Disclaimer } from "@/components/disclaimer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,12 +18,15 @@ export default async function StacksPage() {
   const stacks = await listStacks();
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         title="Stacks"
         description="Curated peptide protocol combinations."
         actions={
-          <Button render={<Link href="/stacks/new" />} size="default">
+          <Button
+            render={<Link href="/stacks/new" />}
+            className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)]"
+          >
             <Plus className="size-4" />
             Build a stack
           </Button>
@@ -65,13 +69,16 @@ function StackCard({ stack }: { stack: Stack }) {
   }
 
   return (
-    <div className="bg-card border-border relative flex flex-col gap-3 rounded-xl border p-5 transition-shadow hover:shadow-md">
+    <div className="card-surface relative flex flex-col gap-3 rounded-[18px] p-5 [box-shadow:var(--shadow-card)] transition-shadow hover:[box-shadow:var(--shadow-card-hover)]">
+      {/* Goal eyebrow */}
+      {stack.goal && <Eyebrow className="text-[#8B86AD]">{stack.goal}</Eyebrow>}
+
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={`/stacks/${stack.slug}`}
-            className="text-base font-semibold hover:underline"
+            className="font-display text-foreground text-base font-semibold hover:underline"
           >
             {stack.name}
           </Link>
@@ -94,13 +101,6 @@ function StackCard({ stack }: { stack: Stack }) {
         )}
       </div>
 
-      {/* Goal */}
-      {stack.goal && (
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          {stack.goal}
-        </p>
-      )}
-
       {/* Goal tags */}
       {tags.length > 0 && <GoalBadges tags={tags} />}
 
@@ -110,7 +110,7 @@ function StackCard({ stack }: { stack: Stack }) {
           {stack.items.map((item) => (
             <span
               key={item.id}
-              className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium"
+              className="bg-accent text-accent-foreground rounded-full px-2.5 py-0.5 text-xs font-medium"
             >
               {item.peptide.name}
             </span>
@@ -118,13 +118,19 @@ function StackCard({ stack }: { stack: Stack }) {
         </div>
       )}
 
-      {/* Footer link */}
-      <Link
-        href={`/stacks/${stack.slug}`}
-        className="text-primary mt-auto text-xs font-medium hover:underline"
-      >
-        View details →
-      </Link>
+      {/* Peptide count + footer link */}
+      <div className="mt-auto flex items-center justify-between">
+        <span className="text-muted-foreground text-xs">
+          <span className="num">{stack.items.length}</span> peptide
+          {stack.items.length !== 1 ? "s" : ""}
+        </span>
+        <Link
+          href={`/stacks/${stack.slug}`}
+          className="text-primary text-xs font-medium hover:underline"
+        >
+          View details →
+        </Link>
+      </div>
     </div>
   );
 }

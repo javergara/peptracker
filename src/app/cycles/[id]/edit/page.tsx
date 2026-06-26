@@ -5,9 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { CycleForm } from "@/components/cycles/cycle-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { updateCycle } from "@/lib/actions/cycles";
-import { getCycle, listPeptides, listStacks } from "@/lib/queries";
+import {
+  getCycle,
+  getCurrentUser,
+  listPeptides,
+  listStacks,
+} from "@/lib/queries";
 import type { ScheduleConfig } from "@/lib/schedule";
 import { toDateInputValue } from "@/lib/dates";
 
@@ -20,7 +24,8 @@ export default async function EditCyclePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [cycle, peptides, stacks] = await Promise.all([
+  const [user, cycle, peptides, stacks] = await Promise.all([
+    getCurrentUser(),
     getCycle(id),
     listPeptides(),
     listStacks(),
@@ -45,6 +50,7 @@ export default async function EditCyclePage({
       <PageHeader
         title="Edit Cycle"
         description={cycle.name}
+        accentColor={user.color ?? undefined}
         actions={
           <Button variant="outline" render={<Link href={`/cycles/${id}`} />}>
             <ArrowLeft className="size-4" />
@@ -53,29 +59,27 @@ export default async function EditCyclePage({
         }
       />
 
-      <Card>
-        <CardContent className="p-6">
-          <CycleForm
-            peptides={peptides}
-            stacks={stacks}
-            action={action}
-            submitLabel="Save changes"
-            defaults={{
-              name: cycle.name,
-              source,
-              startDate: toDateInputValue(cycle.startDate),
-              endDate: cycle.endDate
-                ? toDateInputValue(cycle.endDate)
-                : undefined,
-              status: cycle.status,
-              frequency: cfg?.frequency ?? "daily",
-              dosePerAdmin: cfg?.dosePerAdmin ?? undefined,
-              unit: cfg?.unit ?? "mcg",
-              notes: cycle.notes ?? undefined,
-            }}
-          />
-        </CardContent>
-      </Card>
+      <div className="card-surface rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <CycleForm
+          peptides={peptides}
+          stacks={stacks}
+          action={action}
+          submitLabel="Save changes"
+          defaults={{
+            name: cycle.name,
+            source,
+            startDate: toDateInputValue(cycle.startDate),
+            endDate: cycle.endDate
+              ? toDateInputValue(cycle.endDate)
+              : undefined,
+            status: cycle.status,
+            frequency: cfg?.frequency ?? "daily",
+            dosePerAdmin: cfg?.dosePerAdmin ?? undefined,
+            unit: cfg?.unit ?? "mcg",
+            notes: cycle.notes ?? undefined,
+          }}
+        />
+      </div>
     </div>
   );
 }

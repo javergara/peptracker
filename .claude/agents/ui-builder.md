@@ -32,9 +32,21 @@ exactly; reuse primitives instead of reinventing them.
   (Space Grotesk, headings), `font-sans` (IBM Plex Sans, body), `font-mono` (IBM
   Plex Mono). **Render numbers in mono + tabular via the `num` utility.** The
   sidebar is a dark **`.brand-rail`** (token-scoped dark surface, same in both
-  themes); nav grouped (Overview · Tracking · Health · Library · Settings). Use
+  themes); nav grouped (Overview · Tracking · Health · Library · Settings); on
+  mobile an Ink bottom tab bar (`MobileTabBar`, `--gradient-ink-bar`). Use
   `PeptraLogo`/`PeptraMark` from `src/components/brand/` for brand moments. Tint
   charts/progress/dose-rows with the active profile color (`user.color`).
+- **"Clinical Instrument" language — REUSE these, don't reinvent.** Layered
+  surfaces + instrument gauges. Utilities: `card-surface` (white card + hairline +
+  soft shadow), `eyebrow` (mono-uppercase section label), `num`. Gradient/shadow
+  tokens: `--gradient-ink-panel`/`--gradient-ink-strip`/`--gradient-gauge`,
+  `--shadow-card`/`--shadow-card-hover`. Primitives in `src/components/common/`:
+  `InkPanel` (`variant="hero"|"strip"`, dark data-readout), `AdherenceRing`,
+  `Sparkline`/`MiniBars`, `VialGauge` (driven by `vials.ts`), `RangeTrack` +
+  `Eyebrow`. **Clinical status colors are the one brand exception:** green
+  `--ok`, amber `--warn`, red `--bad`, `--sealed` (+ `-wash` variants), mapped via
+  `LAB_STATUS_STYLE`/`VIAL_STATUS_STYLE` and `labStatus()` (`src/lib/labs.ts`) —
+  Labs/Inventory only, never on brand surfaces.
 - **Data:** reads come from `src/lib/queries.ts` (add functions there, import
   `prisma` from `@/lib/db`). Mutations are **server actions** (`"use server"`).
 - **Auth:** the app is gated by login (`src/proxy.ts`). Auth pages live at

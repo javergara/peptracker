@@ -1,21 +1,26 @@
 import { Suspense } from "react";
-import { GitCompareArrows, LineChart as LineChartIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
-import { CorrelationChart } from "@/components/metrics/correlation-chart";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { CorrelationExplorer } from "@/components/metrics/correlation-explorer";
 import {
   MetricsTrends,
   type TrendSeries,
 } from "@/components/metrics/metrics-trends";
+import {
+  MetricsRangeControl,
+  DEFAULT_RANGE,
+} from "@/components/metrics/range-control";
+import type { RangeValue } from "@/components/metrics/range-control";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { addMeasurement } from "@/lib/actions/measurements";
 import {
@@ -24,7 +29,7 @@ import {
   getDoseLogsInRange,
   listLabs,
 } from "@/lib/queries";
-import { formatDate } from "@/lib/dates";
+import { GitCompareArrows } from "lucide-react";
 
 export const metadata = { title: "Metrics" };
 
@@ -39,58 +44,160 @@ const TYPE_LABELS: Record<string, string> = {
   custom: "Custom",
 };
 
-export default async function MetricsPage() {
+/** Convert a range string to milliseconds. */
+function rangeToDays(range: RangeValue): number {
+  switch (range) {
+    case "7d":
+      return 7;
+    case "30d":
+      return 30;
+    case "90d":
+      return 90;
+    case "1y":
+      return 365;
+  }
+}
+
+/** Clip points to the window [windowStart, now]. */
+function clipPoints(
+  points: { t: number; value: number }[],
+  windowStart: number,
+): { t: number; value: number }[] {
+  return points.filter((p) => p.t >= windowStart);
+}
+
+/** Metric tile for the 4-col summary row. */
+function MetricTile({
+  label,
+  value,
+  unit,
+  delta,
+  deltaLabel,
+  improving,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  delta: string | null;
+  deltaLabel: string;
+  improving: boolean | null;
+}) {
+  return (
+    <div className="card-surface rounded-2xl p-4">
+      <Eyebrow>{label}</Eyebrow>
+      <div className="mt-[5px] flex items-baseline gap-[5px]">
+        <span className="num text-foreground text-2xl font-semibold">
+          {value}
+        </span>
+        <span className="text-xs" style={{ color: "#8B86AD" }}>
+          {unit}
+        </span>
+      </div>
+      <div
+        className="mt-0.5 text-xs"
+        style={{
+          color:
+            improving === true
+              ? "var(--ok)"
+              : improving === false
+                ? "var(--bad)"
+                : "#8B86AD",
+        }}
+      >
+        {delta !== null
+          ? `${improving === false ? "▲" : improving === true ? "▼" : ""} ${delta} / ${deltaLabel}`
+          : "— no data"}
+      </div>
+    </div>
+  );
+}
+
+export default async function MetricsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const params = await searchParams;
+  const rawRange = params.range as RangeValue | undefined;
+  const validRanges: RangeValue[] = ["7d", "30d", "90d", "1y"];
+  const range: RangeValue =
+    rawRange && validRanges.includes(rawRange) ? rawRange : DEFAULT_RANGE;
+
   const now = new Date();
-  const start90 = new Date(now);
-  start90.setDate(start90.getDate() - 90);
+  const rangeMs = rangeToDays(range) * 86_400_000;
+  const windowStart = now.getTime() - rangeMs;
+
+  // Fetch all-time for chart data (correlation explorer needs full history),
+  // then clip to the range window for display.
+  const fetchStart = new Date(now);
+  fetchStart.setDate(fetchStart.getDate() - 365);
 
   const [measurements, user, doseLogs, labs] = await Promise.all([
     listMeasurements(),
     getCurrentUser(),
-    getDoseLogsInRange(start90, now),
+    getDoseLogsInRange(fetchStart, now),
     listLabs(),
   ]);
 
   const profileColor = user.color ?? "var(--chart-1)";
 
-  // Bodyweight vs IGF-1 correlation: merge both series by calendar day.
-  const weights = measurements.filter((m) => m.type === "weight");
-  const igf = labs.filter((l) => /igf/i.test(l.marker));
-  const corrMap = new Map<
-    string,
-    { ts: number; date: string; weight: number | null; igf: number | null }
-  >();
-  function corrKey(d: Date) {
-    return d.toISOString().slice(0, 10);
-  }
-  for (const w of weights) {
-    const key = corrKey(w.recordedAt);
-    const e = corrMap.get(key) ?? {
-      ts: w.recordedAt.getTime(),
-      date: formatDate(w.recordedAt, "MMM d"),
-      weight: null,
-      igf: null,
-    };
-    e.weight = w.value;
-    corrMap.set(key, e);
-  }
-  for (const l of igf) {
-    const key = corrKey(l.takenAt);
-    const e = corrMap.get(key) ?? {
-      ts: l.takenAt.getTime(),
-      date: formatDate(l.takenAt, "MMM d"),
-      weight: null,
-      igf: null,
-    };
-    e.igf = l.value;
-    corrMap.set(key, e);
-  }
-  const correlation = Array.from(corrMap.values()).sort((a, b) => a.ts - b.ts);
-  const hasCorrelation = weights.length > 0 && igf.length > 0;
-  const weightUnit = weights[0]?.unit ?? "kg";
-  const igfUnit = igf[0]?.unit ?? "ng/mL";
+  // --- Metric tiles: latest value + delta within the range window -----------
+  const TILE_TYPES = [
+    { key: "weight", label: "Weight", defaultUnit: "kg" },
+    { key: "bodyFat", label: "Body fat", defaultUnit: "%" },
+    { key: "sleep", label: "Sleep", defaultUnit: "h avg" },
+    { key: "recovery", label: "Recovery", defaultUnit: "/100" },
+  ] as const;
 
-  // Selectable series (metric types + lab markers) for the correlation explorer.
+  const rangeLabel = range; // e.g. "30d"
+
+  const tiles = TILE_TYPES.map(({ key, label, defaultUnit }) => {
+    const rows = measurements.filter((m) => m.type === key);
+    if (rows.length === 0) {
+      return {
+        label,
+        value: "—",
+        unit: defaultUnit,
+        delta: null,
+        deltaLabel: rangeLabel,
+        improving: null,
+      };
+    }
+    const unit = rows[0].unit ?? defaultUnit;
+    const latest = rows[rows.length - 1].value;
+
+    // Find the first point at or after windowStart for delta calculation.
+    const windowRows = rows.filter(
+      (m) => m.recordedAt.getTime() >= windowStart,
+    );
+    let delta: string | null = null;
+    let improving: boolean | null = null;
+
+    if (windowRows.length >= 2) {
+      const first = windowRows[0].value;
+      const diff = latest - first;
+      // "Improving" direction: weight & bodyFat lower is better; sleep & recovery higher is better.
+      const lowerIsBetter = key === "weight" || key === "bodyFat";
+      improving = lowerIsBetter ? diff < -0.05 : diff > 0.05;
+      if (Math.abs(diff) <= 0.05) improving = null; // stable
+      const sign = diff >= 0 ? "▲" : "▼";
+      delta = `${sign} ${Math.abs(diff).toFixed(1)} ${unit}`;
+    } else if (windowRows.length === 1) {
+      delta = "stable";
+      improving = null;
+    }
+
+    return {
+      label,
+      value: latest.toString(),
+      unit,
+      delta,
+      deltaLabel: rangeLabel,
+      improving,
+    };
+  });
+
+  // --- Selectable series for CorrelationExplorer (all-time, not windowed) ---
   const corrSeries: {
     key: string;
     label: string;
@@ -130,7 +237,7 @@ export default async function MetricsPage() {
     });
   }
 
-  // Group measurements by type (already ordered by recordedAt asc).
+  // --- Trend series (windowed to selected range) ----------------------------
   const byType = new Map<string, typeof measurements>();
   for (const m of measurements) {
     const arr = byType.get(m.type) ?? [];
@@ -138,8 +245,6 @@ export default async function MetricsPage() {
     byType.set(m.type, arr);
   }
 
-  // Build one combined, toggleable trend dataset: measurement types + mood +
-  // energy + lab markers. Each series keeps real values (its own hidden axis).
   const TREND_PALETTE = [
     "var(--chart-1)",
     "var(--chart-2)",
@@ -156,25 +261,38 @@ export default async function MetricsPage() {
   const nextColor = () => TREND_PALETTE[colorIdx++ % TREND_PALETTE.length];
 
   for (const [type, rows] of byType) {
-    trendSeries.push({
-      key: `m:${type}`,
-      label: TYPE_LABELS[type] ?? type,
-      unit: rows[0]?.unit ?? null,
-      color: nextColor(),
-      points: rows
-        .map((r) => ({ t: r.recordedAt.getTime(), value: r.value }))
-        .sort((a, b) => a.t - b.t),
-    });
+    const allPoints = rows
+      .map((r) => ({ t: r.recordedAt.getTime(), value: r.value }))
+      .sort((a, b) => a.t - b.t);
+    const windowed = clipPoints(allPoints, windowStart);
+    if (windowed.length > 0) {
+      trendSeries.push({
+        key: `m:${type}`,
+        label: TYPE_LABELS[type] ?? type,
+        unit: rows[0]?.unit ?? null,
+        color: nextColor(),
+        points: windowed,
+      });
+    } else {
+      // Still include the series color slot so colors stay stable across ranges.
+      nextColor();
+    }
   }
 
-  const moodPts = doseLogs
-    .filter((d) => d.mood != null)
-    .map((d) => ({ t: d.takenAt.getTime(), value: d.mood as number }))
-    .sort((a, b) => a.t - b.t);
-  const energyPts = doseLogs
-    .filter((d) => d.energy != null)
-    .map((d) => ({ t: d.takenAt.getTime(), value: d.energy as number }))
-    .sort((a, b) => a.t - b.t);
+  const moodPts = clipPoints(
+    doseLogs
+      .filter((d) => d.mood != null)
+      .map((d) => ({ t: d.takenAt.getTime(), value: d.mood as number }))
+      .sort((a, b) => a.t - b.t),
+    windowStart,
+  );
+  const energyPts = clipPoints(
+    doseLogs
+      .filter((d) => d.energy != null)
+      .map((d) => ({ t: d.takenAt.getTime(), value: d.energy as number }))
+      .sort((a, b) => a.t - b.t),
+    windowStart,
+  );
   if (moodPts.length > 0)
     trendSeries.push({
       key: "mood",
@@ -193,26 +311,116 @@ export default async function MetricsPage() {
     });
 
   for (const [marker, rows] of lByMarker) {
-    trendSeries.push({
-      key: `l:${marker}`,
-      label: marker,
-      unit: rows[0]?.unit ?? null,
-      color: nextColor(),
-      points: rows
-        .map((r) => ({ t: r.takenAt.getTime(), value: r.value }))
-        .sort((a, b) => a.t - b.t),
-    });
+    const allPoints = rows
+      .map((r) => ({ t: r.takenAt.getTime(), value: r.value }))
+      .sort((a, b) => a.t - b.t);
+    const windowed = clipPoints(allPoints, windowStart);
+    if (windowed.length > 0) {
+      trendSeries.push({
+        key: `l:${marker}`,
+        label: marker,
+        unit: rows[0]?.unit ?? null,
+        color: nextColor(),
+        points: windowed,
+      });
+    } else {
+      nextColor();
+    }
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl space-y-5">
+      {/* Header with range control + Add button */}
       <PageHeader
         title="Metrics"
-        description="Track outcomes over time and correlate them with your cycles."
+        description="Body, mood &amp; bloodwork on one timeline."
         accentColor={profileColor}
+        actions={
+          <div className="flex items-center gap-3">
+            <Suspense>
+              <MetricsRangeControl />
+            </Suspense>
+            {/* Add measurement — opens the form card below via scroll or anchor */}
+            <a
+              href="#add-measurement"
+              className="focus-visible:ring-ring inline-flex h-10 items-center gap-2 rounded-[11px] px-4 text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none"
+              style={{
+                background: "linear-gradient(180deg,#8B47F0,#7C3AED)",
+                boxShadow: "0 10px 22px -10px rgba(124,58,237,.85)",
+              }}
+            >
+              <Plus className="size-[15px]" strokeWidth={1.8} />
+              Add
+            </a>
+          </div>
+        }
       />
 
-      <Card className="mb-6">
+      {/* Four metric tiles */}
+      <div className="grid grid-cols-2 gap-[14px] sm:grid-cols-4">
+        {tiles.map((t) => (
+          <MetricTile
+            key={t.label}
+            label={t.label}
+            value={t.value}
+            unit={t.unit}
+            delta={t.delta}
+            deltaLabel={t.deltaLabel}
+            improving={t.improving}
+          />
+        ))}
+      </div>
+
+      {/* Trends card */}
+      <Card className="card-surface">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-display text-base font-semibold">
+                Trends — last {range}
+              </CardTitle>
+              <CardDescription className="mt-0.5 text-[12.5px]">
+                Toggle any series. Lines share a timeline but keep their own
+                scale.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Suspense>
+            <MetricsTrends series={trendSeries} />
+          </Suspense>
+        </CardContent>
+      </Card>
+
+      {/* Correlation explorer */}
+      <section aria-label="Correlation explorer">
+        <h2 className="font-display mb-4 text-base font-semibold tracking-tight">
+          Correlation
+        </h2>
+        {corrSeries.length >= 2 ? (
+          <Card className="card-surface">
+            <CardContent className="pt-6">
+              <Suspense>
+                <CorrelationExplorer series={corrSeries} color={profileColor} />
+              </Suspense>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="card-surface">
+            <CardContent className="py-8">
+              <EmptyState
+                icon={<GitCompareArrows className="size-6" />}
+                title="Need at least two data series"
+                description="Log metrics (e.g. bodyweight) and lab results to correlate them here."
+              />
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      {/* Add measurement form */}
+      <Card className="card-surface" id="add-measurement">
         <CardHeader>
           <CardTitle>Add a measurement</CardTitle>
         </CardHeader>
@@ -292,68 +500,6 @@ export default async function MetricsPage() {
           </ActionForm>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LineChartIcon className="size-4" />
-            Trends
-          </CardTitle>
-          <CardDescription>
-            Toggle any series. Lines share a timeline but keep their own scale,
-            so you can see how mood moves as your weight (or labs) change.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Suspense>
-            <MetricsTrends series={trendSeries} />
-          </Suspense>
-        </CardContent>
-      </Card>
-
-      {/* Bodyweight vs IGF-1 correlation */}
-      <div className="mt-8">
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
-          Correlation
-        </h2>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GitCompareArrows className="size-4" />
-              Bodyweight vs IGF-1
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {hasCorrelation ? (
-              <CorrelationChart
-                data={correlation}
-                leftLabel={`Weight (${weightUnit})`}
-                rightLabel={`IGF-1 (${igfUnit})`}
-                leftColor={profileColor}
-                rightColor="var(--chart-3)"
-              />
-            ) : (
-              <EmptyState
-                icon={<GitCompareArrows className="size-6" />}
-                title="Not enough data to correlate yet"
-                description="Log bodyweight on the Metrics page and IGF-1 results on the Labs page to overlay them here."
-              />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GitCompareArrows className="size-4" />
-              Correlate any two markers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CorrelationExplorer series={corrSeries} color={profileColor} />
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

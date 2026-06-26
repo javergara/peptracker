@@ -1,24 +1,15 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
+import { InkPanel } from "@/components/common/ink-panel";
 import { EmptyState } from "@/components/common/empty-state";
 import { CycleActions } from "@/components/cycles/cycle-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { logDose } from "@/lib/actions/doses";
 import {
   getCurrentUser,
@@ -65,6 +56,12 @@ export default async function CycleDetailPage({
     peptideName: cycle.peptide?.name ?? undefined,
   }));
 
+  const pct = prog.percent ?? 0;
+  const weekNum =
+    prog.daysElapsed > 0 ? Math.ceil((prog.daysElapsed + 1) / 7) : 1;
+  const totalWeeks =
+    prog.totalDays != null ? Math.ceil(prog.totalDays / 7) : null;
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
@@ -90,149 +87,171 @@ export default async function CycleDetailPage({
         }
       />
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <CycleActions id={cycle.id} status={cycle.status} />
-        <div className="min-w-48 flex-1">
-          <div className="text-muted-foreground mb-1 flex justify-between text-xs">
-            <span>Progress</span>
-            <span className="num">
-              {prog.percent !== null
-                ? `${prog.percent}%`
-                : `Day ${prog.daysElapsed + 1}`}
+      {/* Ink hero — dominant metric for this cycle */}
+      <InkPanel variant="hero" className="mb-6 p-6">
+        <Eyebrow className="text-[#C4B5FD]">CYCLE PROGRESS</Eyebrow>
+        <div className="mt-3 flex items-end gap-4">
+          <span className="num text-[56px] leading-[.9] font-semibold text-[#EFEBFA]">
+            {pct}
+            <span className="text-[28px] font-medium text-[#A8A2CC]">%</span>
+          </span>
+          {totalWeeks != null ? (
+            <span className="num pb-2 text-[18px] text-[#A8A2CC]">
+              wk <span className="font-semibold text-[#EFEBFA]">{weekNum}</span>
+              <span className="text-[#6D648E]"> / {totalWeeks}</span>
             </span>
-          </div>
-          <Progress
-            value={prog.percent ?? 0}
-            style={
-              user.color ? ({ "--pc": user.color } as CSSProperties) : undefined
-            }
-            className={
-              user.color
-                ? "[&_[data-slot=progress-indicator]]:bg-[var(--pc)]"
-                : undefined
-            }
+          ) : (
+            <span className="num pb-2 text-[16px] text-[#A8A2CC]">
+              day{" "}
+              <span className="font-semibold text-[#EFEBFA]">
+                {prog.daysElapsed + 1}
+              </span>
+            </span>
+          )}
+        </div>
+        {/* Gradient progress bar */}
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full [background:var(--gradient-gauge)]"
+            style={{ width: `${pct}%` }}
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
           />
         </div>
+        {cfg ? (
+          <p className="mt-3 text-[13px] text-[#A8A2CC]">
+            {cfg.frequency}
+            {cfg.dosePerAdmin
+              ? ` · ${cfg.dosePerAdmin} ${cfg.unit ?? "mcg"} per dose`
+              : ""}
+          </p>
+        ) : null}
+      </InkPanel>
+
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <CycleActions id={cycle.id} status={cycle.status} />
       </div>
 
-      {cfg ? (
-        <p className="text-muted-foreground mb-6 text-sm">
-          Schedule: {cfg.frequency}
-          {cfg.dosePerAdmin ? ` · ${cfg.dosePerAdmin} ${cfg.unit ?? ""}` : ""}
-        </p>
-      ) : null}
+      <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <Eyebrow className="mb-4">Log a dose for this cycle</Eyebrow>
+        <form
+          action={logDose}
+          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <input type="hidden" name="cycleId" value={cycle.id} />
+          <div className="space-y-1.5">
+            <label htmlFor="cd-peptide" className="text-sm font-medium">
+              Peptide
+            </label>
+            <select
+              id="cd-peptide"
+              name="peptideId"
+              required
+              className={inputCls}
+            >
+              {peptideOptions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="cd-amount" className="text-sm font-medium">
+              Amount
+            </label>
+            <input
+              id="cd-amount"
+              name="amount"
+              type="number"
+              step="any"
+              min="0"
+              required
+              defaultValue={cfg?.dosePerAdmin ?? ""}
+              className={inputCls}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="cd-unit" className="text-sm font-medium">
+              Unit
+            </label>
+            <select
+              id="cd-unit"
+              name="unit"
+              defaultValue={cfg?.unit ?? "mcg"}
+              className={inputCls}
+            >
+              <option value="mcg">mcg</option>
+              <option value="mg">mg</option>
+            </select>
+          </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Log a dose for this cycle</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            action={logDose}
-            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            <input type="hidden" name="cycleId" value={cycle.id} />
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Peptide</label>
-              <select name="peptideId" required className={inputCls}>
-                {peptideOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+          {/* Enriched optional fields — spans the full grid */}
+          <div className="contents">
+            <DoseFormFields
+              vials={vialsForForm}
+              suggestedSite={suggestedSite}
+              lastSite={lastSite}
+              weightUnit={user.weightUnit}
+            />
+          </div>
+
+          <div className="sm:col-span-2 lg:col-span-4">
+            <Button type="submit">Log dose</Button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card-surface rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <Eyebrow className="mb-4">
+          Dose history · <span className="num">{cycle.doseLogs.length}</span>
+        </Eyebrow>
+        {cycle.doseLogs.length === 0 ? (
+          <EmptyState title="No doses logged for this cycle yet." />
+        ) : (
+          <div>
+            {/* Column headers */}
+            <div className="eyebrow mb-0.5 grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.5fr] border-b border-[#F1EEF9] px-1 pb-[9px] text-[#9A95B8]">
+              <span>PEPTIDE</span>
+              <span>AMOUNT</span>
+              <span>WHEN</span>
+              <span>SITE</span>
+              <span />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Amount</label>
-              <input
-                name="amount"
-                type="number"
-                step="any"
-                min="0"
-                required
-                defaultValue={cfg?.dosePerAdmin ?? ""}
-                className={inputCls}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Unit</label>
-              <select
-                name="unit"
-                defaultValue={cfg?.unit ?? "mcg"}
-                className={inputCls}
+            {cycle.doseLogs.map((d, i) => (
+              <div
+                key={d.id}
+                className={`grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.5fr] items-center px-1 py-[11px] text-[13px] ${
+                  i < cycle.doseLogs.length - 1
+                    ? "border-b border-[#F6F4FB]"
+                    : ""
+                }`}
               >
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
-            </div>
-
-            {/* Enriched optional fields — spans the full grid */}
-            <div className="contents">
-              <DoseFormFields
-                vials={vialsForForm}
-                suggestedSite={suggestedSite}
-                lastSite={lastSite}
-                weightUnit={user.weightUnit}
-              />
-            </div>
-
-            <div className="sm:col-span-2 lg:col-span-4">
-              <Button type="submit">Log dose</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Dose history ({cycle.doseLogs.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {cycle.doseLogs.length === 0 ? (
-            <EmptyState title="No doses logged for this cycle yet." />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Peptide</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>When</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead className="w-20" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {cycle.doseLogs.map((d) => (
-                  <TableRow
-                    key={d.id}
-                    style={
-                      user.color
-                        ? { borderLeft: `3px solid ${user.color}` }
-                        : undefined
-                    }
-                  >
-                    <TableCell className="font-medium">
-                      {d.peptide.name}
-                    </TableCell>
-                    <TableCell className="num">
-                      {d.amount} {d.unit}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(d.takenAt, "MMM d, h:mm a")}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {d.site ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <DoseRowActions id={d.id} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                <span className="text-foreground flex items-center gap-[9px] font-medium">
+                  <span
+                    className="block h-[18px] w-[3px] shrink-0 rounded-full"
+                    style={{ background: user.color ?? "#7C3AED" }}
+                    aria-hidden
+                  />
+                  {d.peptide.name}
+                </span>
+                <span className="num text-foreground">
+                  {d.amount} {d.unit}
+                </span>
+                <span className="text-muted-foreground">
+                  {formatDate(d.takenAt, "MMM d · HH:mm")}
+                </span>
+                <span className="text-muted-foreground">{d.site ?? "—"}</span>
+                <span className="flex justify-end">
+                  <DoseRowActions id={d.id} />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

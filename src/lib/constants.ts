@@ -1,4 +1,6 @@
 import type { BiomarkerSystem } from "@/types/biomarker";
+import type { LabStatus } from "@/lib/labs";
+import type { VialGaugeStatus } from "@/lib/vials";
 import type {
   PeptideCategory,
   GoalTag,
@@ -56,6 +58,53 @@ export const GOAL_BADGE: Partial<Record<GoalTag, string>> = {
   "fat-loss": "bg-violet-500/15 text-violet-700 dark:text-violet-300",
   "recovery-injury": "bg-rose-500/15 text-rose-700 dark:text-rose-300",
   "cognition-mood": "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+};
+
+/**
+ * Clinical status styling for the Labs reference-range tracks + count tiles.
+ * These use the clinical-only --ok/--warn/--bad tokens (see globals.css) — green
+ * and red are reserved for in/out-of-range semantics and never brand surfaces.
+ */
+export const LAB_STATUS_STYLE: Record<
+  LabStatus,
+  { label: string; dot: string; text: string; wash: string; pill: string }
+> = {
+  ok: {
+    label: "In range",
+    dot: "bg-ok",
+    text: "text-ok",
+    wash: "bg-ok-wash",
+    pill: "bg-ok-wash text-ok",
+  },
+  borderline: {
+    label: "Borderline",
+    dot: "bg-warn",
+    text: "text-warn-foreground",
+    wash: "bg-warn-wash",
+    pill: "bg-warn-wash text-warn-foreground",
+  },
+  bad: {
+    label: "Out of range",
+    dot: "bg-bad",
+    text: "text-bad",
+    wash: "bg-bad-wash",
+    pill: "bg-bad-wash text-bad",
+  },
+};
+
+/**
+ * Status pill styling for inventory vial cards. The gauge fill itself is drawn
+ * by `VialGauge` (SVG); this maps each state to its pill label + classes.
+ */
+export const VIAL_STATUS_STYLE: Record<
+  VialGaugeStatus,
+  { label: string; pill: string }
+> = {
+  active: { label: "Active", pill: "bg-ok-wash text-ok" },
+  soon: { label: "Expires soon", pill: "bg-warn-wash text-warn-foreground" },
+  sealed: { label: "Sealed", pill: "bg-sealed-wash text-sealed" },
+  expired: { label: "Expired", pill: "bg-bad-wash text-bad" },
+  empty: { label: "Empty", pill: "bg-muted text-muted-foreground" },
 };
 
 export const INTERACTION_STYLE: Record<

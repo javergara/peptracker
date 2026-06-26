@@ -5,8 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { EmptyState } from "@/components/common/empty-state";
 import { cn } from "@/lib/utils";
 import {
@@ -108,8 +108,11 @@ export function BiomarkerBrowser({ biomarkers }: BiomarkerBrowserProps) {
       </div>
 
       {/* Results count */}
-      <p className="text-muted-foreground text-sm">
-        {filtered.length} biomarker{filtered.length !== 1 ? "s" : ""}
+      <div className="flex items-center gap-2">
+        <Eyebrow>
+          <span className="num">{filtered.length}</span> biomarker
+          {filtered.length !== 1 ? "s" : ""}
+        </Eyebrow>
         {(query || system !== "all") && (
           <button
             onClick={() => {
@@ -117,12 +120,12 @@ export function BiomarkerBrowser({ biomarkers }: BiomarkerBrowserProps) {
               setSystem("all");
               syncUrl("", "all");
             }}
-            className="text-primary ml-2 hover:underline"
+            className="text-primary eyebrow hover:underline"
           >
             Clear filters
           </button>
         )}
-      </p>
+      </div>
 
       {/* Grid */}
       {filtered.length === 0 ? (
@@ -139,31 +142,34 @@ export function BiomarkerBrowser({ biomarkers }: BiomarkerBrowserProps) {
               href={`/biomarkers/${biomarker.slug}`}
               className="group block focus-visible:outline-none"
             >
-              <Card className="group-focus-visible:ring-ring h-full transition-shadow duration-150 group-hover:shadow-md group-focus-visible:ring-2">
-                <CardHeader>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <CardTitle className="text-base leading-snug">
-                      {biomarker.name}
-                    </CardTitle>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge
-                        variant="outline"
-                        className={cn(SYSTEM_BADGE[biomarker.system])}
-                      >
-                        {SYSTEM_LABELS[biomarker.system]}
-                      </Badge>
-                      <span className="text-muted-foreground num text-xs">
-                        {biomarker.unit}
-                      </span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
-                    {biomarker.summary}
-                  </p>
-                </CardContent>
-              </Card>
+              <div
+                className={cn(
+                  "card-surface h-full rounded-2xl px-5 py-4 transition-shadow duration-150",
+                  "group-hover:[box-shadow:var(--shadow-card-hover)]",
+                  "group-focus-visible:ring-ring group-focus-visible:ring-2",
+                )}
+              >
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <Eyebrow>{SYSTEM_LABELS[biomarker.system]}</Eyebrow>
+                  <span className="num text-muted-foreground text-xs">
+                    {biomarker.unit}
+                  </span>
+                </div>
+                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="text-base leading-snug font-semibold tracking-tight">
+                    {biomarker.name}
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className={cn(SYSTEM_BADGE[biomarker.system])}
+                  >
+                    {SYSTEM_LABELS[biomarker.system]}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
+                  {biomarker.summary}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

@@ -1,6 +1,6 @@
 # Peptra
 
-**Precision for every protocol.** A web app to **track peptide protocols** and serve as a **cited knowledge base** — dosing, benefits, risks, routes, cycles, stacks, interaction checks, and rule-based suggestions. Violet brand: Space Grotesk / IBM Plex type system, mono tabular numbers, dark "Ink" sidebar.
+**Precision for every protocol.** A web app to **track peptide protocols** and serve as a **cited knowledge base** — dosing, benefits, risks, routes, cycles, stacks, interaction checks, and rule-based suggestions. Violet "Clinical Instrument" UI: Space Grotesk / IBM Plex type system, mono tabular numbers, dark "Ink" data panels, instrument gauges (adherence ring, vial gauges, lab reference-range tracks), and a dark "Ink" sidebar (with an Ink bottom tab bar on mobile).
 
 > ⚠️ **Educational and research use only. Not medical advice.** Many peptides listed are research compounds not approved for human use. Nothing here recommends obtaining or using any substance. Consult a qualified healthcare professional before making health decisions.
 

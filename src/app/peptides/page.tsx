@@ -15,7 +15,7 @@ export default async function PeptidesPage() {
   const peptides = await listPeptides();
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         title="Peptides Knowledge Base"
         description="Research-grade reference for mechanisms, dosing protocols, and interactions."

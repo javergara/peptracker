@@ -8,6 +8,7 @@ import {
   Zap,
   AlertTriangle,
   Info,
+  ChevronLeft,
 } from "lucide-react";
 
 import { getPeptideBySlug, getPeptideInteractions } from "@/lib/queries";
@@ -20,13 +21,13 @@ import {
 import { PageHeader } from "@/components/common/page-header";
 import { Disclaimer } from "@/components/disclaimer";
 import { ReferenceList } from "@/components/common/reference-list";
+import { Eyebrow } from "@/components/common/eyebrow";
 import {
   CategoryBadge,
   RouteBadge,
   GoalBadges,
   InteractionBadge,
 } from "@/components/common/badges";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Table,
@@ -79,13 +80,14 @@ export default async function PeptideDetailPage({
   const reconstitution = asReconstitution(peptide.reconstitution);
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* Back nav */}
       <Link
         href="/peptides"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
       >
-        ← Back to Knowledge Base
+        <ChevronLeft className="size-3.5" />
+        Knowledge Base
       </Link>
 
       {/* Header */}
@@ -125,144 +127,114 @@ export default async function PeptideDetailPage({
         {/* ── Overview ── */}
         <TabsContent value="overview" className="space-y-4 pt-4">
           {/* Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="size-4" />
-                Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+            <Eyebrow className="mb-3">SUMMARY</Eyebrow>
+            <div className="flex items-start gap-2">
+              <Info className="text-primary mt-0.5 size-4 shrink-0" />
               <p className="text-muted-foreground leading-relaxed">
                 {peptide.summary}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Mechanism */}
           {peptide.mechanism && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="size-4" />
-                  Mechanism of Action
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-3">MECHANISM OF ACTION</Eyebrow>
+              <div className="flex items-start gap-2">
+                <Zap className="text-primary mt-0.5 size-4 shrink-0" />
                 <p className="text-muted-foreground leading-relaxed">
                   {peptide.mechanism}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Benefits & Risks */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {benefits.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-violet-700 dark:text-violet-400">
-                    Benefits
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-muted-foreground space-y-1.5 text-sm">
-                    {benefits.map((b, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="shrink-0 text-violet-500">✓</span>
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+                <Eyebrow className="mb-3 text-[#16A06A]">BENEFITS</Eyebrow>
+                <ul className="text-muted-foreground space-y-1.5 text-sm">
+                  {benefits.map((b, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="shrink-0 text-violet-500">✓</span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
             {risks.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-amber-700 dark:text-amber-400">
-                    Risks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-muted-foreground space-y-1.5 text-sm">
-                    {risks.map((r, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="shrink-0 text-amber-500">⚠</span>
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+                <Eyebrow className="mb-3 text-[#B97608]">RISKS</Eyebrow>
+                <ul className="text-muted-foreground space-y-1.5 text-sm">
+                  {risks.map((r, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="shrink-0 text-amber-500">⚠</span>
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
           {/* Side effects */}
           {sideEffects.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Side Effects</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-muted-foreground grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2">
-                  {sideEffects.map((se, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="shrink-0 text-rose-400">•</span>
-                      {se}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-3">SIDE EFFECTS</Eyebrow>
+              <ul className="text-muted-foreground grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2">
+                {sideEffects.map((se, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="shrink-0 text-rose-400">•</span>
+                    {se}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {/* Quick facts */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Facts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
-                <FactRow
-                  label="Route"
-                  value={peptide.route}
-                  icon={<Zap className="size-3.5" />}
-                />
-                <FactRow
-                  label="Frequency"
-                  value={peptide.frequency}
-                  icon={<RotateCcw className="size-3.5" />}
-                />
-                <FactRow
-                  label="Half-life"
-                  value={peptide.halfLife}
-                  icon={<Clock className="size-3.5" />}
-                />
-                <FactRow
-                  label="Cycle length"
-                  value={peptide.cycleLength}
-                  icon={<RotateCcw className="size-3.5" />}
-                />
-                <FactRow
-                  label="Storage"
-                  value={peptide.storage}
-                  icon={<Thermometer className="size-3.5" />}
-                />
-                <FactRow label="Status" value={peptide.status} />
-              </dl>
-            </CardContent>
-          </Card>
+          <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+            <Eyebrow className="mb-4">QUICK FACTS</Eyebrow>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm sm:grid-cols-3">
+              <FactRow
+                label="ROUTE"
+                value={peptide.route}
+                icon={<Zap className="size-3.5" />}
+              />
+              <FactRow
+                label="FREQUENCY"
+                value={peptide.frequency}
+                icon={<RotateCcw className="size-3.5" />}
+              />
+              <FactRow
+                label="HALF-LIFE"
+                value={peptide.halfLife}
+                icon={<Clock className="size-3.5" />}
+              />
+              <FactRow
+                label="CYCLE LENGTH"
+                value={peptide.cycleLength}
+                icon={<RotateCcw className="size-3.5" />}
+              />
+              <FactRow
+                label="STORAGE"
+                value={peptide.storage}
+                icon={<Thermometer className="size-3.5" />}
+              />
+              <FactRow label="STATUS" value={peptide.status} />
+            </dl>
+          </div>
         </TabsContent>
 
         {/* ── Dosing ── */}
         <TabsContent value="dosing" className="space-y-4 pt-4">
           {dosage ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Dosing Protocol</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-4">DOSING PROTOCOL</Eyebrow>
+              <div className="space-y-4">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -276,7 +248,7 @@ export default async function PeptideDetailPage({
                       <TableCell className="font-medium text-indigo-700 dark:text-indigo-400">
                         Low
                       </TableCell>
-                      <TableCell>{dosage.low}</TableCell>
+                      <TableCell className="num">{dosage.low}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {dosage.unit}
                       </TableCell>
@@ -285,7 +257,7 @@ export default async function PeptideDetailPage({
                       <TableCell className="font-medium text-violet-700 dark:text-violet-400">
                         Standard
                       </TableCell>
-                      <TableCell>{dosage.standard}</TableCell>
+                      <TableCell className="num">{dosage.standard}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {dosage.unit}
                       </TableCell>
@@ -294,7 +266,7 @@ export default async function PeptideDetailPage({
                       <TableCell className="font-medium text-amber-700 dark:text-amber-400">
                         High
                       </TableCell>
-                      <TableCell>{dosage.high}</TableCell>
+                      <TableCell className="num">{dosage.high}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {dosage.unit}
                       </TableCell>
@@ -320,7 +292,7 @@ export default async function PeptideDetailPage({
 
                 {dosage.protocols && dosage.protocols.length > 0 && (
                   <div className="space-y-4">
-                    <p className="text-sm font-medium">Titration schedule</p>
+                    <Eyebrow className="mt-2">TITRATION SCHEDULE</Eyebrow>
                     {dosage.protocols.map((proto, pi) => (
                       <div key={pi} className="space-y-2">
                         {proto.label && (
@@ -391,11 +363,25 @@ export default async function PeptideDetailPage({
                           return (
                             <p className="text-muted-foreground text-xs">
                               Volume (insulin-syringe units) shown for a{" "}
-                              {reconstitution.vialMg} mg vial reconstituted with{" "}
-                              {reconstitution.bacWaterMl} mL BAC water
-                              {mcgPerUnit
-                                ? ` — ≈ ${mcgPerUnit} mcg per unit on a U-100 syringe`
-                                : ""}
+                              <span className="num">
+                                {reconstitution.vialMg}
+                              </span>{" "}
+                              mg vial reconstituted with{" "}
+                              <span className="num">
+                                {reconstitution.bacWaterMl}
+                              </span>{" "}
+                              mL BAC water
+                              {mcgPerUnit ? (
+                                <>
+                                  {" "}
+                                  — ≈ <span className="num">
+                                    {mcgPerUnit}
+                                  </span>{" "}
+                                  mcg per unit on a U-100 syringe
+                                </>
+                              ) : (
+                                ""
+                              )}
                               . Recalculate for your own vial below.
                             </p>
                           );
@@ -409,16 +395,14 @@ export default async function PeptideDetailPage({
                     {dosage.notes}
                   </p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                  No structured dosing data available.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-8 text-center [box-shadow:var(--shadow-card)]">
+              <p className="text-muted-foreground text-sm">
+                No structured dosing data available.
+              </p>
+            </div>
           )}
 
           {/* Reconstitution calculator */}
@@ -429,30 +413,24 @@ export default async function PeptideDetailPage({
           />
 
           {reconstitution?.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Reconstitution Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {reconstitution.notes}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-3">RECONSTITUTION NOTES</Eyebrow>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {reconstitution.notes}
+              </p>
+            </div>
           )}
         </TabsContent>
 
         {/* ── Safety ── */}
         <TabsContent value="safety" className="space-y-4 pt-4">
           {contraindications.length > 0 && (
-            <Card className="border-rose-500/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-rose-700 dark:text-rose-400">
-                  <AlertTriangle className="size-4" />
-                  Contraindications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="card-surface rounded-[18px] border border-rose-500/20 p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-3 text-rose-600 dark:text-rose-400">
+                CONTRAINDICATIONS
+              </Eyebrow>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-500" />
                 <ul className="text-muted-foreground space-y-1.5 text-sm">
                   {contraindications.map((c, i) => (
                     <li key={i} className="flex gap-2">
@@ -461,36 +439,30 @@ export default async function PeptideDetailPage({
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {sideEffects.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Side Effects</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-muted-foreground grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2">
-                  {sideEffects.map((se, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="shrink-0 text-amber-400">•</span>
-                      {se}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-3">SIDE EFFECTS</Eyebrow>
+              <ul className="text-muted-foreground grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2">
+                {sideEffects.map((se, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="shrink-0 text-amber-400">•</span>
+                    {se}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {contraindications.length === 0 && sideEffects.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                  No safety data recorded yet.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-8 text-center [box-shadow:var(--shadow-card)]">
+              <p className="text-muted-foreground text-sm">
+                No safety data recorded yet.
+              </p>
+            </div>
           )}
         </TabsContent>
 
@@ -498,26 +470,27 @@ export default async function PeptideDetailPage({
         {interactions.length > 0 && (
           <TabsContent value="interactions" className="space-y-3 pt-4">
             {interactions.map((interaction) => (
-              <Card key={interaction.id}>
-                <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:gap-4">
-                  <div className="shrink-0">
-                    <InteractionBadge kind={interaction.kind} />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <Link
-                      href={`/peptides/${interaction.other.slug}`}
-                      className="text-primary text-sm font-medium hover:underline"
-                    >
-                      {interaction.other.name}
-                    </Link>
-                    {interaction.note && (
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {interaction.note}
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <div
+                key={interaction.id}
+                className="card-surface flex flex-col gap-3 rounded-[18px] p-4 [box-shadow:var(--shadow-card)] sm:flex-row sm:items-start sm:gap-4"
+              >
+                <div className="shrink-0">
+                  <InteractionBadge kind={interaction.kind} />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <Link
+                    href={`/peptides/${interaction.other.slug}`}
+                    className="text-primary text-sm font-medium hover:underline"
+                  >
+                    {interaction.other.name}
+                  </Link>
+                  {interaction.note && (
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {interaction.note}
+                    </p>
+                  )}
+                </div>
+              </div>
             ))}
           </TabsContent>
         )}
@@ -525,14 +498,10 @@ export default async function PeptideDetailPage({
         {/* ── References ── */}
         {references.length > 0 && (
           <TabsContent value="references" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>References</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ReferenceList references={references} />
-              </CardContent>
-            </Card>
+            <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+              <Eyebrow className="mb-4">REFERENCES</Eyebrow>
+              <ReferenceList references={references} />
+            </div>
           </TabsContent>
         )}
       </Tabs>
@@ -555,10 +524,16 @@ function FactRow({
   return (
     <>
       <dt className="text-muted-foreground flex items-center gap-1.5 font-medium">
-        {icon}
-        {label}
+        {icon && (
+          <span className="text-primary shrink-0" aria-hidden>
+            {icon}
+          </span>
+        )}
+        <span className="eyebrow">{label}</span>
       </dt>
-      <dd className="col-span-1">{value}</dd>
+      <dd className="text-foreground col-span-1 text-sm font-medium">
+        {value}
+      </dd>
     </>
   );
 }

@@ -27,14 +27,16 @@ import {
 } from "@/types/biomarker";
 import { asStringArray } from "@/types/peptide";
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
+import { RangeTrack } from "@/components/common/range-track";
 import { Disclaimer } from "@/components/disclaimer";
 import { ReferenceList } from "@/components/common/reference-list";
 import { EmptyState } from "@/components/common/empty-state";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MarkerTimelineChart } from "@/components/metrics/marker-timeline-chart";
-import { SYSTEM_BADGE } from "@/lib/constants";
+import { SYSTEM_BADGE, LAB_STATUS_STYLE } from "@/lib/constants";
+import { labStatus, LAB_STATUS_LABEL } from "@/lib/labs";
 import { cn } from "@/lib/utils";
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
@@ -116,11 +118,11 @@ export default async function BiomarkerDetailPage({
   const points = labs.map((l) => ({ t: l.takenAt.getTime(), value: l.value }));
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-4xl">
       {/* Back nav */}
       <Link
         href="/biomarkers"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+        className="text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1 text-sm transition-colors"
       >
         ← Back to Biomarkers
       </Link>
@@ -145,7 +147,7 @@ export default async function BiomarkerDetailPage({
         }
       />
 
-      <Disclaimer />
+      <Disclaimer className="mb-6" />
 
       {/* Main content tabs */}
       <Tabs defaultValue="overview">
@@ -168,46 +170,56 @@ export default async function BiomarkerDetailPage({
         {/* ── Overview ── */}
         <TabsContent value="overview" className="space-y-4 pt-4">
           {/* Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="size-4" />
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1 flex items-center gap-1.5">
+                <Info className="size-3" />
                 What it is
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </Eyebrow>
+              <h2 className="text-base font-semibold tracking-tight">
+                Summary
+              </h2>
+            </div>
+            <div className="px-5 py-4">
               <p className="text-muted-foreground leading-relaxed">
                 {biomarker.summary}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* What it means */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FlaskConical className="size-4" />
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1 flex items-center gap-1.5">
+                <FlaskConical className="size-3" />
                 What it means
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </Eyebrow>
+              <h2 className="text-base font-semibold tracking-tight">
+                Clinical significance
+              </h2>
+            </div>
+            <div className="px-5 py-4">
               <p className="text-muted-foreground leading-relaxed">
                 {biomarker.whatItMeans}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Reference range */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowUpDown className="size-4" />
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1 flex items-center gap-1.5">
+                <ArrowUpDown className="size-3" />
+                Reference range
+              </Eyebrow>
+              <h2 className="text-base font-semibold tracking-tight">
                 Typical Reference Range
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+              </h2>
+            </div>
+            <div className="space-y-4 px-5 py-4">
               {resolved ? (
                 <>
+                  {/* Range value display */}
                   <div className="flex flex-wrap items-baseline gap-2">
                     {resolved.low != null && resolved.high != null ? (
                       <p className="text-foreground text-lg font-semibold">
@@ -234,6 +246,66 @@ export default async function BiomarkerDetailPage({
                       </p>
                     ) : null}
                   </div>
+
+                  {/* RangeTrack with latest reading if available */}
+                  {latest != null &&
+                    (() => {
+                      const trackLow = latest.refLow ?? resolved.low ?? null;
+                      const trackHigh = latest.refHigh ?? resolved.high ?? null;
+                      const rail = labStatus(latest.value, trackLow, trackHigh);
+                      const style = LAB_STATUS_STYLE[rail.status];
+                      return (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-[185px_1fr_auto] items-center gap-4">
+                            <div>
+                              <div className="text-foreground text-sm font-medium">
+                                Latest reading
+                              </div>
+                              <span
+                                className="num text-[11px]"
+                                style={{ color: "#8B86AD" }}
+                              >
+                                {trackLow !== null && trackHigh !== null
+                                  ? `ref ${trackLow}–${trackHigh}`
+                                  : trackHigh !== null
+                                    ? `optimal < ${trackHigh}`
+                                    : trackLow !== null
+                                      ? `optimal > ${trackLow}`
+                                      : ""}
+                                {biomarker.unit ? ` ${biomarker.unit}` : ""}
+                              </span>
+                            </div>
+                            <RangeTrack
+                              value={latest.value}
+                              refLow={trackLow}
+                              refHigh={trackHigh}
+                            />
+                            <div className="text-right">
+                              <span className="num text-foreground text-lg font-semibold">
+                                {latest.value}
+                              </span>
+                              {biomarker.unit ? (
+                                <span
+                                  className="ml-1 text-[11px]"
+                                  style={{ color: "#8B86AD" }}
+                                >
+                                  {biomarker.unit}
+                                </span>
+                              ) : null}
+                              <div
+                                className={cn(
+                                  "text-[11px] font-medium",
+                                  style.text,
+                                )}
+                              >
+                                {LAB_STATUS_LABEL[rail.status]}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                   {resolved.note && (
                     <p className="text-muted-foreground text-sm">
                       {resolved.note}
@@ -269,18 +341,21 @@ export default async function BiomarkerDetailPage({
                   )}
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
         {/* ── Your History ── */}
         <TabsContent value="your-history" className="space-y-4 pt-4">
           {labs.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Results Over Time</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1">History</Eyebrow>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Your Results Over Time
+                </h2>
+              </div>
+              <div className="px-5 py-4">
                 <MarkerTimelineChart
                   points={points}
                   bands={bands}
@@ -289,7 +364,6 @@ export default async function BiomarkerDetailPage({
                   unit={biomarker.unit}
                   color={user.color ?? "var(--chart-1)"}
                 />
-                {/* Latest value callout */}
                 {latest && (
                   <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
                     <p>
@@ -307,8 +381,8 @@ export default async function BiomarkerDetailPage({
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
             <EmptyState
               icon={<FlaskConical className="size-8" />}
@@ -331,14 +405,17 @@ export default async function BiomarkerDetailPage({
           <TabsContent value="factors" className="space-y-4 pt-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {raises.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-rose-700 dark:text-rose-400">
-                      <TrendingUp className="size-4" />
+                <div className="card-surface rounded-2xl">
+                  <div className="border-border border-b px-5 pt-4 pb-3">
+                    <Eyebrow className="mb-1 flex items-center gap-1.5 text-rose-500">
+                      <TrendingUp className="size-3" />
+                      Raises
+                    </Eyebrow>
+                    <h3 className="text-base font-semibold tracking-tight">
                       What raises it
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    </h3>
+                  </div>
+                  <div className="px-5 py-4">
                     <ul className="text-muted-foreground space-y-1.5 text-sm">
                       {raises.map((item, i) => (
                         <li key={i} className="flex gap-2">
@@ -347,18 +424,21 @@ export default async function BiomarkerDetailPage({
                         </li>
                       ))}
                     </ul>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
               {lowers.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                      <TrendingDown className="size-4" />
+                <div className="card-surface rounded-2xl">
+                  <div className="border-border border-b px-5 pt-4 pb-3">
+                    <Eyebrow className="mb-1 flex items-center gap-1.5 text-indigo-500">
+                      <TrendingDown className="size-3" />
+                      Lowers
+                    </Eyebrow>
+                    <h3 className="text-base font-semibold tracking-tight">
                       What lowers it
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    </h3>
+                  </div>
+                  <div className="px-5 py-4">
                     <ul className="text-muted-foreground space-y-1.5 text-sm">
                       {lowers.map((item, i) => (
                         <li key={i} className="flex gap-2">
@@ -367,20 +447,23 @@ export default async function BiomarkerDetailPage({
                         </li>
                       ))}
                     </ul>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
             </div>
 
             {confounders.length > 0 && (
-              <Card className="border-amber-500/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
-                    <TriangleAlert className="size-4" />
+              <div className="card-surface rounded-2xl border-amber-500/20">
+                <div className="border-border border-b px-5 pt-4 pb-3">
+                  <Eyebrow className="mb-1 flex items-center gap-1.5 text-amber-600">
+                    <TriangleAlert className="size-3" />
                     Confounders
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </Eyebrow>
+                  <h3 className="text-base font-semibold tracking-tight">
+                    Known confounders
+                  </h3>
+                </div>
+                <div className="px-5 py-4">
                   <ul className="text-muted-foreground space-y-1.5 text-sm">
                     {confounders.map((item, i) => (
                       <li key={i} className="flex gap-2">
@@ -389,8 +472,8 @@ export default async function BiomarkerDetailPage({
                       </li>
                     ))}
                   </ul>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </TabsContent>
         )}
@@ -398,14 +481,17 @@ export default async function BiomarkerDetailPage({
         {/* ── Related Peptides ── */}
         {relatedPeptides.length > 0 && (
           <TabsContent value="peptides" className="space-y-4 pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="size-4" />
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1 flex items-center gap-1.5">
+                  <BookOpen className="size-3" />
+                  Library
+                </Eyebrow>
+                <h3 className="text-base font-semibold tracking-tight">
                   Related Peptides
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h3>
+              </div>
+              <div className="px-5 py-4">
                 <ul className="space-y-2 text-sm">
                   {relatedPeptides.map((slugStr) => {
                     const label = slugStr
@@ -427,22 +513,25 @@ export default async function BiomarkerDetailPage({
                     );
                   })}
                 </ul>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
         )}
 
         {/* ── References ── */}
         {references.length > 0 && (
           <TabsContent value="references" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>References</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1">Sources</Eyebrow>
+                <h3 className="text-base font-semibold tracking-tight">
+                  References
+                </h3>
+              </div>
+              <div className="px-5 py-4">
                 <ReferenceList references={references} />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
         )}
       </Tabs>

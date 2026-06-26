@@ -11,6 +11,7 @@ import {
   worstKind,
   type InteractionRow,
 } from "@/lib/interactions";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { InteractionBadge } from "@/components/common/badges";
 import { Button } from "@/components/ui/button";
 import { GOAL_TAGS, GOAL_LABELS, type GoalTag } from "@/types/peptide";
@@ -48,9 +49,6 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
   const worst = worstKind(activeInteractions);
 
   async function handleSubmit(formData: FormData) {
-    // Append selected peptide IDs since checkboxes with "peptideIds" name are
-    // already in the form, but we drive state via React — use hidden inputs
-    // approach via the FormData already built from the form element.
     startTransition(async () => {
       try {
         const slug = await createStack(formData);
@@ -73,11 +71,14 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
           ? "border-indigo-500/40 bg-indigo-500/10"
           : "border-border bg-muted/30";
 
+  const inputCls =
+    "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
+
   return (
-    <form action={handleSubmit} className="space-y-8">
+    <form action={handleSubmit} className="space-y-6">
       {/* Stack metadata */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold">Stack Details</h2>
+        <Eyebrow>STACK DETAILS</Eyebrow>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="name" className="text-sm font-medium">
@@ -90,7 +91,7 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Recovery Protocol"
-              className="border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+              className={inputCls}
             />
           </div>
           <div className="space-y-1.5">
@@ -102,7 +103,7 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
               name="goal"
               value={goal}
               onChange={(e) => setGoal(e.target.value as GoalTag | "")}
-              className="border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+              className={inputCls}
             >
               <option value="">— Select a goal —</option>
               {GOAL_TAGS.map((tag) => (
@@ -124,7 +125,7 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the purpose and context of this stack…"
-            className="border-input bg-background focus-visible:ring-ring w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+            className={`${inputCls} resize-none`}
           />
         </div>
       </section>
@@ -132,12 +133,12 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
       {/* Peptide picker */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">
-            Select Peptides{" "}
-            <span className="text-muted-foreground font-normal">
-              ({selectedIds.size} selected)
+          <div className="flex items-baseline gap-2">
+            <Eyebrow>SELECT PEPTIDES</Eyebrow>
+            <span className="num text-muted-foreground text-xs">
+              {selectedIds.size} selected
             </span>
-          </h2>
+          </div>
           {selectedIds.size > 0 && (
             <button
               type="button"
@@ -154,10 +155,10 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
             return (
               <label
                 key={p.id}
-                className={`border-border flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors ${
                   checked
                     ? "border-primary/60 bg-primary/5"
-                    : "hover:bg-muted/50"
+                    : "border-border hover:bg-accent/50"
                 }`}
               >
                 <input
@@ -178,9 +179,9 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
       {/* Live interaction warnings */}
       {selectedIds.size >= 2 && (
         <section className="space-y-3">
-          <h2 className="text-base font-semibold">Interaction Check</h2>
+          <Eyebrow>INTERACTION CHECK</Eyebrow>
           {activeInteractions.length === 0 ? (
-            <div className="flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-700 dark:text-indigo-300">
+            <div className="flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-700 dark:text-indigo-300">
               <CheckCircle2 className="size-4 shrink-0" />
               No known interactions among the selected peptides.
             </div>
@@ -232,10 +233,11 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
       )}
 
       {/* Submit */}
-      <div className="flex items-center gap-3">
+      <div className="border-border flex items-center gap-3 border-t pt-4">
         <Button
           type="submit"
           disabled={isPending || selectedIds.size === 0 || !name.trim()}
+          className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)] disabled:opacity-50 disabled:[box-shadow:none]"
         >
           {isPending ? "Creating…" : "Create Stack"}
         </Button>

@@ -28,12 +28,12 @@ export default async function BiomarkersPage() {
   }));
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Biomarkers"
         description="A cited reference for the markers you track."
       />
-      <Disclaimer />
+      <Disclaimer className="mb-6" />
       <Suspense>
         <BiomarkerBrowser biomarkers={biomarkers} />
       </Suspense>

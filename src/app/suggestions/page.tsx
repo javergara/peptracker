@@ -27,13 +27,13 @@ export default async function SuggestionsPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         title="Suggestions"
         description="Pick a goal to see matching peptides and stacks. Rule-based, from curated tags."
       />
       <Disclaimer className="mb-6" />
-      <div className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <Sparkles className="size-4" />
         Select a goal below
       </div>

@@ -1,6 +1,14 @@
-import { FlaskConical, Bell } from "lucide-react";
+import {
+  Check,
+  TriangleAlert,
+  CircleAlert,
+  FlaskConical,
+  Bell,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
+import { RangeTrack } from "@/components/common/range-track";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { DeleteLabButton } from "@/components/labs/delete-lab-button";
@@ -8,13 +16,7 @@ import { PanelEntryForm } from "@/components/labs/panel-entry-form";
 import { RecheckRow } from "@/components/labs/recheck-row";
 import { MarkerTimelineChart } from "@/components/metrics/marker-timeline-chart";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { addLab } from "@/lib/actions/labs";
 import { addLabReminder } from "@/lib/actions/labReminders";
 import {
@@ -26,7 +28,8 @@ import {
 } from "@/lib/queries";
 import { formatDate, toDateInputValue } from "@/lib/dates";
 import { SYSTEM_LABELS, BIOMARKER_SYSTEMS } from "@/types/biomarker";
-import { SYSTEM_BADGE } from "@/lib/constants";
+import { SYSTEM_BADGE, LAB_STATUS_STYLE } from "@/lib/constants";
+import { labStatus, LAB_STATUS_LABEL } from "@/lib/labs";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Labs & Bloodwork" };
@@ -36,7 +39,7 @@ const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 // ---------------------------------------------------------------------------
-// RangeBadge — preserved from original page
+// RangeBadge — preserved for per-entry detail rows
 // ---------------------------------------------------------------------------
 function RangeBadge({
   value,
@@ -70,7 +73,7 @@ function RangeBadge({
 }
 
 // ---------------------------------------------------------------------------
-// Delta badge — direction relative to in-range
+// DeltaBadge — direction relative to in-range
 // ---------------------------------------------------------------------------
 function DeltaBadge({
   first,
@@ -86,7 +89,6 @@ function DeltaBadge({
   const delta = latest - first;
   if (delta === 0) return null;
 
-  // "toward in-range" is good (green), "away" is amber
   const inRange = (v: number) => {
     if (refLow !== null && v < refLow) return false;
     if (refHigh !== null && v > refHigh) return false;
@@ -94,7 +96,6 @@ function DeltaBadge({
   };
   const firstIn = inRange(first);
   const latestIn = inRange(latest);
-  // moved from out → in = good, in → out = amber, both out = neutral amber
   const good = !firstIn && latestIn;
 
   const sign = delta > 0 ? "▲" : "▼";
@@ -113,6 +114,70 @@ function DeltaBadge({
       {sign} {display}
     </span>
   );
+}
+
+// ---------------------------------------------------------------------------
+// countLabStatuses — counts ok/borderline/bad across the latest reading of
+// each distinct marker that has a reference range.
+// ---------------------------------------------------------------------------
+function countLabStatuses(
+  latestByKey: Array<{
+    value: number;
+    refLow: number | null;
+    refHigh: number | null;
+  }>,
+) {
+  let ok = 0;
+  let borderline = 0;
+  let bad = 0;
+  for (const lab of latestByKey) {
+    const result = labStatus(lab.value, lab.refLow, lab.refHigh);
+    if (!result.hasRange) continue;
+    if (result.status === "ok") ok++;
+    else if (result.status === "borderline") borderline++;
+    else bad++;
+  }
+  return { ok, borderline, bad };
+}
+
+// ---------------------------------------------------------------------------
+// RefRangeCaption — "ref X–Y unit" or "optimal < X" / "optimal > X"
+// ---------------------------------------------------------------------------
+function RefRangeCaption({
+  refLow,
+  refHigh,
+  unit,
+}: {
+  refLow: number | null;
+  refHigh: number | null;
+  unit: string | null;
+}) {
+  const u = unit ? ` ${unit}` : "";
+  if (refLow !== null && refHigh !== null) {
+    return (
+      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+        ref {refLow}–{refHigh}
+        {u}
+      </span>
+    );
+  }
+  if (refHigh !== null) {
+    return (
+      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+        optimal &lt; {refHigh}
+        {u}
+      </span>
+    );
+  }
+  if (refLow !== null) {
+    return (
+      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+        optimal &gt; {refLow}
+        {u}
+      </span>
+    );
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -160,7 +225,6 @@ export default async function LabsPage() {
   function getSystem(key: string): string {
     const bm = bmMap.get(key);
     if (bm) return bm.system;
-    // Try to match by marker name if slug lookup fails
     return "OTHER";
   }
 
@@ -182,202 +246,72 @@ export default async function LabsPage() {
   const pendingReminders = reminders.filter((r) => !r.completedAt);
   const completedReminders = reminders.filter((r) => r.completedAt);
 
+  // Compute count tiles: latest reading per marker
+  const latestReadings = [...byKey.values()].map((rows) => {
+    const latest = rows[rows.length - 1];
+    return {
+      value: latest.value,
+      refLow: latest.refLow,
+      refHigh: latest.refHigh,
+    };
+  });
+  const statusCounts = countLabStatuses(latestReadings);
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Labs & Bloodwork"
-        description="Track biomarker trends alongside your peptide cycles."
+        description="Bloodwork markers against reference ranges."
         accentColor={profileColor}
       />
 
       <Disclaimer className="mb-6" />
 
       {/* ------------------------------------------------------------------ */}
-      {/* ENTRY SECTION                                                        */}
+      {/* COUNT TILES                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <div className="mb-8 grid gap-6 lg:grid-cols-2">
-        {/* Log a panel */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FlaskConical className="size-4" />
-              Log a panel
-            </CardTitle>
-            <CardDescription>
-              Enter results from a full blood panel at once. Fill in only the
-              markers you have — empty fields are skipped.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PanelEntryForm
-              biomarkers={biomarkers.map((b) => ({
-                slug: b.slug,
-                name: b.name,
-                system: b.system,
-                unit: b.unit,
-              }))}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Add a single result */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FlaskConical className="size-4" />
-              Add a single result
-            </CardTitle>
-            <CardDescription>
-              Log one marker. Choose a catalog entry to auto-fill unit and
-              reference range, or enter a custom marker name.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ActionForm
-              action={addLab}
-              success="Lab result added"
-              className="grid gap-4 sm:grid-cols-2"
-            >
-              {/* Biomarker select */}
-              <div className="space-y-1.5 sm:col-span-2">
-                <label htmlFor="lab-biomarker" className="text-sm font-medium">
-                  Catalog marker
-                </label>
-                <select
-                  id="lab-biomarker"
-                  name="biomarkerSlug"
-                  defaultValue=""
-                  className={inputCls}
-                >
-                  <option value="">— custom entry —</option>
-                  {BIOMARKER_SYSTEMS.map((sys) => {
-                    const group = biomarkers.filter((b) => b.system === sys);
-                    if (group.length === 0) return null;
-                    return (
-                      <optgroup key={sys} label={SYSTEM_LABELS[sys]}>
-                        {group.map((b) => (
-                          <option key={b.slug} value={b.slug}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    );
-                  })}
-                </select>
+      {hasLabs && (
+        <div className="mb-6 flex flex-wrap gap-3">
+          {/* In range */}
+          <div className="card-surface flex flex-1 items-center gap-3 rounded-2xl px-4 py-3.5">
+            <div className="bg-ok-wash text-ok flex size-[38px] shrink-0 items-center justify-center rounded-[10px]">
+              <Check className="size-[18px]" strokeWidth={2} />
+            </div>
+            <div>
+              <div className="num text-foreground text-[22px] leading-none font-semibold">
+                {statusCounts.ok}
               </div>
+              <div className="eyebrow mt-1">in range</div>
+            </div>
+          </div>
 
-              {/* Custom marker name (free-form fallback) */}
-              <div className="space-y-1.5 sm:col-span-2">
-                <label htmlFor="lab-marker" className="text-sm font-medium">
-                  Marker name{" "}
-                  <span className="text-muted-foreground font-normal">
-                    (required for custom)
-                  </span>
-                </label>
-                <input
-                  id="lab-marker"
-                  name="marker"
-                  placeholder="e.g. IGF-1, Free T, HbA1c"
-                  className={inputCls}
-                />
+          {/* Borderline */}
+          <div className="card-surface flex flex-1 items-center gap-3 rounded-2xl px-4 py-3.5">
+            <div className="bg-warn-wash text-warn-foreground flex size-[38px] shrink-0 items-center justify-center rounded-[10px]">
+              <TriangleAlert className="size-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <div className="num text-foreground text-[22px] leading-none font-semibold">
+                {statusCounts.borderline}
               </div>
+              <div className="eyebrow mt-1">borderline</div>
+            </div>
+          </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="lab-value" className="text-sm font-medium">
-                  Value <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="lab-value"
-                  name="value"
-                  type="number"
-                  step="any"
-                  inputMode="decimal"
-                  required
-                  placeholder="0"
-                  className={inputCls}
-                />
+          {/* Out of range */}
+          <div className="card-surface flex flex-1 items-center gap-3 rounded-2xl px-4 py-3.5">
+            <div className="bg-bad-wash text-bad flex size-[38px] shrink-0 items-center justify-center rounded-[10px]">
+              <CircleAlert className="size-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <div className="num text-foreground text-[22px] leading-none font-semibold">
+                {statusCounts.bad}
               </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="lab-unit" className="text-sm font-medium">
-                  Unit{" "}
-                  <span className="text-muted-foreground font-normal">
-                    (auto-filled from catalog)
-                  </span>
-                </label>
-                <input
-                  id="lab-unit"
-                  name="unit"
-                  placeholder="ng/mL, pg/mL…"
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="lab-low" className="text-sm font-medium">
-                  Ref Low
-                </label>
-                <input
-                  id="lab-low"
-                  name="refLow"
-                  type="number"
-                  step="any"
-                  inputMode="decimal"
-                  placeholder="optional"
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="lab-high" className="text-sm font-medium">
-                  Ref High
-                </label>
-                <input
-                  id="lab-high"
-                  name="refHigh"
-                  type="number"
-                  step="any"
-                  inputMode="decimal"
-                  placeholder="optional"
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="lab-date" className="text-sm font-medium">
-                  Date taken
-                </label>
-                <input
-                  id="lab-date"
-                  name="takenAt"
-                  type="date"
-                  defaultValue={today}
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="lab-notes" className="text-sm font-medium">
-                  Notes
-                </label>
-                <input
-                  id="lab-notes"
-                  name="notes"
-                  placeholder="optional"
-                  className={inputCls}
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <SubmitButton>
-                  <FlaskConical className="size-4" />
-                  Add result
-                </SubmitButton>
-              </div>
-            </ActionForm>
-          </CardContent>
-        </Card>
-      </div>
+              <div className="eyebrow mt-1">out of range</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* RESULTS grouped by system → marker                                  */}
@@ -386,13 +320,20 @@ export default async function LabsPage() {
         <EmptyState
           icon={<FlaskConical className="size-6" />}
           title="No lab results yet"
-          description="Log a panel or add a single result above to start tracking biomarker trends."
+          description="Log a panel or add a single result below to start tracking biomarker trends."
         />
       ) : (
         <div className="space-y-8">
           {BIOMARKER_SYSTEMS.map((sys) => {
             const keys = bySystem.get(sys) ?? [];
             if (keys.length === 0) return null;
+
+            // Separate keys with range (for the track list) from those without
+            const keysWithRange = keys.filter((key) => {
+              const rows = byKey.get(key)!;
+              const latest = rows[rows.length - 1];
+              return latest.refLow !== null || latest.refHigh !== null;
+            });
 
             return (
               <section key={sys} aria-labelledby={`section-${sys}`}>
@@ -414,10 +355,83 @@ export default async function LabsPage() {
                   </span>
                 </div>
 
+                {/* Reference-range track list (markers with a range) */}
+                {keysWithRange.length > 0 && (
+                  <div className="card-surface mb-4 rounded-[18px] px-[22px] py-2">
+                    {keysWithRange.map((key, i) => {
+                      const rows = byKey.get(key)!;
+                      const latest = rows[rows.length - 1];
+                      const bm = bmMap.get(key);
+                      const markerName = bm?.name ?? latest.marker;
+                      const rail = labStatus(
+                        latest.value,
+                        latest.refLow,
+                        latest.refHigh,
+                      );
+                      const style = LAB_STATUS_STYLE[rail.status];
+                      const statusLabel = LAB_STATUS_LABEL[rail.status];
+
+                      return (
+                        <div
+                          key={key}
+                          className={cn(
+                            "grid items-center gap-[18px] py-[15px]",
+                            "grid-cols-1 sm:grid-cols-[185px_1fr_132px]",
+                            i < keysWithRange.length - 1 &&
+                              "border-b border-[#F4F1FA] dark:border-white/5",
+                          )}
+                        >
+                          {/* LEFT: name + ref caption */}
+                          <div>
+                            <div className="text-foreground text-sm font-medium">
+                              {markerName}
+                            </div>
+                            <RefRangeCaption
+                              refLow={latest.refLow}
+                              refHigh={latest.refHigh}
+                              unit={latest.unit}
+                            />
+                          </div>
+
+                          {/* MIDDLE: range track rail */}
+                          <RangeTrack
+                            value={latest.value}
+                            refLow={latest.refLow}
+                            refHigh={latest.refHigh}
+                          />
+
+                          {/* RIGHT: value + status */}
+                          <div className="text-right sm:text-right">
+                            <span className="num text-foreground text-lg font-semibold">
+                              {latest.value}
+                            </span>
+                            {latest.unit ? (
+                              <span
+                                className="ml-1 text-[11px]"
+                                style={{ color: "#8B86AD" }}
+                              >
+                                {latest.unit}
+                              </span>
+                            ) : null}
+                            <div
+                              className={cn(
+                                "text-[11px] font-medium",
+                                style.text,
+                              )}
+                            >
+                              {statusLabel}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Per-marker detail cards with timeline charts */}
                 <div className="grid gap-4">
                   {keys.map((key) => {
                     const rows = byKey.get(key)!;
-                    // rows are oldest → newest from listLabs()
                     const first = rows[0];
                     const latest = rows[rows.length - 1];
                     const bm = bmMap.get(key);
@@ -428,11 +442,17 @@ export default async function LabsPage() {
                     }));
 
                     return (
-                      <Card key={key}>
-                        <CardHeader>
+                      <div key={key} className="card-surface rounded-2xl">
+                        {/* Card header */}
+                        <div className="border-border border-b px-5 pt-4 pb-3">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                              <CardTitle>{bm?.name ?? latest.marker}</CardTitle>
+                              <Eyebrow className="mb-1">
+                                {SYSTEM_LABELS[sys]}
+                              </Eyebrow>
+                              <h3 className="text-base font-semibold tracking-tight">
+                                {bm?.name ?? latest.marker}
+                              </h3>
                               {latest.unit ? (
                                 <span className="text-muted-foreground text-xs">
                                   {latest.unit}
@@ -459,16 +479,17 @@ export default async function LabsPage() {
                             </div>
                           </div>
                           {latest.refLow !== null || latest.refHigh !== null ? (
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-muted-foreground mt-1 text-xs">
                               Reference range:{" "}
                               {latest.refLow !== null ? latest.refLow : "—"} –{" "}
                               {latest.refHigh !== null ? latest.refHigh : "—"}
                               {latest.unit ? ` ${latest.unit}` : ""}
                             </p>
                           ) : null}
-                        </CardHeader>
+                        </div>
 
-                        <CardContent>
+                        {/* Card body */}
+                        <div className="px-5 pt-4 pb-4">
                           {/* Timeline chart when ≥2 readings */}
                           {rows.length >= 2 ? (
                             <div className="mb-4">
@@ -523,8 +544,8 @@ export default async function LabsPage() {
                               </div>
                             ))}
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -535,33 +556,228 @@ export default async function LabsPage() {
       )}
 
       {/* ------------------------------------------------------------------ */}
+      {/* ENTRY SECTION                                                        */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="mt-10 space-y-2">
+        <Eyebrow className="mb-3">Add results</Eyebrow>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Log a panel */}
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1">Panel entry</Eyebrow>
+              <h2 className="text-base font-semibold tracking-tight">
+                Log a panel
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Enter results from a full blood panel at once. Fill in only the
+                markers you have — empty fields are skipped.
+              </p>
+            </div>
+            <div className="px-5 py-4">
+              <PanelEntryForm
+                biomarkers={biomarkers.map((b) => ({
+                  slug: b.slug,
+                  name: b.name,
+                  system: b.system,
+                  unit: b.unit,
+                }))}
+              />
+            </div>
+          </div>
+
+          {/* Add a single result */}
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1">Single result</Eyebrow>
+              <h2 className="text-base font-semibold tracking-tight">
+                Add a single result
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Log one marker. Choose a catalog entry to auto-fill unit and
+                reference range, or enter a custom marker name.
+              </p>
+            </div>
+            <div className="px-5 py-4">
+              <ActionForm
+                action={addLab}
+                success="Lab result added"
+                className="grid gap-4 sm:grid-cols-2"
+              >
+                {/* Biomarker select */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label
+                    htmlFor="lab-biomarker"
+                    className="text-sm font-medium"
+                  >
+                    Catalog marker
+                  </label>
+                  <select
+                    id="lab-biomarker"
+                    name="biomarkerSlug"
+                    defaultValue=""
+                    className={inputCls}
+                  >
+                    <option value="">— custom entry —</option>
+                    {BIOMARKER_SYSTEMS.map((sys) => {
+                      const group = biomarkers.filter((b) => b.system === sys);
+                      if (group.length === 0) return null;
+                      return (
+                        <optgroup key={sys} label={SYSTEM_LABELS[sys]}>
+                          {group.map((b) => (
+                            <option key={b.slug} value={b.slug}>
+                              {b.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Custom marker name (free-form fallback) */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label htmlFor="lab-marker" className="text-sm font-medium">
+                    Marker name{" "}
+                    <span className="text-muted-foreground font-normal">
+                      (required for custom)
+                    </span>
+                  </label>
+                  <input
+                    id="lab-marker"
+                    name="marker"
+                    placeholder="e.g. IGF-1, Free T, HbA1c"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-value" className="text-sm font-medium">
+                    Value <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="lab-value"
+                    name="value"
+                    type="number"
+                    step="any"
+                    inputMode="decimal"
+                    required
+                    placeholder="0"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-unit" className="text-sm font-medium">
+                    Unit{" "}
+                    <span className="text-muted-foreground font-normal">
+                      (auto-filled from catalog)
+                    </span>
+                  </label>
+                  <input
+                    id="lab-unit"
+                    name="unit"
+                    placeholder="ng/mL, pg/mL…"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-low" className="text-sm font-medium">
+                    Ref Low
+                  </label>
+                  <input
+                    id="lab-low"
+                    name="refLow"
+                    type="number"
+                    step="any"
+                    inputMode="decimal"
+                    placeholder="optional"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-high" className="text-sm font-medium">
+                    Ref High
+                  </label>
+                  <input
+                    id="lab-high"
+                    name="refHigh"
+                    type="number"
+                    step="any"
+                    inputMode="decimal"
+                    placeholder="optional"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-date" className="text-sm font-medium">
+                    Date taken
+                  </label>
+                  <input
+                    id="lab-date"
+                    name="takenAt"
+                    type="date"
+                    defaultValue={today}
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="lab-notes" className="text-sm font-medium">
+                    Notes
+                  </label>
+                  <input
+                    id="lab-notes"
+                    name="notes"
+                    placeholder="optional"
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <SubmitButton>
+                    <FlaskConical className="size-4" />
+                    Add result
+                  </SubmitButton>
+                </div>
+              </ActionForm>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ------------------------------------------------------------------ */}
       {/* RECHECKS                                                             */}
       {/* ------------------------------------------------------------------ */}
       <section className="mt-10" aria-labelledby="rechecks-heading">
-        <div className="mb-4 flex items-center gap-2">
-          <h2
-            id="rechecks-heading"
-            className="text-base font-semibold tracking-tight"
-          >
-            Lab recheck reminders
-          </h2>
+        <div className="mb-3 flex items-center gap-2">
+          <Eyebrow>Recheck reminders</Eyebrow>
           {pendingReminders.length > 0 ? (
             <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">
               {pendingReminders.length} pending
             </span>
           ) : null}
         </div>
+        <h2
+          id="rechecks-heading"
+          className="mb-4 text-base font-semibold tracking-tight"
+        >
+          Lab recheck reminders
+        </h2>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Schedule form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1">Schedule</Eyebrow>
+              <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight">
                 <Bell className="size-4" />
                 Schedule a recheck
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="px-5 py-4">
               <ActionForm
                 action={addLabReminder}
                 success="Reminder scheduled"
@@ -654,15 +870,18 @@ export default async function LabsPage() {
                   </SubmitButton>
                 </div>
               </ActionForm>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Reminders list */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming &amp; past</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1">Upcoming &amp; past</Eyebrow>
+              <h3 className="text-base font-semibold tracking-tight">
+                Reminders
+              </h3>
+            </div>
+            <div className="px-5 py-4">
               {reminders.length === 0 ? (
                 <EmptyState
                   icon={<Bell className="size-5" />}
@@ -671,7 +890,6 @@ export default async function LabsPage() {
                 />
               ) : (
                 <div className="divide-y">
-                  {/* Pending (due first) */}
                   {pendingReminders.map((r) => (
                     <RecheckRow
                       key={r.id}
@@ -688,7 +906,6 @@ export default async function LabsPage() {
                       isOverdue={r.dueAt <= now}
                     />
                   ))}
-                  {/* Completed (struck-through, below) */}
                   {completedReminders.map((r) => (
                     <RecheckRow
                       key={r.id}
@@ -707,8 +924,8 @@ export default async function LabsPage() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </section>
     </div>

@@ -1,9 +1,9 @@
 import { Camera } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { PhotoBoard } from "@/components/photos/photo-board";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { uploadPhoto } from "@/lib/actions/photos";
 import { listPhotos, getCurrentUser } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
@@ -33,11 +33,17 @@ export default async function PhotosPage() {
       />
 
       {/* Upload form */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Add a photo</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="card-surface mb-8 rounded-2xl">
+        <div className="border-border border-b px-5 pt-4 pb-3">
+          <Eyebrow className="mb-1">Upload</Eyebrow>
+          <h2 className="text-base font-semibold tracking-tight">
+            Add a photo
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Photos are stored privately and never shared.
+          </p>
+        </div>
+        <div className="px-5 py-4">
           <ActionForm
             action={uploadPhoto}
             success="Photo uploaded"
@@ -88,8 +94,8 @@ export default async function PhotosPage() {
               </SubmitButton>
             </div>
           </ActionForm>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Before/After (selectable) + zoomable gallery */}
       <PhotoBoard photos={items} />

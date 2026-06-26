@@ -200,13 +200,34 @@ strings (Neon) — see `.env.example`.
   lives in `src/proxy.ts` (Next 16 renamed `middleware`→`proxy`); auth config is
   split into edge-safe `src/auth.config.ts` + full `src/auth.ts`.
 - **Disclaimer** must appear on peptide/stack/suggestion surfaces.
-- **Design system (Peptra — violet).** Brand: indigo→violet→orchid
-  (`#4F46E5`/`#7C3AED`/`#A855F7`), Ink `#16102E`, amber `#F59E0B` for
-  alerts/warnings only. Colors live as CSS variables in `src/app/globals.css`
-  (`:root` light + `.dark`) and flow through Tailwind v4 `@theme inline`. NEVER
-  hardcode hex/oklch in components — use tokens (`bg-primary`,
-  `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`, `sidebar-*`).
-  `--radius: 0.75rem`.
+- **Design system (Peptra — violet · "Clinical Instrument").** Brand:
+  indigo→violet→orchid (`#4F46E5`/`#7C3AED`/`#A855F7`), Ink `#16102E`, amber
+  `#F59E0B` for alerts/warnings only. The field is a warm violet-tinted off-white
+  (`--background #F7F6FB`); cards are pure white with a cool hairline
+  (`--border #ECE8F7`) and a soft depth shadow. Colors live as CSS variables in
+  `src/app/globals.css` (`:root` light + `.dark`) and flow through Tailwind v4
+  `@theme inline`. NEVER hardcode hex/oklch in components — use tokens
+  (`bg-primary`, `text-muted-foreground`, `bg-card`, `border`, `chart-1..5`,
+  `sidebar-*`). `--radius: 0.75rem`.
+- **Clinical status colors (the ONE brand exception).** Labs/Inventory in/out-of-
+  range signalling uses dedicated tokens — green `--ok`, amber `--warn`
+  (+`--warn-foreground`), red `--bad`, slate `--sealed`, each with a `-wash`
+  variant (e.g. `bg-ok-wash text-ok`). These are **clinical-only**: never use
+  green/red on brand surfaces. Mapped in `LAB_STATUS_STYLE` / `VIAL_STATUS_STYLE`
+  (`src/lib/constants.ts`). Amber stays reserved for warnings everywhere else.
+- **Surface helpers + primitives.** `globals.css` exposes the layered-surface
+  vocabulary as tokens/utilities: gradients `--gradient-ink-panel` /
+  `--gradient-ink-strip` / `--gradient-ink-bar` (mobile tab bar) /
+  `--gradient-gauge` (violet progress fills), shadows `--shadow-card` /
+  `--shadow-card-hover`, and the `@utility eyebrow` (mono-uppercase section label)
+  - `@utility card-surface` (white card + hairline + soft shadow). The reusable
+    presentational primitives live in `src/components/common/`: `InkPanel`
+    (dark data-readout panel — dashboard hero, inventory summary strip, correlation
+    result), `AdherenceRing` (SVG donut gauge), `Sparkline`/`MiniBars` (inline stat
+    trends), `VialGauge` (drawn vial w/ fill, driven by `vials.ts`), `RangeTrack`
+    (lab reference-range rail, driven by `labStatus` in `src/lib/labs.ts`), and
+    `Eyebrow`. SVG gauges use `useId` for gradient/clip ids (so they're `"use
+client"`). Reuse these; don't reinvent gauges/panels.
 - **Type system:** `font-display` = Space Grotesk (headings/wordmark; h1–h3 get it
   via a base rule + CardTitle), `font-sans` = IBM Plex Sans (body), `font-mono` =
   IBM Plex Mono. **Numbers render in mono + tabular** — use the `num` utility
@@ -217,7 +238,10 @@ strings (Neon) — see `.env.example`.
   tokens to a dark violet scale so any child (nav, profile switcher, account menu,
   disclaimer) reads correctly on the rail without per-component edits. Applied to
   the `<aside>` + mobile `SheetContent` in `app-shell.tsx`. Sidebar nav is grouped:
-  Overview · Tracking · Health · Library · Settings.
+  Overview · Tracking · Health · Library · Settings. On mobile (`<lg`) an **Ink
+  bottom tab bar** (`MobileTabBar` in `app-shell.tsx`, `--gradient-ink-bar`) gives
+  quick access to Home/Log/Calendar/Metrics; the hamburger `Sheet` stays for full
+  nav. `main` gets extra bottom padding on mobile so content clears the bar.
 - **Logo:** `src/components/brand/peptra-logo.tsx` — `PeptraMark` (gradient SVG,
   unique ids via `useId`) + `PeptraLogo` (mark + wordmark). App icon/favicon =
   `src/app/icon.svg`; PWA = `src/app/manifest.ts`. App name in `APP_NAME`.

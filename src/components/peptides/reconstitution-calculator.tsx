@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { FlaskConical, Save } from "lucide-react";
 import { toast } from "sonner";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { Button } from "@/components/ui/button";
 import { calculateReconstitution } from "@/lib/reconstitution";
 import { createVial } from "@/lib/actions/vials";
@@ -62,14 +62,15 @@ export function ReconstitutionCalculator({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FlaskConical className="size-4" />
-          Reconstitution Calculator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+      <Eyebrow className="mb-4">
+        <span className="flex items-center gap-2">
+          <FlaskConical className="size-3.5" />
+          RECONSTITUTION CALCULATOR
+        </span>
+      </Eyebrow>
+
+      <div className="space-y-5">
         {/* Inputs */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
@@ -130,20 +131,26 @@ export function ReconstitutionCalculator({
 
         {/* Results */}
         {hasResult ? (
-          <div className="bg-muted/50 grid grid-cols-2 gap-3 rounded-xl p-4 sm:grid-cols-4">
+          <div className="bg-accent/50 grid grid-cols-2 gap-3 rounded-xl p-4 sm:grid-cols-4">
             <ResultItem
-              label="Concentration"
-              value={`${result.concentrationMcgPerMl} mcg/mL`}
+              label="CONCENTRATION"
+              value={`${result.concentrationMcgPerMl}`}
+              unit="mcg/mL"
               sub={`${result.concentrationMgPerMl} mg/mL`}
             />
-            <ResultItem label="Draw volume" value={`${result.drawMl} mL`} />
             <ResultItem
-              label="Insulin units"
-              value={`${result.insulinUnits} U`}
-              sub="(U-100 syringe)"
+              label="DRAW VOLUME"
+              value={`${result.drawMl}`}
+              unit="mL"
             />
             <ResultItem
-              label="Doses per vial"
+              label="INSULIN UNITS"
+              value={`${result.insulinUnits}`}
+              unit="U"
+              sub="U-100 syringe"
+            />
+            <ResultItem
+              label="DOSES / VIAL"
               value={String(result.dosesPerVial)}
             />
           </div>
@@ -167,27 +174,33 @@ export function ReconstitutionCalculator({
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 function ResultItem({
   label,
   value,
+  unit,
   sub,
 }: {
   label: string;
   value: string;
+  unit?: string;
   sub?: string;
 }) {
   return (
     <div className="space-y-0.5 text-center">
-      <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        {label}
-      </p>
-      <p className="text-foreground text-lg font-semibold tabular-nums">
-        {value}
+      <p className="eyebrow text-[#8B86AD]">{label}</p>
+      <p className="text-foreground text-lg font-semibold">
+        <span className="num">{value}</span>
+        {unit && (
+          <span className="text-muted-foreground ml-0.5 text-xs font-normal">
+            {" "}
+            {unit}
+          </span>
+        )}
       </p>
       {sub && <p className="text-muted-foreground text-xs">{sub}</p>}
     </div>

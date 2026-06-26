@@ -115,7 +115,7 @@ export function SupplementRow({
 
   return (
     <div
-      className={`rounded-xl border px-4 py-3 transition-opacity ${
+      className={`px-5 py-4 transition-opacity first:rounded-t-2xl last:rounded-b-2xl ${
         isInactive ? "opacity-60" : ""
       }`}
     >
@@ -140,10 +140,14 @@ export function SupplementRow({
             </div>
             <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
               {s.dose || s.frequency ? (
-                <span>{[s.dose, s.frequency].filter(Boolean).join(" · ")}</span>
+                <span className="num">
+                  {[s.dose, s.frequency].filter(Boolean).join(" · ")}
+                </span>
               ) : null}
               <span className="text-muted-foreground/60">·</span>
-              <span>{formatDateRange(s.startDate, s.endDate)}</span>
+              <span className="num">
+                {formatDateRange(s.startDate, s.endDate)}
+              </span>
             </div>
             {s.notes ? (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">

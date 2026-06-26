@@ -2,12 +2,14 @@ import Link from "next/link";
 import { CalendarRange, Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, listCycles } from "@/lib/queries";
+import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Cycles" };
 
@@ -22,7 +24,8 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default async function CyclesPage() {
   const [user, cycles] = await Promise.all([getCurrentUser(), listCycles()]);
-  const accent = user.color ?? undefined;
+  const accent = user.color ?? "#7C3AED";
+  const now = new Date();
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -31,7 +34,10 @@ export default async function CyclesPage() {
         description={`${user.name}'s peptide protocols and their progress.`}
         accentColor={accent}
         actions={
-          <Button render={<Link href="/cycles/new" />}>
+          <Button
+            className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)]"
+            render={<Link href="/cycles/new" />}
+          >
             <Plus className="size-4" />
             New cycle
           </Button>
@@ -49,37 +55,83 @@ export default async function CyclesPage() {
         />
       ) : (
         <div className="grid gap-3">
-          {cycles.map((c) => (
-            <Card
-              key={c.id}
-              className="hover:border-primary/40 border-l-4 transition-colors"
-              style={accent ? { borderLeftColor: accent } : undefined}
-            >
-              <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <Link
-                    href={`/cycles/${c.id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {c.name}
-                  </Link>
-                  <p className="text-muted-foreground text-sm">
-                    {c.peptide?.name ?? c.stack?.name ?? "—"} ·{" "}
-                    {formatDate(c.startDate)}
-                    {c.endDate ? ` → ${formatDate(c.endDate)}` : ""}
-                  </p>
+          {cycles.map((c) => {
+            const prog = cycleProgress(c.startDate, c.endDate, now);
+            const pct = prog.percent ?? 0;
+            const weekNum =
+              prog.daysElapsed > 0 ? Math.ceil((prog.daysElapsed + 1) / 7) : 1;
+            const totalWeeks =
+              prog.totalDays != null ? Math.ceil(prog.totalDays / 7) : null;
+            const cfg = c.scheduleConfig as ScheduleConfig | null;
+
+            return (
+              <Link
+                key={c.id}
+                href={`/cycles/${c.id}`}
+                className={cn(
+                  "card-surface block rounded-[18px] p-5 no-underline transition-shadow hover:[box-shadow:var(--shadow-card-hover)]",
+                )}
+                style={{ borderLeft: `4px solid ${accent}` }}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  {/* Left: name + subtitle */}
+                  <div className="min-w-0">
+                    <Eyebrow className="mb-1">
+                      {c.peptide?.name ?? c.stack?.name ?? "Protocol"}
+                    </Eyebrow>
+                    <p className="font-display text-foreground text-[15px] font-semibold">
+                      {c.name}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-[12px]">
+                      {formatDate(c.startDate)}
+                      {c.endDate ? ` → ${formatDate(c.endDate)}` : ""}
+                      {cfg?.frequency ? ` · ${cfg.frequency}` : ""}
+                    </p>
+                  </div>
+
+                  {/* Right: dose count + status */}
+                  <div className="flex shrink-0 items-center gap-3">
+                    <div className="text-right">
+                      <span className="num text-foreground text-[22px] leading-none font-semibold">
+                        {c._count.doseLogs}
+                      </span>
+                      <p className="text-muted-foreground text-[11px]">doses</p>
+                    </div>
+                    <Badge variant="outline" className={STATUS_BADGE[c.status]}>
+                      {c.status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground text-xs">
-                    <span className="num">{c._count.doseLogs}</span> doses
-                  </span>
-                  <Badge variant="outline" className={STATUS_BADGE[c.status]}>
-                    {c.status}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                {/* Progress bar — only when there's an end date */}
+                {c.endDate ? (
+                  <div className="mt-4">
+                    <div className="mb-[5px] flex items-baseline justify-between">
+                      <span className="text-muted-foreground text-[11px]">
+                        Progress
+                      </span>
+                      <span className="num text-[11px] text-[#8B86AD]">
+                        {pct}%
+                        {totalWeeks != null
+                          ? ` · wk ${weekNum}/${totalWeeks}`
+                          : ""}
+                      </span>
+                    </div>
+                    <div className="bg-accent h-1.5 overflow-hidden rounded-full">
+                      <div
+                        className="h-full rounded-full [background:var(--gradient-gauge)]"
+                        style={{ width: `${pct}%` }}
+                        role="progressbar"
+                        aria-valuenow={pct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
