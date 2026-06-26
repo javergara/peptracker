@@ -168,6 +168,21 @@ strings (Neon) — see `.env.example`.
   it would let one account touch another's data. See `actions/{cycles,doses}.ts`.
 - **Reads go through `src/lib/queries.ts`**; import the client as
   `import { prisma } from "@/lib/db"`.
+- **Caching (Neon free tier is compute/CU-hour bound — minimize round-trips).**
+  Two layers, applied deliberately:
+  - **Per-request dedupe:** `getActiveUser`/`getAccountId` (`active-user.ts`) are
+    wrapped in React `cache()`, so the many read fns that resolve the active
+    profile do **one** session+profile lookup per render/action, not one each.
+    These are per-request only — never cross-request (a global cache would leak
+    one account's profile to another). Don't re-wrap or assume them uncached.
+  - **Cross-request cache for GLOBAL, seed-only data:** the peptide library,
+    biomarker catalog, and interaction edges go through `unstable_cache`
+    (`next/cache`, 1h `revalidate` + `tags`) in `queries.ts` — served from Next's
+    data cache instead of hitting Neon every view. Rule of thumb: **cache global
+    reference reads; never cache user-scoped reads.** **Stacks are intentionally
+    NOT cached** — `Stack.userId` exists and stacks are user-created in the
+    builder, so caching could hide a freshly built stack. After `db:seed` adds
+    catalog rows they appear within ≤1h (or immediately on redeploy).
 - **Form feedback:** wrap server-action add/edit forms in `ActionForm` +
   `SubmitButton` (`src/components/common/action-form.tsx`) — pending-disable +
   spinner, success toast, and the thrown error shown as a toast. Don't use bare
@@ -254,7 +269,14 @@ client"`). Reuse these; don't reinvent gauges/panels.
   login-gated, account-scoped route **`/api/photos/[id]`** (streams the private
   blob via `get(path, { access: "private" })`); `<img src="/api/photos/<id>">`.
   Needs `BLOB_READ_WRITE_TOKEN` (auto on Vercel; `vercel env pull` locally). The
-  Vercel Blob store must be a **private** store.
+  Vercel Blob store must be a **private** store. Uploads are **compressed
+  client-side first** via `PhotoFileInput` (`src/components/photos/photo-file-input.tsx`):
+  it downscales (≤1600px) + re-encodes to WebP/JPEG (<~900 KB) in the browser and
+  feeds the result into a hidden `name="file"` input via `DataTransfer`, so the
+  `uploadPhoto` action is unchanged. This keeps Blob storage/transfer small (1 GB
+  free store) and keeps payloads under Next's server-action body limit
+  (`serverActions.bodySizeLimit: "4mb"` in `next.config.ts`, under Vercel's
+  ~4.5 MB function cap). Reuse this pattern for any future image/file upload.
 - **Never commit secrets or `.env`** (already gitignored). The generated Prisma
   client (`src/generated`) is gitignored — regenerate, don't commit.
 - Style is enforced by prettier + eslint (+ a defensive format hook).
@@ -267,6 +289,18 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
   (Neon pooled), `DIRECT_DATABASE_URL` (Neon unpooled, for migrate/seed),
   `AUTH_SECRET`, optional `AUTH_URL`, `BLOB_READ_WRITE_TOKEN`. See `.env.example`.
 - **Build command** (Vercel): `prisma migrate deploy && prisma generate && next build`.
+- **Free-tier capacity (binding constraints, all hard-pause/suspend — no overage).**
+  Ranked first-to-bite: (1) **Vercel Hobby = non-commercial only** — monetizing
+  requires Pro; (2) **Vercel Blob 1 GB** store ≈ ~500 photos total → ~50
+  photo-using users (mitigated by the client-side compression above); (3) **Neon
+  free** 0.5 GB storage + 100 CU-hrs/mo (autosuspends after 5 min idle, ~sub-sec
+  cold start) ≈ a few hundred light users; (4) **Blob transfer** 10 GB/mo;
+  Vercel compute/invocations/bandwidth (4 CPU-hrs / 1M invocations / 100 GB) have
+  slack to ~1–4k users. Practical envelope: **~100–300 concurrent** (Neon
+  compute-bound; Vercel allows 30k), **~200–400 total** light users (**~50** if
+  photo-heavy). The caching + photo-compression conventions above exist to push
+  these up. Keep this in mind before adding per-request DB reads or uncompressed
+  uploads. [[free-tier-capacity]]
 - **Auth:** Credentials (email + password, bcryptjs) with JWT sessions — no DB
   session table. `Account { email, passwordHash }` owns `User` profiles. Sign-up/
   login/logout actions in `src/lib/actions/auth.ts`; pages at `/login`, `/signup`;
