@@ -408,11 +408,13 @@ Delegate heavy work to the model-tiered subagents in `.claude/agents/` instead o
 doing it all inline:
 
 - **peptide-researcher** (opus) — web research + writes a peptide JSON.
+- **biomarker-researcher** (opus) — web research + writes a cited biomarker JSON
+  (`prisma/data/biomarkers/<slug>.json`) with sex/age-aware reference ranges.
 - **ui-builder** (sonnet) — builds pages/components in the design system.
 - **prisma-migrator** (sonnet) — schema edits + migrations + seed updates.
 - **code-reviewer** (haiku) — fast diff review incl. disclaimer policy.
 
 Subagents return **concise, structured results** (paths changed, decisions, next
 steps) — not full file dumps — so the main thread stays cheap. Prefer the skills
-in `.claude/skills/` (`/add-peptide`, `/add-stack`, `/new-feature`, `/db-migrate`,
-`/seed-refresh`) which orchestrate these agents.
+in `.claude/skills/` (`/add-peptide`, `/add-biomarker`, `/add-stack`, `/add-vial`,
+`/new-feature`, `/db-migrate`, `/seed-refresh`) which orchestrate these agents.
