@@ -10,6 +10,7 @@ import { logDose } from "@/lib/actions/doses";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { averageMood, moodFace } from "@/lib/mood";
+import { suggestNextSite } from "@/lib/sites";
 
 export interface CalendarDose {
   id: string;
@@ -39,6 +40,15 @@ function pad(n: number) {
 /** Compact peptide name for tight cells: drop any "(parenthetical)" / alias tail. */
 function shortPeptide(name: string) {
   return name.split(" (")[0].split(",")[0].trim();
+}
+
+/** Abbreviate an injection site for tight cells: "Abdomen L" -> "Abd L", "Love handle R" -> "LH R". */
+function shortSite(site: string) {
+  const side = site.match(/\s([LR])$/)?.[1] ?? "";
+  const base = site.replace(/\s[LR]$/, "");
+  const abbr =
+    base === "Love handle" ? "LH" : base === "Abdomen" ? "Abd" : base;
+  return side ? `${abbr} ${side}` : abbr;
 }
 
 /** Sort doses chronologically (by time, then logged order via id). */
@@ -131,6 +141,17 @@ export function DoseCalendar({
     isThisMonth ? todayDate : 1,
   );
   const selectedDoses = byDay.get(selected) ?? [];
+
+  // Site rotation hint (single-profile only): the most recent dose with a
+  // recorded site in this month drives the next suggested site.
+  const lastSite = multiProfile
+    ? null
+    : (doses
+        .filter((d) => d.site)
+        .slice()
+        .sort(byTime)
+        .at(-1)?.site ?? null);
+  const nextSite = lastSite ? suggestNextSite(lastSite) : null;
 
   const cells: (number | null)[] = [
     ...Array.from({ length: firstWeekday }, () => null),
@@ -271,20 +292,27 @@ export function DoseCalendar({
                     {dayDoses.slice(0, MAX).map((d) => (
                       <li
                         key={d.id}
-                        title={`${d.peptideName} — ${d.amount} ${d.unit}`}
-                        className="flex items-baseline gap-1 text-[10px] leading-tight"
+                        title={`${d.peptideName} — ${d.amount} ${d.unit}${d.site ? ` · ${d.site}` : ""}`}
+                        className="leading-tight"
                       >
-                        <span
-                          className="mt-[3px] size-1.5 shrink-0 self-start rounded-full"
-                          style={{ background: accent }}
-                        />
-                        <span className="min-w-0 flex-1 truncate">
-                          {shortPeptide(d.peptideName)}
-                        </span>
-                        <span className="num text-muted-foreground shrink-0">
-                          {d.amount}
-                          {d.unit}
-                        </span>
+                        <div className="flex items-baseline gap-1 text-[10px]">
+                          <span
+                            className="mt-[3px] size-1.5 shrink-0 self-start rounded-full"
+                            style={{ background: accent }}
+                          />
+                          <span className="min-w-0 flex-1 truncate">
+                            {shortPeptide(d.peptideName)}
+                          </span>
+                          <span className="num text-muted-foreground shrink-0">
+                            {d.amount}
+                            {d.unit}
+                          </span>
+                        </div>
+                        {d.site ? (
+                          <div className="text-muted-foreground/80 truncate pl-[10px] text-[9px]">
+                            {shortSite(d.site)}
+                          </div>
+                        ) : null}
                       </li>
                     ))}
                     {dayDoses.length > MAX ? (
@@ -363,6 +391,11 @@ export function DoseCalendar({
                         <span className="min-w-0 flex-1 truncate">
                           {shortPeptide(d.peptideName)}
                         </span>
+                        {d.site ? (
+                          <span className="text-muted-foreground/80 shrink-0 text-[10px]">
+                            {shortSite(d.site)}
+                          </span>
+                        ) : null}
                         <span className="num text-muted-foreground shrink-0">
                           {d.amount}
                           {d.unit}
@@ -383,6 +416,21 @@ export function DoseCalendar({
       </div>
 
       <aside className="space-y-3">
+        {nextSite ? (
+          <div className="card-surface rounded-[14px] p-3 [box-shadow:var(--shadow-card)]">
+            <div className="eyebrow text-[#9A95B8]">SITE ROTATION</div>
+            <div className="mt-1.5 flex items-baseline justify-between gap-2 text-sm">
+              <span className="text-muted-foreground text-xs">Last used</span>
+              <span className="text-foreground font-medium">{lastSite}</span>
+            </div>
+            <div className="mt-1 flex items-baseline justify-between gap-2 text-sm">
+              <span className="text-muted-foreground text-xs">
+                Next suggested
+              </span>
+              <span className="text-primary font-semibold">{nextSite}</span>
+            </div>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between">
           <div>
             <div className="eyebrow text-[#9A95B8]">SELECTED DAY</div>

@@ -71,6 +71,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SidebarCalculator } from "@/components/peptides/sidebar-calculator";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
 type NavGroup = { label: string | null; items: NavItem[] };
@@ -151,6 +152,12 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           })}
         </div>
       ))}
+      <div className="flex flex-col gap-1">
+        <p className="text-muted-foreground/70 px-3 pt-1 pb-0.5 text-[0.7rem] font-semibold tracking-wider uppercase">
+          Tools
+        </p>
+        <SidebarCalculator />
+      </div>
     </nav>
   );
 }

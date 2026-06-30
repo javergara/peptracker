@@ -167,7 +167,12 @@ strings (Neon) — see `.env.example`.
   with `{ id, userId }` and check `.count`). Never mutate a row by raw `id` alone —
   it would let one account touch another's data. See `actions/{cycles,doses}.ts`.
 - **Reads go through `src/lib/queries.ts`**; import the client as
-  `import { prisma } from "@/lib/db"`.
+  `import { prisma } from "@/lib/db"`. **Always give date-bearing list reads an
+  explicit `orderBy`** (never rely on insertion order) — date-keyed records
+  (doses, vials, measurements, labs, supplements, reminders, exports) sort by
+  their natural date field with a stable tiebreaker (e.g. doses
+  `[{ takenAt }, { createdAt }]`); pending-before-completed lists use
+  `{ completedAt: { sort: "asc", nulls: "first" } }`.
 - **Caching (Neon free tier is compute/CU-hour bound — minimize round-trips).**
   Two layers, applied deliberately:
   - **Per-request dedupe:** `getActiveUser`/`getAccountId` (`active-user.ts`) are
@@ -253,7 +258,11 @@ client"`). Reuse these; don't reinvent gauges/panels.
   tokens to a dark violet scale so any child (nav, profile switcher, account menu,
   disclaimer) reads correctly on the rail without per-component edits. Applied to
   the `<aside>` + mobile `SheetContent` in `app-shell.tsx`. Sidebar nav is grouped:
-  Overview · Tracking · Health · Library · Settings. On mobile (`<lg`) an **Ink
+  Overview · Tracking · Health · Library · Settings · **Tools**. The Tools group
+  holds **`SidebarCalculator`** (`src/components/peptides/sidebar-calculator.tsx`)
+  — a nav-styled trigger that opens the `ReconstitutionCalculator` in a centered
+  dialog for quick reconstitution math from anywhere (generic, no `peptideId`).
+  On mobile (`<lg`) an **Ink
   bottom tab bar** (`MobileTabBar` in `app-shell.tsx`, `--gradient-ink-bar`) gives
   quick access to Home/Log/Calendar/Metrics; the hamburger `Sheet` stays for full
   nav. `main` gets extra bottom padding on mobile so content clears the bar.
@@ -451,6 +460,11 @@ typical**, not authoritative (they vary by lab/assay).
   `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
   `src/lib/stats.ts`, pairs by nearest date within 14 days). The page builds one
   `TrendSeries[]` from measurement types + mood + energy + lab markers.
+- **Injection-site rotation (calendar):** `dose-calendar.tsx` shows each dose's
+  `site` (abbreviated via `shortSite`) in the day cells (desktop grid + mobile
+  agenda) and a **SITE ROTATION** panel in the sidebar — last-used site + next
+  suggested via `suggestNextSite` (`src/lib/sites.ts`). Single-profile only;
+  derived from the most recent sited dose in the visible month.
 - **Mood visualization:** logged 1–5 mood ratings render as emoji faces via
   `src/lib/mood.ts` (`moodFace`/`averageMood`) on the calendar day cells + detail
   (`dose-calendar.tsx`); on `/metrics` mood is a toggleable line in `MetricsTrends`.

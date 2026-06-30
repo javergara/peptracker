@@ -38,10 +38,22 @@ export async function exportUserData() {
   const user = await getCurrentUser();
   const [cycles, doseLogs, measurements, journal, customStacks] =
     await Promise.all([
-      prisma.cycle.findMany({ where: { userId: user.id } }),
-      prisma.doseLog.findMany({ where: { userId: user.id } }),
-      prisma.measurement.findMany({ where: { userId: user.id } }),
-      prisma.journalEntry.findMany({ where: { userId: user.id } }),
+      prisma.cycle.findMany({
+        where: { userId: user.id },
+        orderBy: { startDate: "asc" },
+      }),
+      prisma.doseLog.findMany({
+        where: { userId: user.id },
+        orderBy: [{ takenAt: "asc" }, { createdAt: "asc" }],
+      }),
+      prisma.measurement.findMany({
+        where: { userId: user.id },
+        orderBy: { recordedAt: "asc" },
+      }),
+      prisma.journalEntry.findMany({
+        where: { userId: user.id },
+        orderBy: { date: "asc" },
+      }),
       prisma.stack.findMany({
         where: { userId: user.id, isPreset: false },
         include: { items: true },

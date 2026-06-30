@@ -286,7 +286,11 @@ export async function listLabReminders() {
   const user = await getActiveUser();
   return prisma.labReminder.findMany({
     where: { userId: user.id },
-    orderBy: [{ completedAt: "asc" }, { dueAt: "asc" }],
+    // Pending (completedAt = null) first, soonest-due first; completed last.
+    orderBy: [
+      { completedAt: { sort: "asc", nulls: "first" } },
+      { dueAt: "asc" },
+    ],
   });
 }
 
@@ -299,8 +303,12 @@ export async function getInterventionBands(start: Date, end: Date) {
     prisma.cycle.findMany({
       where: { userId: user.id },
       include: { peptide: true, stack: true },
+      orderBy: { startDate: "asc" },
     }),
-    prisma.supplement.findMany({ where: { userId: user.id } }),
+    prisma.supplement.findMany({
+      where: { userId: user.id },
+      orderBy: { startDate: "asc" },
+    }),
   ]);
 
   const items: InterventionInput[] = [
