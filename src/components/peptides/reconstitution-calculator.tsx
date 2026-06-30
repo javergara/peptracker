@@ -62,7 +62,7 @@ export function ReconstitutionCalculator({
   }
 
   return (
-    <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+    <div className="card-surface @container rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
       <Eyebrow className="mb-4">
         <span className="flex items-center gap-2">
           <FlaskConical className="size-3.5" />
@@ -72,7 +72,7 @@ export function ReconstitutionCalculator({
 
       <div className="space-y-5">
         {/* Inputs */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 @sm:grid-cols-3">
           <div className="space-y-1.5">
             <label
               htmlFor="recon-vial-mg"
@@ -131,7 +131,7 @@ export function ReconstitutionCalculator({
 
         {/* Results */}
         {hasResult ? (
-          <div className="bg-accent/50 grid grid-cols-2 gap-3 rounded-xl p-4 sm:grid-cols-4">
+          <div className="bg-accent/50 grid grid-cols-2 gap-3 rounded-xl p-4 @lg:grid-cols-4">
             <ResultItem
               label="CONCENTRATION"
               value={`${result.concentrationMcgPerMl}`}
