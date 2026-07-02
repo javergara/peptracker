@@ -10,16 +10,29 @@ import { isWithinRange } from "@/lib/dates";
 
 export type Frequency = "daily" | "eod" | "twice-weekly" | "weekly" | "custom";
 
+/** Per-peptide dose for a stack-based cycle (each peptide doses differently). */
+export interface CyclePeptideDose {
+  peptideId: string;
+  /** Amount per administration for this peptide (paired with `unit`). */
+  dose?: number;
+  unit?: string;
+}
+
 export interface ScheduleConfig {
   frequency: Frequency;
   /** Days of the week the dose applies to. 0=Sun .. 6=Sat. */
   daysOfWeek?: number[];
   /** Number of administrations per dose day. */
   timesPerDay?: number;
-  /** Amount per administration (free-form numeric, paired with `unit`). */
+  /**
+   * Amount per administration for a SINGLE-peptide cycle (paired with `unit`).
+   * Stack cycles use `items` instead — each peptide doses differently.
+   */
   dosePerAdmin?: number;
   /** Unit label for `dosePerAdmin` (e.g. "mcg", "mg"). */
   unit?: string;
+  /** Per-peptide doses for STACK cycles (peptideId → dose/unit). */
+  items?: CyclePeptideDose[];
 }
 
 export interface CycleLike {

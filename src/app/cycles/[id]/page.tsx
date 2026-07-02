@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/common/eyebrow";
 import { InkPanel } from "@/components/common/ink-panel";
 import { EmptyState } from "@/components/common/empty-state";
 import { CycleActions } from "@/components/cycles/cycle-actions";
+import { CycleLogFields } from "@/components/cycles/cycle-log-fields";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,9 @@ import {
   getActiveVialsForPeptide,
 } from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
+import { doseDefaultsByPeptide } from "@/lib/cycles";
 import { formatDate } from "@/lib/dates";
 import { suggestNextSite } from "@/lib/sites";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function CycleDetailPage({
   params,
@@ -39,6 +38,17 @@ export default async function CycleDetailPage({
   const peptideOptions = cycle.peptide
     ? [cycle.peptide]
     : (cycle.stack?.items.map((i) => i.peptide) ?? []);
+
+  // Per-peptide dose defaults for the log form: a single-peptide cycle maps its
+  // one peptide to dosePerAdmin/unit; a stack cycle uses its per-peptide items.
+  const doseByPeptide = cycle.peptide
+    ? {
+        [cycle.peptide.id]: {
+          dose: cfg?.dosePerAdmin,
+          unit: cfg?.unit ?? "mcg",
+        },
+      }
+    : doseDefaultsByPeptide(cfg?.items);
 
   // Active vials for single-peptide cycles
   const activeVials = cycle.peptide
@@ -141,52 +151,10 @@ export default async function CycleDetailPage({
           className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
         >
           <input type="hidden" name="cycleId" value={cycle.id} />
-          <div className="space-y-1.5">
-            <label htmlFor="cd-peptide" className="text-sm font-medium">
-              Peptide
-            </label>
-            <select
-              id="cd-peptide"
-              name="peptideId"
-              required
-              className={inputCls}
-            >
-              {peptideOptions.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="cd-amount" className="text-sm font-medium">
-              Amount
-            </label>
-            <input
-              id="cd-amount"
-              name="amount"
-              type="number"
-              step="any"
-              min="0"
-              required
-              defaultValue={cfg?.dosePerAdmin ?? ""}
-              className={inputCls}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="cd-unit" className="text-sm font-medium">
-              Unit
-            </label>
-            <select
-              id="cd-unit"
-              name="unit"
-              defaultValue={cfg?.unit ?? "mcg"}
-              className={inputCls}
-            >
-              <option value="mcg">mcg</option>
-              <option value="mg">mg</option>
-            </select>
-          </div>
+          <CycleLogFields
+            peptideOptions={peptideOptions}
+            doseByPeptide={doseByPeptide}
+          />
 
           {/* Enriched optional fields — spans the full grid */}
           <div className="contents">

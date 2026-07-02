@@ -1,9 +1,25 @@
+"use client";
+
+import * as React from "react";
+
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { CYCLE_STATUSES } from "@/types/peptide";
 
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
+
+/** A stack option with its peptides + suggested per-peptide doses. */
+export interface StackOption {
+  id: string;
+  name: string;
+  items: {
+    peptideId: string;
+    peptideName: string;
+    dose?: number;
+    unit?: string;
+  }[];
+}
 
 export interface CycleFormDefaults {
   name?: string;
@@ -16,11 +32,14 @@ export interface CycleFormDefaults {
   dosePerAdmin?: number | string;
   unit?: string;
   notes?: string;
+  /** Edit-mode per-peptide dose prefill (peptideId → dose/unit). */
+  items?: Record<string, { dose?: number; unit?: string }>;
 }
 
 /**
- * Shared create/edit form for a cycle. Stateless server component — pass a
- * server `action` and optional `defaults` to prefill (edit mode).
+ * Shared create/edit form for a cycle. The "Dosing" section adapts to the
+ * selected source: a single-peptide cycle gets one dose field, while a stack
+ * cycle gets one dose input PER peptide (each peptide doses differently).
  */
 export function CycleForm({
   peptides,
@@ -30,11 +49,17 @@ export function CycleForm({
   defaults = {},
 }: {
   peptides: { id: string; name: string }[];
-  stacks: { id: string; name: string }[];
+  stacks: StackOption[];
   action: (formData: FormData) => void | Promise<void>;
   submitLabel: string;
   defaults?: CycleFormDefaults;
 }) {
+  const [source, setSource] = React.useState(defaults.source ?? "");
+  const isStack = source.startsWith("stack:");
+  const selectedStack = isStack
+    ? stacks.find((s) => `stack:${s.id}` === source)
+    : undefined;
+
   return (
     <form action={action} className="space-y-6">
       {/* Basics */}
@@ -62,7 +87,8 @@ export function CycleForm({
             id="source"
             name="source"
             required
-            defaultValue={defaults.source ?? ""}
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
             className={inputCls}
           >
             <option value="" disabled>
@@ -155,40 +181,105 @@ export function CycleForm({
         </div>
       </div>
 
-      {/* Dosing */}
+      {/* Dosing — adapts to single peptide vs. stack */}
       <div className="space-y-4">
         <Eyebrow>Dosing</Eyebrow>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <label htmlFor="dosePerAdmin" className="text-sm font-medium">
-              Dose per administration
-            </label>
-            <input
-              id="dosePerAdmin"
-              name="dosePerAdmin"
-              type="number"
-              step="any"
-              min="0"
-              defaultValue={defaults.dosePerAdmin}
-              placeholder="e.g. 250"
-              className={inputCls}
-            />
+        {isStack ? (
+          selectedStack && selectedStack.items.length > 0 ? (
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-xs">
+                Each peptide in this stack doses differently — set the amount
+                per administration for each. Used as the default when logging.
+              </p>
+              {selectedStack.items.map((it) => {
+                const pre = defaults.items?.[it.peptideId];
+                const dose = pre?.dose ?? it.dose;
+                const unit = pre?.unit ?? it.unit ?? "mcg";
+                return (
+                  <div
+                    key={it.peptideId}
+                    className="grid items-end gap-3 sm:grid-cols-[1.4fr_1fr_0.8fr]"
+                  >
+                    <span className="text-foreground text-sm font-medium">
+                      {it.peptideName}
+                    </span>
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor={`itemDose-${it.peptideId}`}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Dose
+                      </label>
+                      <input
+                        id={`itemDose-${it.peptideId}`}
+                        name={`itemDose:${it.peptideId}`}
+                        type="number"
+                        step="any"
+                        min="0"
+                        defaultValue={dose ?? ""}
+                        placeholder="e.g. 250"
+                        className={inputCls}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor={`itemUnit-${it.peptideId}`}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Unit
+                      </label>
+                      <select
+                        id={`itemUnit-${it.peptideId}`}
+                        name={`itemUnit:${it.peptideId}`}
+                        defaultValue={unit}
+                        className={inputCls}
+                      >
+                        <option value="mcg">mcg</option>
+                        <option value="mg">mg</option>
+                      </select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              This stack has no peptides to dose.
+            </p>
+          )
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="dosePerAdmin" className="text-sm font-medium">
+                Dose per administration
+              </label>
+              <input
+                id="dosePerAdmin"
+                name="dosePerAdmin"
+                type="number"
+                step="any"
+                min="0"
+                defaultValue={defaults.dosePerAdmin}
+                placeholder="e.g. 250"
+                className={inputCls}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="unit" className="text-sm font-medium">
+                Unit
+              </label>
+              <select
+                id="unit"
+                name="unit"
+                defaultValue={defaults.unit ?? "mcg"}
+                className={inputCls}
+              >
+                <option value="mcg">mcg</option>
+                <option value="mg">mg</option>
+              </select>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label htmlFor="unit" className="text-sm font-medium">
-              Unit
-            </label>
-            <select
-              id="unit"
-              name="unit"
-              defaultValue={defaults.unit ?? "mcg"}
-              className={inputCls}
-            >
-              <option value="mcg">mcg</option>
-              <option value="mg">mg</option>
-            </select>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Notes */}

@@ -25,6 +25,15 @@ function parseCycleForm(formData: FormData) {
   }
 
   const [kind, id] = source.split(":");
+
+  // Stack cycles carry a per-peptide dose (different peptides, different doses),
+  // submitted as `itemDose:<peptideId>` / `itemUnit:<peptideId>`. Single-peptide
+  // cycles keep the one `dosePerAdmin`/`unit`.
+  const scheduleConfig =
+    kind === "stack"
+      ? { frequency, items: parseStackItems(formData) }
+      : { frequency, dosePerAdmin, unit };
+
   return {
     name,
     startDate: new Date(startDate),
@@ -32,9 +41,27 @@ function parseCycleForm(formData: FormData) {
     status,
     peptideId: kind === "peptide" ? id : null,
     stackId: kind === "stack" ? id : null,
-    scheduleConfig: { frequency, dosePerAdmin, unit },
+    scheduleConfig,
     notes: notes || null,
   };
+}
+
+/** Collect per-peptide doses from `itemDose:<id>` / `itemUnit:<id>` fields. */
+function parseStackItems(formData: FormData) {
+  const items: { peptideId: string; dose?: number; unit?: string }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith("itemDose:")) continue;
+    const peptideId = key.slice("itemDose:".length);
+    if (!peptideId) continue;
+    const dose = Number(value);
+    const unit = String(formData.get(`itemUnit:${peptideId}`) ?? "mcg");
+    items.push({
+      peptideId,
+      dose: Number.isFinite(dose) && dose > 0 ? dose : undefined,
+      unit,
+    });
+  }
+  return items;
 }
 
 export async function createCycle(formData: FormData) {

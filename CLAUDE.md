@@ -426,6 +426,18 @@ typical**, not authoritative (they vary by lab/assay).
   `actions/doses.ts` (`logDose`/`updateDose`/`deleteDose`); row edit/delete via
   `components/log/dose-row-actions.tsx`, edit page at `/log/[id]/edit`. Editing a
   dose does NOT re-adjust vial inventory (documented on the form).
+- **Cycle dosing (single vs. stack).** A cycle's `scheduleConfig` (Json) holds
+  the dosing intent. **Single-peptide cycles** use `dosePerAdmin` + `unit`;
+  **stack cycles dose each peptide differently**, so they use `items: [{
+peptideId, dose, unit }]` instead (a single dose is meaningless across a
+  multi-peptide stack). `dosePerAdmin`/`items` are **display + log-default only**
+  — adherence/schedule math uses only `frequency` + `timesPerDay`; real amounts
+  come from each `DoseLog.amount`. The `cycle-form.tsx` Dosing section is
+  reactive (client): peptide source → one dose field; stack source → one dose
+  input per peptide, prefilled via `parseDoseAmount` from the stack's suggested
+  `StackItem.dose`. Logging on the cycle detail uses `CycleLogFields` (client) +
+  `doseDefaultsByPeptide` (`src/lib/cycles.ts`, pure + tested) to prefill the
+  amount/unit from the selected peptide's configured dose.
 - **Inventory/vials:** `/inventory`, `src/lib/actions/vials.ts`, `src/lib/vials.ts`.
   Logging a dose against a vial decrements `remainingMcg` (see `logDose`).
 - **Weight-at-dose:** the dose-log forms take an optional weight (via

@@ -7,15 +7,26 @@ import { CycleForm } from "@/components/cycles/cycle-form";
 import { Button } from "@/components/ui/button";
 import { createCycle } from "@/lib/actions/cycles";
 import { getCurrentUser, listPeptides, listStacks } from "@/lib/queries";
+import { parseDoseAmount } from "@/lib/cycles";
 
 export const metadata = { title: "New Cycle" };
 
 export default async function NewCyclePage() {
-  const [user, peptides, stacks] = await Promise.all([
+  const [user, peptides, stacksRaw] = await Promise.all([
     getCurrentUser(),
     listPeptides(),
     listStacks(),
   ]);
+
+  const stacks = stacksRaw.map((s) => ({
+    id: s.id,
+    name: s.name,
+    items: s.items.map((i) => ({
+      peptideId: i.peptideId,
+      peptideName: i.peptide.name,
+      ...parseDoseAmount(i.dose),
+    })),
+  }));
 
   async function action(formData: FormData) {
     "use server";
