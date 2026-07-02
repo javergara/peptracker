@@ -335,6 +335,41 @@ async function main() {
       });
     }
   }
+  // Stock reserve demo (idempotent): a healthy peptide + a low one for the alert.
+  const stockCount = await prisma.stockItem.count({
+    where: { userId: user.id },
+  });
+  if (stockCount === 0) {
+    const bpc = bySlug.get("bpc-157");
+    const tb = bySlug.get("tb-500");
+    if (bpc) {
+      await prisma.stockItem.create({
+        data: {
+          userId: user.id,
+          peptideId: bpc.id,
+          vialMcg: 5000,
+          quantity: 3,
+          dose: 250,
+          doseUnit: "mcg",
+          frequency: "daily",
+        },
+      });
+    }
+    if (tb) {
+      await prisma.stockItem.create({
+        data: {
+          userId: user.id,
+          peptideId: tb.id,
+          vialMcg: 5000,
+          quantity: 1, // one vial on hand → triggers the low-stock alert
+          dose: 2,
+          doseUnit: "mg",
+          frequency: "twice-weekly",
+        },
+      });
+    }
+  }
+
   const labCount = await prisma.labResult.count({ where: { userId: user.id } });
   if (labCount === 0) {
     const igf = [

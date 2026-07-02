@@ -229,6 +229,75 @@ export async function listActiveVials() {
   });
 }
 
+// --- Stock reserve ---------------------------------------------------------
+
+/** The active profile's stock (unopened vials in reserve), by peptide name. */
+export async function listStockItems() {
+  const user = await getActiveUser();
+  return prisma.stockItem.findMany({
+    where: { userId: user.id },
+    orderBy: [{ peptide: { name: "asc" } }, { vialMcg: "asc" }],
+    include: { peptide: true },
+  });
+}
+
+export interface StockLevel {
+  peptideId: string;
+  peptideName: string;
+  /** Unopened vials in the reserve. */
+  stockVials: number;
+  /** Active/sealed vials currently in tracking. */
+  activeVials: number;
+  /** Combined vials on hand — drives the low-stock alert. */
+  total: number;
+}
+
+/**
+ * Combined vials-on-hand per peptide: Σ stock quantity + count of active/sealed
+ * vials. Candidate peptides are those with a stock item OR any vial (any status).
+ * Powers the stock-card low badge and the dashboard low-stock alert.
+ */
+export async function getStockLevels(): Promise<StockLevel[]> {
+  const user = await getActiveUser();
+  const [stock, vials] = await Promise.all([
+    prisma.stockItem.findMany({
+      where: { userId: user.id },
+      include: { peptide: { select: { name: true } } },
+    }),
+    prisma.vial.findMany({
+      where: { userId: user.id },
+      select: {
+        peptideId: true,
+        status: true,
+        peptide: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  const levels = new Map<string, StockLevel>();
+  const ensure = (peptideId: string, peptideName: string) => {
+    let l = levels.get(peptideId);
+    if (!l) {
+      l = { peptideId, peptideName, stockVials: 0, activeVials: 0, total: 0 };
+      levels.set(peptideId, l);
+    }
+    return l;
+  };
+
+  for (const s of stock) {
+    ensure(s.peptideId, s.peptide.name).stockVials += s.quantity;
+  }
+  for (const v of vials) {
+    const l = ensure(v.peptideId, v.peptide.name);
+    if (v.status === "active" || v.status === "sealed") l.activeVials += 1;
+  }
+  for (const l of levels.values()) l.total = l.stockVials + l.activeVials;
+
+  return Array.from(levels.values()).sort((a, b) =>
+    a.peptideName.localeCompare(b.peptideName),
+  );
+}
+
 // --- Labs ------------------------------------------------------------------
 
 export async function listLabs() {

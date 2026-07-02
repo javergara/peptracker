@@ -8,12 +8,14 @@ import { AdherenceRing } from "@/components/common/adherence-ring";
 import { Sparkline, MiniBars } from "@/components/common/sparkline";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
+import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { Button } from "@/components/ui/button";
 import {
   getActiveCycles,
   getCurrentUser,
   getDoseLogsInRange,
   getRecentDoseLogs,
+  getStockLevels,
   listPeptides,
 } from "@/lib/queries";
 import { computeAdherence } from "@/lib/adherence";
@@ -30,13 +32,14 @@ export default async function DashboardPage() {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [user, activeCycles, peptides, recentDoses, rangeLogs] =
+  const [user, activeCycles, peptides, recentDoses, rangeLogs, stockLevels] =
     await Promise.all([
       getCurrentUser(),
       getActiveCycles(),
       listPeptides(),
       getRecentDoseLogs(8),
       getDoseLogsInRange(thirtyDaysAgo, now),
+      getStockLevels(),
     ]);
 
   const accent = user.color ?? "#7C3AED";
@@ -193,6 +196,9 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Low-stock alert — only renders when a peptide is running low */}
+      <LowStockAlert levels={stockLevels} />
 
       {/* Row 2 — Three stat tiles */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">

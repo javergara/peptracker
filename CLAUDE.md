@@ -103,6 +103,11 @@ Path alias: `@/*` -> `src/*`.
 - **Vial** — inventory: `totalMcg`, `bacWaterMl`, `concentrationMcgPerMl`,
   `remainingMcg`, `reconstitutedAt`, `expiresAt`, `status`
   (sealed|active|empty|expired). Math helpers in `src/lib/vials.ts`.
+- **StockItem** — the **reserve** (unopened vials held per peptide, quantity-based):
+  `vialMcg` (size of one vial), `quantity`, planned `dose`/`doseUnit`/`frequency`
+  (for supply estimation). Distinct from `Vial` (which is in-use tracking).
+  Activating a stock item reconstitutes one vial into an active `Vial`. Supply math
+  in `src/lib/stock.ts`.
 - **LabResult** — bloodwork markers over time (`marker`, `value`, `unit`,
   `refLow`/`refHigh`, `takenAt`, optional `biomarkerSlug` → catalog). Ranges are
   **snapshotted** at entry so flags stay stable; `biomarkerSlug` drives KB linking
@@ -324,7 +329,7 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 ## Routes
 
 `/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`) · `/calendar` ·
-`/cycles` (+`/new`,`/[id]`,`/[id]/edit`) · `/inventory` (vials) · `/metrics` ·
+`/cycles` (+`/new`,`/[id]`,`/[id]/edit`) · `/inventory` (`?tab=active|stock`) · `/metrics` ·
 `/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks` (+`/new`,`/[slug]`) ·
 `/suggestions` · `/supplements` · `/biomarkers` (+`/[slug]`) · `/settings`. Auth
 routes render bare; everything else is gated.
@@ -409,7 +414,7 @@ typical**, not authoritative (they vary by lab/assay).
 - Unit/logic: **vitest** (`npm run test`). Tests live next to the lib module
   (`src/lib/<name>.test.ts`); favor testing pure functions. Currently covered:
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
-  `adherence`, `sites`, `vials`, `stats`, `mood`. Keep pure math out of components so it
+  `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`. Keep pure math out of components so it
   stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
@@ -440,6 +445,19 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   amount/unit from the selected peptide's configured dose.
 - **Inventory/vials:** `/inventory`, `src/lib/actions/vials.ts`, `src/lib/vials.ts`.
   Logging a dose against a vial decrements `remainingMcg` (see `logDose`).
+- **Inventory — two modes (`/inventory?tab=active|stock`).** The page has an
+  **Active vials** tab (existing in-use `Vial` tracking) and a **Stock reserve**
+  tab. Stock = `StockItem` (unopened vials per peptide + planned dose/frequency);
+  actions in `src/lib/actions/stock.ts` (`addStock` upserts by peptide+vial size,
+  `updateStock`/`adjustStockQuantity`/`deleteStock`, `activateStock` = decrement
+  qty + create an active reconstituted `Vial` in a `$transaction`, reusing
+  `vialConcentration`/`RECONSTITUTED_SHELF_LIFE_DAYS`). All ownership-scoped.
+  Supply estimation (doses/vial, total doses, days) + low-stock threshold live in
+  **`src/lib/stock.ts`** (pure + tested). Queries: `listStockItems` +
+  `getStockLevels` (combined stock-qty + active/sealed-vial count **per peptide**,
+  user-scoped, not cached). The dashboard **`LowStockAlert`**
+  (`src/components/dashboard/low-stock-alert.tsx`) warns when a peptide's combined
+  total ≤ 1 (amber `warn` tokens); it renders nothing when everything's stocked.
 - **Weight-at-dose:** the dose-log forms take an optional weight (via
   `DoseFormFields` `weightUnit` prop, create-only); `logDose` writes it as a
   `type:"weight"` Measurement at the dose time, so it flows into the Metrics
