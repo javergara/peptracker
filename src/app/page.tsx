@@ -9,6 +9,7 @@ import { Sparkline, MiniBars } from "@/components/common/sparkline";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
+import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
 import { Button } from "@/components/ui/button";
 import {
   getActiveCycles,
@@ -18,7 +19,7 @@ import {
   getStockLevels,
   listPeptides,
 } from "@/lib/queries";
-import { computeAdherence } from "@/lib/adherence";
+import { computeAdherence, computeOverdue } from "@/lib/adherence";
 import {
   cycleProgress,
   getTodaysDoses,
@@ -58,6 +59,7 @@ export default async function DashboardPage() {
   const todays = getTodaysDoses(cycleLikes, now);
   const todaysDue = todays.reduce((sum, t) => sum + t.times, 0);
   const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
+  const overdue = computeOverdue(cycleLikes, rangeLogs, now);
 
   // Doses per day for the last 7 days (for MiniBars)
   const daysOfWeek = Array.from({ length: 7 }, (_, i) => {
@@ -197,7 +199,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Low-stock alert — only renders when a peptide is running low */}
+      {/* Alerts — each renders only when there's something to act on */}
+      <MissedDosesAlert overdue={overdue} />
       <LowStockAlert levels={stockLevels} />
 
       {/* Row 2 — Three stat tiles */}

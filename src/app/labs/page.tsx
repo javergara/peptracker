@@ -12,6 +12,7 @@ import { RangeTrack } from "@/components/common/range-track";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { DeleteLabButton } from "@/components/labs/delete-lab-button";
+import { EditLabButton } from "@/components/labs/edit-lab-button";
 import { PanelEntryForm } from "@/components/labs/panel-entry-form";
 import { RecheckRow } from "@/components/labs/recheck-row";
 import { MarkerTimelineChart } from "@/components/metrics/marker-timeline-chart";
@@ -539,6 +540,13 @@ export default async function LabsPage() {
                                       {r.notes}
                                     </span>
                                   ) : null}
+                                  <EditLabButton
+                                    id={r.id}
+                                    marker={bm?.name ?? r.marker}
+                                    value={r.value}
+                                    takenAt={r.takenAt.toISOString()}
+                                    notes={r.notes}
+                                  />
                                   <DeleteLabButton id={r.id} />
                                 </div>
                               </div>

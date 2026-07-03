@@ -409,3 +409,14 @@ export async function listPhotos() {
     orderBy: { takenAt: "desc" },
   });
 }
+
+// --- Journal -----------------------------------------------------------
+
+/** The active profile's free-text journal entries, newest first. */
+export async function listJournalEntries() {
+  const user = await getActiveUser();
+  return prisma.journalEntry.findMany({
+    where: { userId: user.id },
+    orderBy: { date: "desc" },
+  });
+}

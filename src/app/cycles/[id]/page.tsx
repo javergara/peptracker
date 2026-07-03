@@ -22,6 +22,8 @@ import { doseDefaultsByPeptide } from "@/lib/cycles";
 import { formatDate } from "@/lib/dates";
 import { suggestNextSite } from "@/lib/sites";
 
+const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export default async function CycleDetailPage({
   params,
 }: {
@@ -133,6 +135,10 @@ export default async function CycleDetailPage({
         {cfg ? (
           <p className="mt-3 text-[13px] text-[#A8A2CC]">
             {cfg.frequency}
+            {cfg.daysOfWeek?.length
+              ? ` (${cfg.daysOfWeek.map((d) => DAY_ABBR[d] ?? d).join(", ")})`
+              : ""}
+            {(cfg.timesPerDay ?? 1) > 1 ? ` · ${cfg.timesPerDay}×/day` : ""}
             {cfg.dosePerAdmin
               ? ` · ${cfg.dosePerAdmin} ${cfg.unit ?? "mcg"} per dose`
               : ""}
@@ -143,6 +149,15 @@ export default async function CycleDetailPage({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <CycleActions id={cycle.id} status={cycle.status} />
       </div>
+
+      {cycle.notes ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-2">Notes</Eyebrow>
+          <p className="text-foreground text-sm whitespace-pre-wrap">
+            {cycle.notes}
+          </p>
+        </section>
+      ) : null}
 
       <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
         <Eyebrow className="mb-4">Log a dose for this cycle</Eyebrow>
@@ -203,7 +218,17 @@ export default async function CycleDetailPage({
                     style={{ background: user.color ?? "#7C3AED" }}
                     aria-hidden
                   />
-                  {d.peptide.name}
+                  <span className="min-w-0">
+                    {d.peptide.name}
+                    {d.notes ? (
+                      <span
+                        className="text-muted-foreground block max-w-[200px] truncate text-xs font-normal"
+                        title={d.notes}
+                      >
+                        {d.notes}
+                      </span>
+                    ) : null}
+                  </span>
                 </span>
                 <span className="num text-foreground">
                   {d.amount} {d.unit}

@@ -56,8 +56,39 @@ export async function uploadPhoto(formData: FormData) {
   revalidatePath("/photos");
 }
 
+/**
+ * Correct a photo's caption/date. Never touches the file itself. Ownership-
+ * scoped via `updateMany` + a count check.
+ */
+export async function updatePhotoCaption(id: string, formData: FormData) {
+  const user = await getActiveUser();
+  const caption = String(formData.get("caption") ?? "").trim();
+  const takenAt = String(formData.get("takenAt") ?? "");
+
+  const result = await prisma.photo.updateMany({
+    where: { id, userId: user.id },
+    data: {
+      caption: caption || null,
+      ...(takenAt ? { takenAt: new Date(takenAt) } : {}),
+    },
+  });
+  if (result.count === 0) {
+    throw new Error("Photo not found.");
+  }
+  revalidatePath("/photos");
+}
+
 export async function deletePhoto(id: string) {
-  const photo = await prisma.photo.delete({ where: { id } });
+  const user = await getActiveUser();
+  // Ownership-scoped: findFirst confirms the row belongs to the active
+  // profile before we touch the blob or delete the row.
+  const photo = await prisma.photo.findFirst({
+    where: { id, userId: user.id },
+  });
+  if (!photo) {
+    throw new Error("Photo not found.");
+  }
+  await prisma.photo.delete({ where: { id: photo.id } });
   // Best-effort blob cleanup.
   try {
     await del(photo.path);

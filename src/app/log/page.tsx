@@ -23,7 +23,8 @@ import {
   getCurrentUser,
 } from "@/lib/queries";
 import { formatDate } from "@/lib/dates";
-import { ROUTES, ROUTE_LABELS } from "@/types/peptide";
+import { moodFace } from "@/lib/mood";
+import { asStringArray, ROUTES, ROUTE_LABELS } from "@/types/peptide";
 import { suggestNextSite } from "@/lib/sites";
 
 export const metadata = { title: "Log Dose" };
@@ -203,36 +204,79 @@ export default async function LogPage() {
                   <TableHead>Amount</TableHead>
                   <TableHead>When</TableHead>
                   <TableHead>Site</TableHead>
+                  <TableHead>Mood</TableHead>
                   <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recent.map((d) => (
-                  <TableRow
-                    key={d.id}
-                    style={
-                      user.color
-                        ? { borderLeft: `3px solid ${user.color}` }
-                        : undefined
-                    }
-                  >
-                    <TableCell className="font-medium">
-                      {d.peptide.name}
-                    </TableCell>
-                    <TableCell className="num">
-                      {d.amount} {d.unit}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(d.takenAt, "MMM d, h:mm a")}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {d.site ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <DoseRowActions id={d.id} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {recent.map((d) => {
+                  const mood = moodFace(d.mood);
+                  const sideEffects = asStringArray(d.sideEffects);
+                  return (
+                    <TableRow
+                      key={d.id}
+                      style={
+                        user.color
+                          ? { borderLeft: `3px solid ${user.color}` }
+                          : undefined
+                      }
+                    >
+                      <TableCell className="font-medium">
+                        {d.peptide.name}
+                        {d.notes || sideEffects.length > 0 ? (
+                          <p
+                            className="text-muted-foreground max-w-[220px] truncate text-xs font-normal"
+                            title={[sideEffects.join(", "), d.notes]
+                              .filter(Boolean)
+                              .join(" — ")}
+                          >
+                            {sideEffects.length > 0
+                              ? `SE: ${sideEffects.join(", ")}`
+                              : ""}
+                            {sideEffects.length > 0 && d.notes ? " — " : ""}
+                            {d.notes ?? ""}
+                          </p>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="num">
+                        {d.amount} {d.unit}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(d.takenAt, "MMM d, h:mm a")}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {d.site ?? "—"}
+                      </TableCell>
+                      <TableCell>
+                        {mood ? (
+                          <span
+                            role="img"
+                            aria-label={mood.label}
+                            title={mood.label}
+                          >
+                            {mood.emoji}
+                          </span>
+                        ) : null}
+                        {d.energy != null ? (
+                          <span
+                            className="num text-muted-foreground ml-1 text-xs"
+                            title={`Energy: ${d.energy}/5`}
+                          >
+                            ⚡{d.energy}
+                          </span>
+                        ) : null}
+                        {!mood && d.energy == null ? (
+                          <span className="text-muted-foreground text-xs">
+                            —
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        <DoseRowActions id={d.id} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

@@ -143,6 +143,47 @@ export async function addLabPanel(formData: FormData) {
   revalidatePath("/labs");
 }
 
+/**
+ * Correct a logged result's value/date/notes. Reference ranges are
+ * snapshotted at entry by design (so flags stay stable even if the catalog
+ * range later changes) — this intentionally does NOT recompute refLow/refHigh,
+ * marker name, unit, or biomarkerSlug.
+ */
+export async function updateLab(id: string, formData: FormData) {
+  const user = await getActiveUser();
+  const value = Number(formData.get("value") ?? 0);
+  const takenAt = String(formData.get("takenAt") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim();
+
+  if (Number.isNaN(value)) {
+    throw new Error("A numeric value is required.");
+  }
+
+  const existing = await prisma.labResult.findFirst({
+    where: { id, userId: user.id },
+    select: { biomarkerSlug: true },
+  });
+  if (!existing) {
+    throw new Error("Lab result not found.");
+  }
+
+  const result = await prisma.labResult.updateMany({
+    where: { id, userId: user.id },
+    data: {
+      value,
+      notes: notes || null,
+      ...(takenAt ? { takenAt: new Date(takenAt) } : {}),
+    },
+  });
+  if (result.count === 0) {
+    throw new Error("Lab result not found.");
+  }
+
+  revalidatePath("/labs");
+  if (existing.biomarkerSlug)
+    revalidatePath(`/biomarkers/${existing.biomarkerSlug}`);
+}
+
 export async function deleteLab(id: string) {
   const user = await getActiveUser();
   // Ownership-scoped: only deletes when the row belongs to the active profile.

@@ -12,6 +12,7 @@ import {
   listPeptides,
 } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { asStringArray } from "@/types/peptide";
 
 export const metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
@@ -59,6 +60,9 @@ export default async function CalendarPage({
       site: d.site,
       cycleName: d.cycle?.name ?? null,
       mood: d.mood,
+      energy: d.energy,
+      notes: d.notes,
+      sideEffects: asStringArray(d.sideEffects),
       profileName: d.user?.name ?? "Unknown",
       profileColor: d.user?.color ?? null,
     }));
@@ -74,6 +78,9 @@ export default async function CalendarPage({
       site: d.site,
       cycleName: d.cycle?.name ?? null,
       mood: d.mood,
+      energy: d.energy,
+      notes: d.notes,
+      sideEffects: asStringArray(d.sideEffects),
       profileName: user.name,
       profileColor: user.color,
     }));

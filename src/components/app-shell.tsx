@@ -15,6 +15,7 @@ import {
   LineChart,
   Menu,
   Moon,
+  NotebookPen,
   Package,
   Pill,
   Settings,
@@ -89,6 +90,7 @@ const NAV: NavGroup[] = [
       { href: "/cycles", label: "Cycles", icon: CalendarRange },
       { href: "/inventory", label: "Inventory", icon: Package },
       { href: "/supplements", label: "Supplements", icon: Pill },
+      { href: "/journal", label: "Journal", icon: NotebookPen },
     ],
   },
   {

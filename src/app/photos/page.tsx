@@ -23,6 +23,7 @@ export default async function PhotosPage() {
     id: p.id,
     caption: p.caption,
     dateLabel: formatDate(p.takenAt, "MMM d, yyyy"),
+    takenAt: p.takenAt.toISOString(),
   }));
 
   return (

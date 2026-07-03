@@ -7,12 +7,14 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { AdjustablePhoto } from "@/components/photos/adjustable-photo";
 import { DeletePhotoButton } from "@/components/photos/delete-photo-button";
+import { EditPhotoButton } from "@/components/photos/edit-photo-button";
 import { PhotoTimeline } from "@/components/photos/photo-timeline";
 
 export interface PhotoItem {
   id: string;
   caption: string | null;
   dateLabel: string;
+  takenAt: string; // ISO — feeds EditPhotoButton's date input
 }
 
 const selectCls =
@@ -160,7 +162,12 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
                   </p>
                 ) : null}
               </div>
-              <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <EditPhotoButton
+                  id={photo.id}
+                  caption={photo.caption}
+                  takenAt={photo.takenAt}
+                />
                 <DeletePhotoButton id={photo.id} />
               </div>
             </div>

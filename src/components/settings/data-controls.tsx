@@ -78,7 +78,7 @@ export function DataControls() {
     startTransition(async () => {
       try {
         const count = await importUserData(json);
-        toast.success(`Imported ${count} measurement(s)`);
+        toast.success(`Imported ${count} record(s)`);
         setJson("");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Import failed.");
@@ -126,8 +126,13 @@ export function DataControls() {
           disabled={isPending || !json.trim()}
         >
           <Upload className="size-4" />
-          Import measurements
+          Import backup
         </Button>
+        <p className="text-muted-foreground text-xs">
+          Restores cycles, doses, vials, stock, labs, measurements, journal,
+          supplements and reminders. Additive — importing the same backup twice
+          duplicates records. Photos are not included.
+        </p>
       </div>
     </div>
   );

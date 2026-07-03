@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
 
-import { createStack } from "@/lib/actions/stacks";
+import { createStack, updateStack } from "@/lib/actions/stacks";
 import {
   findInteractions,
   worstKind,
@@ -22,18 +22,44 @@ interface PeptideOption {
   slug: string;
 }
 
+interface InitialItem {
+  peptideId: string;
+  dose: string;
+  notes: string;
+}
+
+interface InitialStack {
+  id: string;
+  name: string;
+  goal: string;
+  description: string;
+  items: InitialItem[];
+}
+
 interface Props {
   peptides: PeptideOption[];
   interactionRows: InteractionRow[];
+  /** Present in edit mode — prefills the form and switches the submit to updateStack. */
+  stack?: InitialStack;
 }
 
-export function StackBuilder({ peptides, interactionRows }: Props) {
+export function StackBuilder({ peptides, interactionRows, stack }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [name, setName] = useState("");
-  const [goal, setGoal] = useState<GoalTag | "">("");
-  const [description, setDescription] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    () => new Set(stack?.items.map((i) => i.peptideId) ?? []),
+  );
+  const [name, setName] = useState(stack?.name ?? "");
+  const [goal, setGoal] = useState<GoalTag | "">(
+    (stack?.goal as GoalTag | "") ?? "",
+  );
+  const [description, setDescription] = useState(stack?.description ?? "");
+  const [doseById, setDoseById] = useState<Record<string, string>>(() =>
+    Object.fromEntries((stack?.items ?? []).map((i) => [i.peptideId, i.dose])),
+  );
+  const [notesById, setNotesById] = useState<Record<string, string>>(() =>
+    Object.fromEntries((stack?.items ?? []).map((i) => [i.peptideId, i.notes])),
+  );
 
   function togglePeptide(id: string) {
     setSelectedIds((prev) => {
@@ -51,12 +77,16 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
   async function handleSubmit(formData: FormData) {
     startTransition(async () => {
       try {
-        const slug = await createStack(formData);
-        toast.success("Stack created!");
+        const slug = stack
+          ? await updateStack(stack.id, formData)
+          : await createStack(formData);
+        toast.success(stack ? "Stack updated!" : "Stack created!");
         router.push(`/stacks/${slug}`);
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Failed to create stack.",
+          err instanceof Error
+            ? err.message
+            : `Failed to ${stack ? "update" : "create"} stack.`,
         );
       }
     });
@@ -153,24 +183,72 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
           {peptides.map((p) => {
             const checked = selectedIds.has(p.id);
             return (
-              <label
+              <div
                 key={p.id}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors ${
+                className={`rounded-xl border p-3 text-sm transition-colors ${
                   checked
                     ? "border-primary/60 bg-primary/5"
                     : "border-border hover:bg-accent/50"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  name="peptideIds"
-                  value={p.id}
-                  checked={checked}
-                  onChange={() => togglePeptide(p.id)}
-                  className="accent-primary size-4 shrink-0 rounded"
-                />
-                <span className="font-medium">{p.name}</span>
-              </label>
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="peptideIds"
+                    value={p.id}
+                    checked={checked}
+                    onChange={() => togglePeptide(p.id)}
+                    className="accent-primary size-4 shrink-0 rounded"
+                  />
+                  <span className="font-medium">{p.name}</span>
+                </label>
+                {checked && (
+                  <div className="mt-2.5 grid grid-cols-2 gap-2 pl-7">
+                    <div className="space-y-1">
+                      <label
+                        htmlFor={`dose-${p.id}`}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Dose
+                      </label>
+                      <input
+                        id={`dose-${p.id}`}
+                        name={`dose:${p.id}`}
+                        value={doseById[p.id] ?? ""}
+                        onChange={(e) =>
+                          setDoseById((prev) => ({
+                            ...prev,
+                            [p.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g. 250 mcg"
+                        className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label
+                        htmlFor={`notes-${p.id}`}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Notes
+                      </label>
+                      <input
+                        id={`notes-${p.id}`}
+                        name={`notes:${p.id}`}
+                        value={notesById[p.id] ?? ""}
+                        onChange={(e) =>
+                          setNotesById((prev) => ({
+                            ...prev,
+                            [p.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="optional"
+                        className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -239,7 +317,13 @@ export function StackBuilder({ peptides, interactionRows }: Props) {
           disabled={isPending || selectedIds.size === 0 || !name.trim()}
           className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)] disabled:opacity-50 disabled:[box-shadow:none]"
         >
-          {isPending ? "Creating…" : "Create Stack"}
+          {isPending
+            ? stack
+              ? "Saving…"
+              : "Creating…"
+            : stack
+              ? "Save Changes"
+              : "Create Stack"}
         </Button>
         {worst === "avoid" && (
           <p className="text-destructive text-xs">

@@ -50,12 +50,16 @@ export async function createVial(formData: FormData) {
 
 /** Reconstitute a sealed vial: set diluent, concentration, expiry, status. */
 export async function reconstituteVial(formData: FormData) {
+  const user = await getActiveUser();
   const id = String(formData.get("id") ?? "");
   const bacWaterMl = Number(formData.get("bacWaterMl") ?? 0);
   if (!id || !bacWaterMl || bacWaterMl <= 0) {
     throw new Error("Diluent volume is required.");
   }
-  const vial = await prisma.vial.findUnique({ where: { id } });
+  // Ownership scope: only the active profile's vials are mutable.
+  const vial = await prisma.vial.findFirst({
+    where: { id, userId: user.id },
+  });
   if (!vial) throw new Error("Vial not found.");
 
   await prisma.vial.update({
@@ -75,21 +79,27 @@ export async function reconstituteVial(formData: FormData) {
 
 /** Manually set remaining amount / status (corrections). */
 export async function adjustVial(formData: FormData) {
+  const user = await getActiveUser();
   const id = String(formData.get("id") ?? "");
   const remainingMcg = Number(formData.get("remainingMcg") ?? 0);
   const status = String(formData.get("status") ?? "");
   if (!id) throw new Error("Vial id required.");
-  await prisma.vial.update({
-    where: { id },
+  const result = await prisma.vial.updateMany({
+    where: { id, userId: user.id },
     data: {
       remainingMcg: Math.max(0, remainingMcg),
       ...(status ? { status } : {}),
     },
   });
+  if (result.count === 0) throw new Error("Vial not found.");
   revalidatePath("/inventory");
 }
 
 export async function deleteVial(id: string) {
-  await prisma.vial.delete({ where: { id } });
+  const user = await getActiveUser();
+  const result = await prisma.vial.deleteMany({
+    where: { id, userId: user.id },
+  });
+  if (result.count === 0) throw new Error("Vial not found.");
   revalidatePath("/inventory");
 }

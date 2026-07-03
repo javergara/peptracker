@@ -2,9 +2,12 @@
 
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { CYCLE_STATUSES } from "@/types/peptide";
+import { cn } from "@/lib/utils";
+
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const inputCls =
   "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
@@ -29,6 +32,9 @@ export interface CycleFormDefaults {
   endDate?: string; // yyyy-MM-dd
   status?: string;
   frequency?: string;
+  /** Days of the week (0=Sun..6=Sat) for twice-weekly/custom frequencies. */
+  daysOfWeek?: number[];
+  timesPerDay?: number;
   dosePerAdmin?: number | string;
   unit?: string;
   notes?: string;
@@ -55,13 +61,31 @@ export function CycleForm({
   defaults?: CycleFormDefaults;
 }) {
   const [source, setSource] = React.useState(defaults.source ?? "");
+  const [frequency, setFrequency] = React.useState(
+    defaults.frequency ?? "daily",
+  );
+  const [days, setDays] = React.useState<number[]>(defaults.daysOfWeek ?? []);
   const isStack = source.startsWith("stack:");
   const selectedStack = isStack
     ? stacks.find((s) => `stack:${s.id}` === source)
     : undefined;
+  // These frequencies only fire on explicitly picked weekdays.
+  const needsDays = frequency === "twice-weekly" || frequency === "custom";
+
+  const toggleDay = (d: number) =>
+    setDays((prev) =>
+      prev.includes(d)
+        ? prev.filter((x) => x !== d)
+        : [...prev, d].sort((a, b) => a - b),
+    );
 
   return (
-    <form action={action} className="space-y-6">
+    <ActionForm
+      action={action}
+      success="Cycle saved"
+      resetOnSuccess={false}
+      className="space-y-6"
+    >
       {/* Basics */}
       <div className="space-y-4">
         <Eyebrow>Basics</Eyebrow>
@@ -168,15 +192,83 @@ export function CycleForm({
             <select
               id="frequency"
               name="frequency"
-              defaultValue={defaults.frequency ?? "daily"}
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
               className={inputCls}
             >
               <option value="daily">Daily</option>
               <option value="eod">Every other day</option>
               <option value="twice-weekly">Twice weekly</option>
               <option value="weekly">Weekly</option>
-              <option value="custom">Custom</option>
+              <option value="custom">Custom days</option>
             </select>
+          </div>
+        </div>
+
+        {needsDays ? (
+          <fieldset className="space-y-1.5">
+            <legend className="text-sm font-medium">
+              Days of the week <span className="text-destructive">*</span>
+            </legend>
+            <div className="flex flex-wrap gap-1.5">
+              {DAY_LABELS.map((label, d) => {
+                const selected = days.includes(d);
+                return (
+                  <label
+                    key={d}
+                    className={cn(
+                      "has-[:focus-visible]:ring-ring cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors select-none has-[:focus-visible]:ring-2",
+                      selected
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-input text-muted-foreground hover:border-primary/40",
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      name="daysOfWeek"
+                      value={d}
+                      checked={selected}
+                      onChange={() => toggleDay(d)}
+                      className="sr-only"
+                    />
+                    {label}
+                  </label>
+                );
+              })}
+            </div>
+            <p
+              className={cn(
+                "text-xs",
+                days.length === 0
+                  ? "text-destructive"
+                  : "text-muted-foreground",
+              )}
+            >
+              {days.length === 0
+                ? "Pick at least one day — the cycle won't schedule doses without it."
+                : frequency === "twice-weekly" && days.length !== 2
+                  ? "Twice weekly usually means two days."
+                  : "Doses are scheduled on these days."}
+            </p>
+          </fieldset>
+        ) : null}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="timesPerDay" className="text-sm font-medium">
+              Times per day
+            </label>
+            <input
+              id="timesPerDay"
+              name="timesPerDay"
+              type="number"
+              min="1"
+              max="6"
+              step="1"
+              inputMode="numeric"
+              defaultValue={defaults.timesPerDay ?? 1}
+              className={inputCls}
+            />
           </div>
         </div>
       </div>
@@ -299,7 +391,9 @@ export function CycleForm({
         </div>
       </div>
 
-      <Button type="submit">{submitLabel}</Button>
-    </form>
+      <SubmitButton disabled={needsDays && days.length === 0}>
+        {submitLabel}
+      </SubmitButton>
+    </ActionForm>
   );
 }

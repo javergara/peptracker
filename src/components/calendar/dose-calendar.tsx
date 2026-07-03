@@ -21,6 +21,9 @@ export interface CalendarDose {
   site: string | null;
   cycleName: string | null;
   mood: number | null;
+  energy: number | null;
+  notes: string | null;
+  sideEffects: string[];
   profileName: string;
   profileColor: string | null;
 }
@@ -528,6 +531,14 @@ export function DoseCalendar({
                           {moodFace(d.mood)!.emoji}
                         </span>
                       ) : null}
+                      {d.energy != null ? (
+                        <span
+                          className="num text-muted-foreground text-[11px]"
+                          title={`Energy: ${d.energy}/5`}
+                        >
+                          ⚡{d.energy}
+                        </span>
+                      ) : null}
                     </span>
                   </div>
                   <div className="text-muted-foreground mt-0.5 text-xs">
@@ -541,6 +552,23 @@ export function DoseCalendar({
                     {d.site ? ` · ${d.site}` : ""}
                     {d.cycleName ? ` · ${d.cycleName}` : ""}
                   </div>
+                  {d.sideEffects.length > 0 ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {d.sideEffects.map((se) => (
+                        <span
+                          key={se}
+                          className="bg-warn-wash text-warn-foreground rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        >
+                          {se}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {d.notes ? (
+                    <p className="text-muted-foreground mt-1 text-xs italic">
+                      {d.notes}
+                    </p>
+                  ) : null}
                 </li>
               ))}
           </ul>

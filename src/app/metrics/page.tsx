@@ -15,6 +15,7 @@ import {
 } from "@/components/metrics/range-control";
 import type { RangeValue } from "@/components/metrics/range-control";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { MeasurementRow } from "@/components/metrics/measurement-row";
 import {
   Card,
   CardContent,
@@ -196,6 +197,11 @@ export default async function MetricsPage({
       improving,
     };
   });
+
+  // --- Recent measurements (newest first, for the editable history list) ---
+  const recentMeasurements = [...measurements]
+    .sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime())
+    .slice(0, 10);
 
   // --- Selectable series for CorrelationExplorer (all-time, not windowed) ---
   const corrSeries: {
@@ -418,6 +424,37 @@ export default async function MetricsPage({
           </Card>
         )}
       </section>
+
+      {/* Recent measurements — editable history */}
+      <Card className="card-surface">
+        <CardHeader>
+          <CardTitle>Recent measurements</CardTitle>
+          <CardDescription className="text-[12.5px]">
+            Latest logged entries. Edit or remove any row.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {recentMeasurements.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No measurements logged yet.
+            </p>
+          ) : (
+            <div className="divide-y">
+              {recentMeasurements.map((m) => (
+                <MeasurementRow
+                  key={m.id}
+                  id={m.id}
+                  typeLabel={TYPE_LABELS[m.type] ?? m.type}
+                  label={m.label}
+                  value={m.value}
+                  unit={m.unit}
+                  recordedAt={m.recordedAt.toISOString()}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add measurement form */}
       <Card className="card-surface" id="add-measurement">

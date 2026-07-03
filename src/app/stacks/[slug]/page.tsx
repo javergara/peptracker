@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 
-import { getStackBySlug, getPeptideInteractions } from "@/lib/queries";
+import {
+  getStackBySlug,
+  getPeptideInteractions,
+  getCurrentUser,
+} from "@/lib/queries";
 import { PageHeader } from "@/components/common/page-header";
 import { GoalBadges, InteractionBadge } from "@/components/common/badges";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Disclaimer } from "@/components/disclaimer";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { asStringArray } from "@/types/peptide";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -22,9 +27,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StackDetailPage({ params }: Props) {
   const { slug } = await params;
-  const stack = await getStackBySlug(slug);
+  const [stack, user] = await Promise.all([
+    getStackBySlug(slug),
+    getCurrentUser(),
+  ]);
   if (!stack) notFound();
 
+  const isOwner = !stack.isPreset && stack.userId === user.id;
   const tags = asStringArray(stack.tags);
   const memberIds = new Set(stack.items.map((i) => i.peptide.id));
 
@@ -68,7 +77,17 @@ export default async function StackDetailPage({ params }: Props) {
         title={stack.name}
         description={stack.description ?? undefined}
         actions={
-          stack.isPreset ? <Badge variant="secondary">Preset</Badge> : undefined
+          stack.isPreset ? (
+            <Badge variant="secondary">Preset</Badge>
+          ) : isOwner ? (
+            <Button
+              variant="outline"
+              render={<Link href={`/stacks/${stack.slug}/edit`} />}
+            >
+              <Pencil className="size-4" />
+              Edit
+            </Button>
+          ) : undefined
         }
       />
 

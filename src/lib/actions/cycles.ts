@@ -20,19 +20,44 @@ function parseCycleForm(formData: FormData) {
   const unit = String(formData.get("unit") ?? "mcg");
   const notes = String(formData.get("notes") ?? "").trim();
 
+  const timesPerDayRaw = Number(formData.get("timesPerDay") ?? 1);
+  const timesPerDay =
+    Number.isFinite(timesPerDayRaw) && timesPerDayRaw >= 1
+      ? Math.min(6, Math.round(timesPerDayRaw))
+      : 1;
+  const daysOfWeek = [
+    ...new Set(formData.getAll("daysOfWeek").map((v) => Number(v))),
+  ]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6)
+    .sort((a, b) => a - b);
+
   if (!name || !startDate) {
     throw new Error("Name and start date are required.");
   }
+  // These frequencies schedule doses only on explicitly picked weekdays —
+  // without any, the cycle would silently never fire (isDoseDay = false).
+  if (
+    (frequency === "twice-weekly" || frequency === "custom") &&
+    daysOfWeek.length === 0
+  ) {
+    throw new Error("Pick at least one day of the week for this frequency.");
+  }
 
   const [kind, id] = source.split(":");
+
+  const schedule = {
+    frequency,
+    timesPerDay,
+    ...(daysOfWeek.length > 0 ? { daysOfWeek } : {}),
+  };
 
   // Stack cycles carry a per-peptide dose (different peptides, different doses),
   // submitted as `itemDose:<peptideId>` / `itemUnit:<peptideId>`. Single-peptide
   // cycles keep the one `dosePerAdmin`/`unit`.
   const scheduleConfig =
     kind === "stack"
-      ? { frequency, items: parseStackItems(formData) }
-      : { frequency, dosePerAdmin, unit };
+      ? { ...schedule, items: parseStackItems(formData) }
+      : { ...schedule, dosePerAdmin, unit };
 
   return {
     name,
