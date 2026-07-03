@@ -10,12 +10,15 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
+import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
+import { QuickLogButton } from "@/components/dashboard/quick-log-button";
 import { Button } from "@/components/ui/button";
 import {
   getActiveCycles,
   getCurrentUser,
   getDoseLogsInRange,
   getRecentDoseLogs,
+  getStarterCounts,
   getStockLevels,
   listPeptides,
 } from "@/lib/queries";
@@ -28,6 +31,7 @@ import {
 } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
+import { suggestNextSite } from "@/lib/sites";
 import { cn } from "@/lib/utils";
 
 export default async function DashboardPage() {
@@ -61,6 +65,30 @@ export default async function DashboardPage() {
   const todaysDue = todays.reduce((sum, t) => sum + t.times, 0);
   const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
   const overdue = computeOverdue(cycleLikes, rangeLogs, now);
+
+  // Getting-started checklist: only new accounts pay the extra count queries —
+  // established ones (cycle + dose exist) skip them entirely.
+  const established = activeCycles.length > 0 && recentDoses.length > 0;
+  const starter = established ? null : await getStarterCounts();
+  const onboarding = starter
+    ? {
+        hasSupply: stockLevels.length > 0,
+        hasCycle: activeCycles.length > 0,
+        hasDose: recentDoses.length > 0,
+        hasBaseline: starter.measurements > 0 || starter.labs > 0,
+        hasPhoto: starter.photos > 0,
+      }
+    : null;
+
+  // Raw active cycles (with scalar peptideId/stackId) for quick-log defaults —
+  // cycleLikes drops those in favor of just the peptide/stack display name.
+  const activeCycleById = new Map(activeCycles.map((c) => [c.id, c]));
+  const peptideNameById = new Map(peptides.map((p) => [p.id, p.name]));
+
+  // Suggested next injection site — same rotation logic as /log, seeded from
+  // the most recently logged dose that recorded a site.
+  const lastSite = recentDoses.find((d) => d.site)?.site ?? null;
+  const suggestedSite = suggestNextSite(lastSite);
 
   // Doses per day for the last 7 days (for MiniBars)
   const daysOfWeek = Array.from({ length: 7 }, (_, i) => {
@@ -198,6 +226,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Alerts — each renders only when there's something to act on */}
+      {onboarding ? <OnboardingChecklist status={onboarding} /> : null}
       <MissedDosesAlert overdue={overdue} />
       <LowStockAlert levels={stockLevels} />
 
@@ -285,54 +314,106 @@ export default async function DashboardPage() {
                     log.cycleId === cycle.id && log.takenAt >= todayStart,
                 );
 
+                // Resolve quick-log defaults. Single-peptide cycles dose via
+                // scheduleConfig.dosePerAdmin/unit; stack cycles dose each
+                // peptide differently via scheduleConfig.items. A cycle with
+                // neither configured can't be one-tap logged (no amount to
+                // guess), so it falls back to a plain link to the cycle page.
+                const raw = activeCycleById.get(cycle.id);
+                const config = cycle.scheduleConfig;
+                const singleDose =
+                  raw?.peptideId && config?.dosePerAdmin
+                    ? {
+                        peptideId: raw.peptideId,
+                        amount: config.dosePerAdmin,
+                        unit: config.unit ?? "mcg",
+                      }
+                    : null;
+                const stackDoses = (config?.items ?? []).filter(
+                  (it): it is typeof it & { dose: number } =>
+                    Boolean(it.peptideId) && Boolean(it.dose),
+                );
+
                 return (
-                  <div
-                    key={cycle.id}
-                    className="flex items-center justify-between py-[11px]"
-                  >
-                    <div className="flex items-center gap-[11px]">
-                      <span
-                        className="size-[9px] shrink-0 rounded-full"
-                        style={{ background: accent }}
-                        aria-hidden
-                      />
-                      <div>
-                        <Link
-                          href={`/cycles/${cycle.id}`}
-                          className="text-foreground text-[14px] font-medium hover:underline"
-                        >
-                          {cycle.peptide?.name ??
-                            cycle.stack?.name ??
-                            cycle.name}
-                        </Link>
-                        <p className="text-muted-foreground text-[12px]">
-                          {cycle.name}
-                        </p>
+                  <div key={cycle.id} className="py-[11px]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-[11px]">
+                        <span
+                          className="size-[9px] shrink-0 rounded-full"
+                          style={{ background: accent }}
+                          aria-hidden
+                        />
+                        <div>
+                          <Link
+                            href={`/cycles/${cycle.id}`}
+                            className="text-foreground text-[14px] font-medium hover:underline"
+                          >
+                            {cycle.peptide?.name ??
+                              cycle.stack?.name ??
+                              cycle.name}
+                          </Link>
+                          <p className="text-muted-foreground text-[12px]">
+                            {cycle.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {logged ? (
+                          <div className="text-ok inline-flex items-center gap-1.5 text-[12px] font-medium">
+                            <Check className="size-[13px]" strokeWidth={2} />
+                            Logged{" "}
+                            <span className="num">
+                              {formatDate(logged.takenAt, "HH:mm")}
+                            </span>
+                          </div>
+                        ) : singleDose ? (
+                          <div className="flex items-center gap-2">
+                            <span className="num text-foreground text-[13px]">
+                              {singleDose.amount} {singleDose.unit}
+                            </span>
+                            <QuickLogButton
+                              cycleId={cycle.id}
+                              peptideId={singleDose.peptideId}
+                              amount={singleDose.amount}
+                              unit={singleDose.unit}
+                              site={suggestedSite}
+                            />
+                          </div>
+                        ) : stackDoses.length === 0 ? (
+                          <>
+                            <Link
+                              href={`/cycles/${cycle.id}`}
+                              className="text-primary text-[12px] font-medium hover:underline"
+                            >
+                              Log →
+                            </Link>
+                            <div className="text-muted-foreground text-[11px]">
+                              pending
+                            </div>
+                          </>
+                        ) : null}
                       </div>
                     </div>
-                    <div className="text-right">
-                      {logged ? (
-                        <div className="text-ok inline-flex items-center gap-1.5 text-[12px] font-medium">
-                          <Check className="size-[13px]" strokeWidth={2} />
-                          Logged{" "}
-                          <span className="num">
-                            {formatDate(logged.takenAt, "HH:mm")}
-                          </span>
-                        </div>
-                      ) : (
-                        <>
-                          {cycle.scheduleConfig?.dosePerAdmin ? (
-                            <div className="num text-foreground text-[13px]">
-                              {cycle.scheduleConfig.dosePerAdmin}{" "}
-                              {cycle.scheduleConfig.unit ?? "mcg"}
-                            </div>
-                          ) : null}
-                          <div className="text-muted-foreground text-[11px]">
-                            pending
-                          </div>
-                        </>
-                      )}
-                    </div>
+
+                    {/* Stack cycles dose each peptide differently — one small
+                        quick-log button per configured peptide, wrapped below
+                        the row instead of squeezed inline. */}
+                    {!logged && stackDoses.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1.5 pl-[20px]">
+                        {stackDoses.map((it) => (
+                          <QuickLogButton
+                            key={it.peptideId}
+                            cycleId={cycle.id}
+                            peptideId={it.peptideId}
+                            amount={it.dose}
+                            unit={it.unit ?? "mcg"}
+                            site={suggestedSite}
+                            label={peptideNameById.get(it.peptideId) ?? "dose"}
+                            className="h-6 px-2 text-[11px]"
+                          />
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 );
               })}

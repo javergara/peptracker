@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ImageIcon, X, ZoomIn } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -9,6 +10,7 @@ import { AdjustablePhoto } from "@/components/photos/adjustable-photo";
 import { DeletePhotoButton } from "@/components/photos/delete-photo-button";
 import { EditPhotoButton } from "@/components/photos/edit-photo-button";
 import { PhotoTimeline } from "@/components/photos/photo-timeline";
+import { cn } from "@/lib/utils";
 
 export interface PhotoItem {
   id: string;
@@ -22,15 +24,24 @@ const selectCls =
 
 const src = (id: string) => `/api/photos/${id}`;
 
-export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
-  // `photos` arrives newest-first (listPhotos desc); chronological is oldest-first.
-  const chronological = React.useMemo(() => [...photos].reverse(), [photos]);
+export function PhotoBoard({
+  gallery,
+  all,
+  page,
+  totalPages,
+}: {
+  /** Current page of the paginated grid (newest-first). */
+  gallery: PhotoItem[];
+  /** The FULL chronological history (newest-first) — feeds Before/After + Timeline, which need the whole set regardless of gallery pagination. */
+  all: PhotoItem[];
+  page: number;
+  totalPages: number;
+}) {
+  // `all` arrives newest-first (listPhotoMeta desc); chronological is oldest-first.
+  const chronological = React.useMemo(() => [...all].reverse(), [all]);
   const oldest = chronological[0];
   const newest = chronological[chronological.length - 1];
-  const byId = React.useMemo(
-    () => new Map(photos.map((p) => [p.id, p])),
-    [photos],
-  );
+  const byId = React.useMemo(() => new Map(all.map((p) => [p.id, p])), [all]);
 
   // Default: oldest = Before, newest = After (selectable below).
   const [beforeId, setBeforeId] = React.useState(oldest?.id ?? "");
@@ -39,7 +50,7 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
 
   const before = byId.get(beforeId) ?? oldest;
   const after = byId.get(afterId) ?? newest;
-  const showBeforeAfter = photos.length >= 2;
+  const showBeforeAfter = all.length >= 2;
 
   // Close the lightbox on Escape.
   React.useEffect(() => {
@@ -135,15 +146,28 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
         </div>
       ) : null}
 
-      {photos.length === 0 ? (
+      {all.length === 0 ? (
         <EmptyState
           icon={<ImageIcon className="size-6" />}
           title="No photos yet"
           description="Upload your first progress photo above to start your visual timeline."
         />
+      ) : gallery.length === 0 ? (
+        <EmptyState
+          icon={<ImageIcon className="size-6" />}
+          title="No photos on this page"
+          action={
+            <Link
+              href="/photos"
+              className="text-primary text-sm font-medium hover:underline"
+            >
+              Back to page 1
+            </Link>
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {photos.map((photo) => (
+          {gallery.map((photo) => (
             <div
               key={photo.id}
               className="card-surface group relative overflow-hidden rounded-xl"
@@ -174,6 +198,36 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
           ))}
         </div>
       )}
+
+      {totalPages > 1 ? (
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            href={page > 1 ? `/photos?page=${page - 1}` : "/photos"}
+            aria-disabled={page <= 1}
+            tabIndex={page <= 1 ? -1 : undefined}
+            className={cn(
+              "hover:bg-accent rounded-lg border px-2.5 py-1.5 text-sm",
+              page <= 1 && "pointer-events-none opacity-40",
+            )}
+          >
+            Prev
+          </Link>
+          <span className="text-muted-foreground num text-sm">
+            Page {page} of {totalPages}
+          </span>
+          <Link
+            href={`/photos?page=${page + 1}`}
+            aria-disabled={page >= totalPages}
+            tabIndex={page >= totalPages ? -1 : undefined}
+            className={cn(
+              "hover:bg-accent rounded-lg border px-2.5 py-1.5 text-sm",
+              page >= totalPages && "pointer-events-none opacity-40",
+            )}
+          >
+            Next
+          </Link>
+        </div>
+      ) : null}
 
       {zoomId ? (
         <div

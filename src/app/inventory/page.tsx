@@ -37,9 +37,9 @@ type InventoryMode = "active" | "stock";
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; peptide?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, peptide: peptideFilter } = await searchParams;
   const mode: InventoryMode = tab === "stock" ? "stock" : "active";
 
   const [peptides, user, vials, stockItems, levels] = await Promise.all([
@@ -49,6 +49,21 @@ export default async function InventoryPage({
     mode === "stock" ? listStockItems() : Promise.resolve([]),
     mode === "stock" ? getStockLevels() : Promise.resolve([]),
   ]);
+
+  // Peptide filter pills — derived from the peptides that actually have
+  // vials on this tab (no extra query, `vials` is already fetched).
+  const vialPeptides =
+    mode === "active"
+      ? Array.from(
+          new Map(vials.map((v) => [v.peptideId, v.peptide.name])).entries(),
+        )
+          .map(([id, name]) => ({ id, name }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : [];
+  const displayedVials =
+    mode === "active" && peptideFilter
+      ? vials.filter((v) => v.peptideId === peptideFilter)
+      : vials;
 
   // Summary strip computations
   const activeAndSealed = vials.filter(
@@ -77,11 +92,12 @@ export default async function InventoryPage({
     ? differenceInCalendarDays(nextExpiryVial.expiresAt, now)
     : null;
 
-  // Sort: active/sealed first, then empty/expired de-emphasized
-  const primaryVials = vials.filter(
+  // Sort: active/sealed first, then empty/expired de-emphasized. Uses
+  // `displayedVials` so the peptide filter narrows the grid only.
+  const primaryVials = displayedVials.filter(
     (v) => v.status === "active" || v.status === "sealed",
   );
-  const secondaryVials = vials.filter(
+  const secondaryVials = displayedVials.filter(
     (v) => v.status === "empty" || v.status === "expired",
   );
 
@@ -183,12 +199,56 @@ export default async function InventoryPage({
             </div>
           </InkPanel>
 
+          {/* Peptide filter pills */}
+          {vialPeptides.length > 1 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Link
+                href="/inventory"
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  !peptideFilter
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground border-transparent",
+                )}
+              >
+                All peptides
+              </Link>
+              {vialPeptides.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/inventory?peptide=${p.id}`}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    peptideFilter === p.id
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground border-transparent",
+                  )}
+                >
+                  {p.name}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
           {/* Vial grid */}
           {vials.length === 0 ? (
             <EmptyState
               icon={<Package className="size-6" />}
               title="No vials tracked yet"
               description="Add your first vial below to start tracking your inventory."
+            />
+          ) : displayedVials.length === 0 ? (
+            <EmptyState
+              icon={<Package className="size-6" />}
+              title="No vials for this peptide"
+              action={
+                <Link
+                  href="/inventory"
+                  className="text-primary text-sm font-medium hover:underline"
+                >
+                  Clear filter
+                </Link>
+              }
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

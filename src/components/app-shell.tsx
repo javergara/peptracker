@@ -18,6 +18,7 @@ import {
   NotebookPen,
   Package,
   Pill,
+  Search,
   Settings,
   Sparkles,
   Sun,
@@ -73,6 +74,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SidebarCalculator } from "@/components/peptides/sidebar-calculator";
+import { GlobalSearch } from "@/components/search/global-search";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
 type NavGroup = { label: string | null; items: NavItem[] };
@@ -121,10 +123,32 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({
+  onNavigate,
+  onOpenSearch,
+}: {
+  onNavigate?: () => void;
+  onOpenSearch: () => void;
+}) {
   const pathname = usePathname();
   return (
     <nav className="flex flex-col gap-4 px-3">
+      <div className="flex flex-col gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            onOpenSearch();
+            onNavigate?.();
+          }}
+          className="text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-ring flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <Search className="size-4 shrink-0" />
+          <span className="flex-1 text-left">Search</span>
+          <kbd className="border-input text-muted-foreground rounded border px-1.5 py-0.5 font-mono text-[10px]">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
       {NAV.map((group, gi) => (
         <div key={group.label ?? `g${gi}`} className="flex flex-col gap-1">
           {group.label ? (
@@ -196,6 +220,7 @@ export function AppShell({
   profileSlot?: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
 
   return (
     <div className="flex min-h-svh">
@@ -210,7 +235,7 @@ export function AppShell({
         <Brand />
         {profileSlot ? <div className="px-3 pb-2">{profileSlot}</div> : null}
         <div className="mt-2 flex-1 overflow-y-auto pb-4">
-          <NavLinks />
+          <NavLinks onOpenSearch={() => setSearchOpen(true)} />
         </div>
         <div className="text-muted-foreground border-t px-5 py-3 text-xs">
           <Activity className="mr-1 inline size-3" />
@@ -243,7 +268,13 @@ export function AppShell({
               {profileSlot ? (
                 <div className="px-3 pb-2">{profileSlot}</div>
               ) : null}
-              <NavLinks onNavigate={() => setOpen(false)} />
+              <NavLinks
+                onNavigate={() => setOpen(false)}
+                onOpenSearch={() => {
+                  setOpen(false);
+                  setSearchOpen(true);
+                }}
+              />
             </SheetContent>
           </Sheet>
           <div className="flex-1" />
@@ -259,6 +290,7 @@ export function AppShell({
       </div>
 
       <MobileTabBar />
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }

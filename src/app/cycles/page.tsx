@@ -10,6 +10,7 @@ import { getCurrentUser, listCycles } from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
+import { CYCLE_STATUSES, type CycleStatus } from "@/types/peptide";
 
 export const metadata = { title: "Cycles" };
 
@@ -22,8 +23,24 @@ const STATUS_BADGE: Record<string, string> = {
   completed: "bg-muted text-muted-foreground",
 };
 
-export default async function CyclesPage() {
-  const [user, cycles] = await Promise.all([getCurrentUser(), listCycles()]);
+const STATUS_FILTERS = ["all", ...CYCLE_STATUSES] as const;
+
+export default async function CyclesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status: statusParam } = await searchParams;
+  const status: (typeof STATUS_FILTERS)[number] = CYCLE_STATUSES.includes(
+    statusParam as CycleStatus,
+  )
+    ? (statusParam as CycleStatus)
+    : "all";
+
+  const [user, cycles] = await Promise.all([
+    getCurrentUser(),
+    listCycles(status === "all" ? undefined : status),
+  ]);
   const accent = user.color ?? "#7C3AED";
   const now = new Date();
 
@@ -41,13 +58,44 @@ export default async function CyclesPage() {
         }
       />
 
+      {/* Status filter tabs */}
+      <div className="border-border mb-6 flex gap-1 overflow-x-auto border-b">
+        {STATUS_FILTERS.map((s) => (
+          <Link
+            key={s}
+            href={s === "all" ? "/cycles" : `/cycles?status=${s}`}
+            className={cn(
+              "-mb-px shrink-0 border-b-2 px-4 py-2 text-sm font-medium capitalize transition-colors",
+              status === s
+                ? "border-primary text-foreground"
+                : "text-muted-foreground hover:text-foreground border-transparent",
+            )}
+          >
+            {s}
+          </Link>
+        ))}
+      </div>
+
       {cycles.length === 0 ? (
         <EmptyState
           icon={<CalendarRange className="size-6" />}
-          title="No cycles yet"
-          description="Create a cycle from a peptide or stack to start tracking doses and progress."
+          title={status === "all" ? "No cycles yet" : `No ${status} cycles`}
+          description={
+            status === "all"
+              ? "Create a cycle from a peptide or stack to start tracking doses and progress."
+              : undefined
+          }
           action={
-            <Button render={<Link href="/cycles/new" />}>New cycle</Button>
+            status === "all" ? (
+              <Button render={<Link href="/cycles/new" />}>New cycle</Button>
+            ) : (
+              <Link
+                href="/cycles"
+                className="text-primary text-sm font-medium hover:underline"
+              >
+                Clear filter
+              </Link>
+            )
           }
         />
       ) : (

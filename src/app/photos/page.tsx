@@ -7,22 +7,41 @@ import { PhotoFileInput } from "@/components/photos/photo-file-input";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Input } from "@/components/ui/input";
 import { uploadPhoto } from "@/lib/actions/photos";
-import { listPhotos, getCurrentUser } from "@/lib/queries";
+import { getPhotosPage, listPhotoMeta, getCurrentUser } from "@/lib/queries";
 import { formatDate, toDateInputValue } from "@/lib/dates";
 
 export const metadata = { title: "Progress Photos" };
 
-export default async function PhotosPage() {
-  const [photos, user] = await Promise.all([listPhotos(), getCurrentUser()]);
-  const accent = user.color ?? undefined;
+const PAGE_SIZE = 24;
 
-  // Shape for the client board (newest-first, as listPhotos returns).
-  const items = photos.map((p) => ({
+function toItem(p: { id: string; caption: string | null; takenAt: Date }) {
+  return {
     id: p.id,
     caption: p.caption,
     dateLabel: formatDate(p.takenAt, "MMM d, yyyy"),
     takenAt: p.takenAt.toISOString(),
-  }));
+  };
+}
+
+export default async function PhotosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+
+  const [{ rows: photos, total }, allMeta, user] = await Promise.all([
+    getPhotosPage({ page, pageSize: PAGE_SIZE }),
+    listPhotoMeta(),
+    getCurrentUser(),
+  ]);
+  const accent = user.color ?? undefined;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Shape for the client board (newest-first, as the queries return).
+  const gallery = photos.map(toItem);
+  const all = allMeta.map(toItem);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -92,7 +111,12 @@ export default async function PhotosPage() {
       </div>
 
       {/* Before/After (selectable) + zoomable gallery */}
-      <PhotoBoard photos={items} />
+      <PhotoBoard
+        gallery={gallery}
+        all={all}
+        page={page}
+        totalPages={totalPages}
+      />
     </div>
   );
 }

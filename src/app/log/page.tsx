@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { Syringe } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
+import { DoseLogFilters } from "@/components/log/dose-log-filters";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { SearchableSelect } from "@/components/common/searchable-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +29,7 @@ import { logDose } from "@/lib/actions/doses";
 import {
   getLoggableCycles,
   getRecentDoseLogs,
+  getDoseLogsPage,
   listPeptides,
   listActiveVials,
   getCurrentUser,
@@ -35,21 +38,45 @@ import { formatDate, toDateTimeLocalValue } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
 import { asStringArray, ROUTES, ROUTE_LABELS } from "@/types/peptide";
 import { suggestNextSite } from "@/lib/sites";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Log Dose" };
 export const dynamic = "force-dynamic";
 
-export default async function LogPage() {
-  const [peptides, cycles, recent, activeVials, user] = await Promise.all([
-    listPeptides(),
-    getLoggableCycles(),
-    getRecentDoseLogs(15),
-    listActiveVials(),
-    getCurrentUser(),
-  ]);
+const PAGE_SIZE = 15;
 
-  const lastSite = recent.find((d) => d.site)?.site ?? null;
+export default async function LogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; peptide?: string }>;
+}) {
+  const { page: pageParam, peptide: peptideId } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+
+  const [peptides, cycles, dosesPage, recentForSite, activeVials, user] =
+    await Promise.all([
+      listPeptides(),
+      getLoggableCycles(),
+      getDoseLogsPage({ page, pageSize: PAGE_SIZE, peptideId }),
+      // Site-rotation suggestion should reflect the true most-recent dose,
+      // independent of the peptide filter / page above.
+      getRecentDoseLogs(5),
+      listActiveVials(),
+      getCurrentUser(),
+    ]);
+  const { rows: recent, total } = dosesPage;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const lastSite = recentForSite.find((d) => d.site)?.site ?? null;
   const suggestedSite = suggestNextSite(lastSite);
+
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (peptideId) params.set("peptide", peptideId);
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return qs ? `/log?${qs}` : "/log";
+  }
 
   // Shape vials for DoseFormFields (include peptide name)
   const vialsForForm = activeVials.map((v) => ({
@@ -187,14 +214,31 @@ export default async function LogPage() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>Recent doses</CardTitle>
+          {peptides.length > 0 ? (
+            <DoseLogFilters peptides={peptides} selectedPeptideId={peptideId} />
+          ) : null}
         </CardHeader>
         <CardContent>
           {recent.length === 0 ? (
             <EmptyState
               icon={<Syringe className="size-6" />}
-              title="No doses logged yet"
+              title={
+                peptideId || page > 1
+                  ? "No doses match this filter"
+                  : "No doses logged yet"
+              }
+              action={
+                peptideId || page > 1 ? (
+                  <Link
+                    href="/log"
+                    className="text-primary text-sm font-medium hover:underline"
+                  >
+                    Clear filter
+                  </Link>
+                ) : undefined
+              }
             />
           ) : (
             <Table>
@@ -280,6 +324,38 @@ export default async function LogPage() {
               </TableBody>
             </Table>
           )}
+
+          {totalPages > 1 ? (
+            <div className="mt-4 flex items-center justify-between border-t pt-4">
+              <span className="text-muted-foreground num text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <Link
+                  href={pageHref(page - 1)}
+                  aria-disabled={page <= 1}
+                  tabIndex={page <= 1 ? -1 : undefined}
+                  className={cn(
+                    "hover:bg-accent rounded-lg border px-2.5 py-1.5 text-sm",
+                    page <= 1 && "pointer-events-none opacity-40",
+                  )}
+                >
+                  Prev
+                </Link>
+                <Link
+                  href={pageHref(page + 1)}
+                  aria-disabled={page >= totalPages}
+                  tabIndex={page >= totalPages ? -1 : undefined}
+                  className={cn(
+                    "hover:bg-accent rounded-lg border px-2.5 py-1.5 text-sm",
+                    page >= totalPages && "pointer-events-none opacity-40",
+                  )}
+                >
+                  Next
+                </Link>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

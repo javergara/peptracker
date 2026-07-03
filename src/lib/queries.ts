@@ -101,10 +101,11 @@ export async function getStackBySlug(slug: string) {
   });
 }
 
-export async function listCycles() {
+/** `status` filters to one CycleStatus (e.g. "active"); omit/undefined = all. */
+export async function listCycles(status?: string) {
   const user = await getActiveUser();
   return prisma.cycle.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, ...(status ? { status } : {}) },
     orderBy: { startDate: "desc" },
     include: {
       peptide: true,
@@ -165,6 +166,38 @@ export async function getRecentDoseLogs(limit = 10) {
     take: limit,
     include: { peptide: true, cycle: true },
   });
+}
+
+/**
+ * Paged dose-log history for the /log "Recent doses" table. Optional
+ * `peptideId` narrows to one peptide. Uses skip/take (not fetch-all-then-slice)
+ * so history pages stay cheap against Neon's free tier.
+ */
+export async function getDoseLogsPage({
+  page = 1,
+  pageSize = 15,
+  peptideId,
+}: {
+  page?: number;
+  pageSize?: number;
+  peptideId?: string;
+} = {}) {
+  const user = await getActiveUser();
+  const where = {
+    userId: user.id,
+    ...(peptideId ? { peptideId } : {}),
+  };
+  const [rows, total] = await Promise.all([
+    prisma.doseLog.findMany({
+      where,
+      orderBy: [{ takenAt: "desc" }, { createdAt: "desc" }],
+      skip: (Math.max(1, page) - 1) * pageSize,
+      take: pageSize,
+      include: { peptide: true, cycle: true },
+    }),
+    prisma.doseLog.count({ where }),
+  ]);
+  return { rows, total };
 }
 
 /** Dose logs for the active profile within a date range (calendar view). */
@@ -298,6 +331,21 @@ export async function getStockLevels(): Promise<StockLevel[]> {
   );
 }
 
+/**
+ * Counts for the getting-started checklist. Only queried by the dashboard
+ * while the account is still new (it skips this once cycles + doses exist),
+ * so these extra reads don't ride every dashboard render.
+ */
+export async function getStarterCounts() {
+  const user = await getActiveUser();
+  const [measurements, labs, photos] = await Promise.all([
+    prisma.measurement.count({ where: { userId: user.id } }),
+    prisma.labResult.count({ where: { userId: user.id } }),
+    prisma.photo.count({ where: { userId: user.id } }),
+  ]);
+  return { measurements, labs, photos };
+}
+
 // --- Labs ------------------------------------------------------------------
 
 export async function listLabs() {
@@ -402,11 +450,39 @@ export async function getInterventionBands(start: Date, end: Date) {
 
 // --- Photos ----------------------------------------------------------------
 
-export async function listPhotos() {
+/**
+ * Paged photo gallery for /photos (skip/take, not fetch-all-then-slice) —
+ * Vercel Blob transfer is a free-tier-bound resource too.
+ */
+export async function getPhotosPage({
+  page = 1,
+  pageSize = 24,
+}: { page?: number; pageSize?: number } = {}) {
+  const user = await getActiveUser();
+  const where = { userId: user.id };
+  const [rows, total] = await Promise.all([
+    prisma.photo.findMany({
+      where,
+      orderBy: { takenAt: "desc" },
+      skip: (Math.max(1, page) - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.photo.count({ where }),
+  ]);
+  return { rows, total };
+}
+
+/**
+ * Lightweight full-history photo list (id/caption/takenAt only, no image
+ * data) for the Before/After + Timeline pickers — those need the whole
+ * chronological set to stay useful even while the gallery grid paginates.
+ */
+export async function listPhotoMeta() {
   const user = await getActiveUser();
   return prisma.photo.findMany({
     where: { userId: user.id },
     orderBy: { takenAt: "desc" },
+    select: { id: true, caption: true, takenAt: true },
   });
 }
 
