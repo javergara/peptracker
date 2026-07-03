@@ -5,7 +5,9 @@ import { ImageIcon, X, ZoomIn } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { Eyebrow } from "@/components/common/eyebrow";
+import { AdjustablePhoto } from "@/components/photos/adjustable-photo";
 import { DeletePhotoButton } from "@/components/photos/delete-photo-button";
+import { PhotoTimeline } from "@/components/photos/photo-timeline";
 
 export interface PhotoItem {
   id: string;
@@ -93,11 +95,12 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
                     </select>
                   </div>
                   {photo ? (
-                    <ZoomButton
-                      id={photo.id}
+                    <AdjustablePhoto
+                      key={photo.id}
+                      src={src(photo.id)}
                       alt={photo.caption ?? label}
-                      onZoom={() => setZoomId(photo.id)}
-                      className="bg-muted/30 h-[30rem]"
+                      onExpand={() => setZoomId(photo.id)}
+                      className="h-[30rem]"
                     />
                   ) : null}
                   {photo ? (
@@ -108,6 +111,24 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
                 </div>
               ))}
             </div>
+            <p className="text-muted-foreground mt-3 text-xs">
+              Drag to reposition · pinch, scroll, or use the buttons to zoom in.
+              Photos always fill their frame.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {showBeforeAfter ? (
+        <div className="card-surface mb-8 rounded-2xl">
+          <div className="border-border border-b px-5 pt-4 pb-3">
+            <Eyebrow className="mb-1">Timeline</Eyebrow>
+            <h2 className="text-base font-semibold tracking-tight">
+              Progress over time
+            </h2>
+          </div>
+          <div className="px-5 py-4">
+            <PhotoTimeline photos={chronological} onZoom={setZoomId} />
           </div>
         </div>
       ) : null}

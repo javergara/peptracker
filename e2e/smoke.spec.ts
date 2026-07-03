@@ -92,7 +92,8 @@ test("labs page shows the seeded marker", async ({ page }) => {
 test("photos page loads with an upload control", async ({ page }) => {
   await page.goto("/photos");
   await expect(page.getByRole("heading", { name: /Photos/i })).toBeVisible();
-  await expect(page.locator('input[type="file"]')).toBeAttached();
+  // PhotoFileInput renders a visible picker + a hidden compressed-file input.
+  await expect(page.locator('input[type="file"]').first()).toBeAttached();
 });
 
 test("dashboard shows adherence widget", async ({ page }) => {

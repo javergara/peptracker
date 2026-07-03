@@ -351,7 +351,10 @@ export. See `DEPLOYMENT.md`/the plan for Phase 2.
   indicator via `env(safe-area-inset-*)` Tailwind arbitraries in
   `app-shell.tsx` (mobile header, brand-rail aside, mobile `SheetContent`, main
   bottom padding). In a normal browser the insets resolve to 0 — desktop is
-  unaffected. Use `pt-[env(safe-area-inset-top)]` / `pb-[calc(...+env(...))]`.
+  unaffected. Use `pt-[env(safe-area-inset-top)]` or a calc like
+  `pb-[calc(1.5rem+env(safe-area-inset-bottom))]`. (Careful: Tailwind v4 scans
+  ALL non-gitignored files — including this one — for class candidates, so a
+  malformed class-shaped example here becomes invalid CSS and breaks the build.)
 - **Service worker:** hand-written `public/sw.js` (no bundler step — robust under
   Turbopack), registered by `src/components/pwa/service-worker-register.tsx`
   (production only). Offline = precache + SWR for static assets + the PUBLIC
