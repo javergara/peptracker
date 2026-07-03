@@ -328,11 +328,48 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 
 ## Routes
 
-`/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`) · `/calendar` ·
-`/cycles` (+`/new`,`/[id]`,`/[id]/edit`) · `/inventory` (`?tab=active|stock`) · `/metrics` ·
-`/labs` · `/photos` · `/peptides` (+`/[slug]`) · `/stacks` (+`/new`,`/[slug]`) ·
-`/suggestions` · `/supplements` · `/biomarkers` (+`/[slug]`) · `/settings`. Auth
-routes render bare; everything else is gated.
+`/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`, `?page&peptide`) ·
+`/calendar` · `/cycles` (+`/new`,`/[id]`,`/[id]/edit`, `?status`) · `/inventory`
+(`?tab=active|stock`, `?peptide`) · `/metrics` · `/labs` · `/photos` (`?page`) ·
+`/journal` · `/checkin` · `/peptides` (+`/[slug]`) · `/stacks`
+(+`/new`,`/[slug]`,`/[slug]/edit`) · `/suggestions` · `/supplements` ·
+`/biomarkers` (+`/[slug]`) · `/settings`. Auth routes render bare; everything else
+is gated. Global **⌘K search** (`src/components/search/global-search.tsx`, index
+via `actions/search.ts`) is mounted in the app shell.
+
+### Recently added feature surfaces (keep in mind before duplicating)
+
+- **Journal** — `/journal` + `actions/journal.ts` (the model existed unused; now
+  full CRUD). **Check-in** — `/checkin` daily 1-5 wellbeing markers
+  (`src/types/checkin.ts` `CHECKIN_MARKERS`, `CheckIn` model unique per
+  `[userId,date]`, `actions/checkin.ts`); markers flow into `/metrics` trends and
+  a dashboard prompt (`components/dashboard/checkin-prompt.tsx`).
+- **Quick-log** — one-tap dose logging from the dashboard's "today" rows
+  (`components/dashboard/quick-log-button.tsx`), per-peptide for stack cycles.
+- **Estimated PK / "Active Levels"** — pure one-compartment decay in
+  `src/lib/pk.ts` (tested), driven by `Peptide.halfLifeHours` (Float?; numeric
+  half-life in the peptide JSONs — after adding one, a `db:seed` is needed to load
+  it). Charted by `components/metrics/active-levels-chart.tsx` (peak-normalized per
+  peptide) on the dashboard + cycle detail. Educational estimate — renders under
+  the Disclaimer, never as concentration/advice.
+- **Cycle detail intelligence** — "what changed" before/after
+  (`src/lib/cycle-insights.ts`, tested), live interaction guard among active-cycle
+  peptides (`getActiveCyclePeptideIds` + `findInteractions`), cost estimate
+  (`src/lib/cycle-cost.ts` on `src/lib/cost.ts`), and washout (`Cycle.washoutDays`).
+- **Cost tracking** — optional `Vial.price` / `StockItem.price`; per-dose/month
+  math in `src/lib/cost.ts` (tested), shown on inventory + cycle detail.
+- **Cycle scheduling** — twice-weekly/custom cycles need `daysOfWeek` (the form
+  collects them; `isDoseDay` fires on them). `scheduleConfig` also carries
+  `timesPerDay`.
+- **Body map** (`components/log/body-map-select.tsx`) replaces the site select;
+  **syringe gauge** (`components/peptides/syringe-gauge.tsx`) in the reconstitution
+  calculator. **SearchableSelect** (`components/common/searchable-select.tsx`,
+  base-ui Combobox) is the typeahead used for peptide pickers.
+- **Forms**: use the `ui/{input,select,textarea}.tsx` primitives (NOT a local
+  `inputCls` string — that pattern was removed) inside `ActionForm`.
+- **Full JSON backup**: `exportUserData`/`importUserData` (`actions/settings.ts`)
+  now round-trip cycles/doses/vials/stock/labs/journal/supplements/reminders with
+  id remapping (photos excluded — blobs don't serialize).
 
 ## Mobile / PWA (iPhone)
 
@@ -417,7 +454,8 @@ typical**, not authoritative (they vary by lab/assay).
 - Unit/logic: **vitest** (`npm run test`). Tests live next to the lib module
   (`src/lib/<name>.test.ts`); favor testing pure functions. Currently covered:
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
-  `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`. Keep pure math out of components so it
+  `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
+  `cost`, `cycle-insights`, `cycle-cost`. Keep pure math out of components so it
   stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
