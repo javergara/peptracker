@@ -21,6 +21,14 @@ import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { logDose } from "@/lib/actions/doses";
 import {
@@ -37,6 +45,7 @@ import {
 } from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { doseDefaultsByPeptide } from "@/lib/cycles";
+import { doseForCycleDay, protocolLabel } from "@/lib/titration";
 import { addDays, formatDate } from "@/lib/dates";
 import { activeLevelSeries, type PkDose } from "@/lib/pk";
 import { suggestNextSite } from "@/lib/sites";
@@ -52,6 +61,7 @@ import {
 } from "@/lib/cycle-cost";
 import { formatCost } from "@/lib/cost";
 import { toMcg } from "@/lib/stock";
+import { asDosage } from "@/types/peptide";
 import { cn } from "@/lib/utils";
 
 const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -99,6 +109,7 @@ export default async function CycleDetailPage({
   const [user, cycle] = await Promise.all([getCurrentUser(), getCycle(id)]);
   if (!cycle) notFound();
 
+  const now = new Date();
   const prog = cycleProgress(cycle.startDate, cycle.endDate);
   const cfg = cycle.scheduleConfig as ScheduleConfig | null;
 
@@ -107,13 +118,38 @@ export default async function CycleDetailPage({
     ? [cycle.peptide]
     : (cycle.stack?.items.map((i) => i.peptide) ?? []);
 
+  // Titration — single-peptide cycles only. Resolve the chosen protocol from
+  // the peptide's own `dosage.protocols` (re-derived here, not trusted from
+  // the client) and compute the current week's target dose.
+  const titrationProtocols = cycle.peptide
+    ? (asDosage(cycle.peptide.dosage)?.protocols ?? [])
+    : [];
+  const titrationProtocol = cfg?.titration
+    ? (titrationProtocols.find(
+        (proto, i) => protocolLabel(proto, i) === cfg.titration!.label,
+      ) ?? null)
+    : null;
+  const titrationToday = titrationProtocol
+    ? doseForCycleDay(titrationProtocol, cycle.startDate, now)
+    : null;
+  const titrationCurrentIndex = titrationProtocol
+    ? titrationProtocol.steps.findIndex(
+        (s) => s.weeks === titrationToday?.stepLabel,
+      )
+    : -1;
+  const titrationNextStep =
+    titrationProtocol && titrationCurrentIndex >= 0
+      ? (titrationProtocol.steps[titrationCurrentIndex + 1] ?? null)
+      : null;
+
   // Per-peptide dose defaults for the log form: a single-peptide cycle maps its
-  // one peptide to dosePerAdmin/unit; a stack cycle uses its per-peptide items.
+  // one peptide to dosePerAdmin/unit (or, when a titration protocol is active,
+  // the current week's step); a stack cycle uses its per-peptide items.
   const doseByPeptide = cycle.peptide
     ? {
         [cycle.peptide.id]: {
-          dose: cfg?.dosePerAdmin,
-          unit: cfg?.unit ?? "mcg",
+          dose: titrationToday?.amount ?? cfg?.dosePerAdmin,
+          unit: titrationToday?.unit ?? cfg?.unit ?? "mcg",
         },
       }
     : doseDefaultsByPeptide(cfg?.items);
@@ -131,7 +167,6 @@ export default async function CycleDetailPage({
   // only peptides with a configured half-life. Uses ALL of the cycle's
   // already-loaded doseLogs (not just the display window) so a dose taken
   // just before the window still contributes its decaying tail correctly.
-  const now = new Date();
   const windowEnd = cycle.endDate && cycle.endDate < now ? cycle.endDate : now;
   const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
   const windowStartDate = new Date(
@@ -383,6 +418,91 @@ export default async function CycleDetailPage({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <CycleActions id={cycle.id} status={cycle.status} />
       </div>
+
+      {/* Titration schedule — single-peptide cycles with a chosen protocol. */}
+      {titrationProtocol && cfg?.titration ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-1">Titration schedule</Eyebrow>
+          <p className="text-muted-foreground mb-4 text-xs">
+            {cfg.titration.label} · dose auto-advances weekly per the protocol.
+          </p>
+
+          {titrationToday ? (
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-muted-foreground text-xs">
+                  This week · wk{" "}
+                  <span className="num">{titrationToday.weekNumber}</span>
+                </p>
+                <p className="num text-foreground text-3xl font-semibold">
+                  {titrationToday.amount}
+                  <span className="text-muted-foreground ml-1.5 text-base font-medium">
+                    {titrationToday.unit}
+                  </span>
+                </p>
+                {titrationToday.note ? (
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {titrationToday.note}
+                  </p>
+                ) : null}
+              </div>
+              {titrationNextStep ? (
+                <div className="text-right">
+                  <p className="text-muted-foreground text-xs">
+                    Next · wk{" "}
+                    <span className="num">{titrationNextStep.weeks}</span>
+                  </p>
+                  <p className="num text-foreground text-lg font-semibold">
+                    {titrationNextStep.amount} {titrationNextStep.unit}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-muted-foreground mb-5 text-sm">
+              This cycle hasn&apos;t reached the start of its titration schedule
+              yet, or has run past the last defined step.
+            </p>
+          )}
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Weeks</TableHead>
+                <TableHead>Dose</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {titrationProtocol.steps.map((step, i) => {
+                const isCurrent = i === titrationCurrentIndex;
+                return (
+                  <TableRow key={i} className={cn(isCurrent && "bg-primary/5")}>
+                    <TableCell className="num text-muted-foreground">
+                      {step.weeks}
+                      {isCurrent ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-primary/10 text-primary ml-2 border-transparent"
+                        >
+                          Current
+                        </Badge>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="num text-foreground">
+                      {step.amount} {step.unit}
+                      {step.note ? (
+                        <span className="text-muted-foreground ml-1 text-xs font-normal">
+                          · {step.note}
+                        </span>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </section>
+      ) : null}
 
       {hasConfiguredHalfLife ? (
         <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">

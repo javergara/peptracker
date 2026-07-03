@@ -370,6 +370,21 @@ via `actions/search.ts`) is mounted in the app shell.
 - **Full JSON backup**: `exportUserData`/`importUserData` (`actions/settings.ts`)
   now round-trip cycles/doses/vials/stock/labs/journal/supplements/reminders with
   id remapping (photos excluded — blobs don't serialize).
+- **Supplements 2.0**: `Supplement` gained `timesPerDay`/`timing`; `SupplementLog`
+  tracks per-intake adherence (`actions/supplements.ts` `logSupplementIntake`,
+  `getSupplementAdherence`), surfaced on `/supplements` + a dashboard widget.
+- **Exercise/recovery**: measurement `type` (a String, no migration) now includes
+  `restingHr`/`hrv`/`steps`/`workout`; **wearable CSV import**
+  (`importMeasurementsCsv`, header `date,type,value[,unit]`) in settings; a
+  **readiness score** (`src/lib/readiness.ts`, tested — blends sleep/HRV/RHR/mood)
+  drives `components/dashboard/readiness-tile.tsx`.
+- **Proactive correlations** (`src/lib/correlations.ts`, tested): auto-surfaces the
+  strongest |r| pairs (n-weighted) as insight cards on `/metrics`
+  (`correlation-insights.tsx`) — correlational language + Disclaimer, never causal.
+- **Titration auto-advance** (`src/lib/titration.ts`, tested): a single-peptide
+  cycle can select one of the peptide's `dosage.protocols`; the current week's
+  step drives the cycle-detail display + the log-dose default
+  (`scheduleConfig.titration = { label }`, validated server-side).
 
 ## Mobile / PWA (iPhone)
 
@@ -455,8 +470,8 @@ typical**, not authoritative (they vary by lab/assay).
   (`src/lib/<name>.test.ts`); favor testing pure functions. Currently covered:
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
-  `cost`, `cycle-insights`, `cycle-cost`. Keep pure math out of components so it
-  stays testable.
+  `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
+  `titration`. Keep pure math out of components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the

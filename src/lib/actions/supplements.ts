@@ -16,6 +16,9 @@ function readFields(formData: FormData) {
   const category = String(formData.get("category") ?? "").trim() || null;
   const dose = String(formData.get("dose") ?? "").trim() || null;
   const frequency = String(formData.get("frequency") ?? "").trim() || null;
+  const timesPerDayRaw = String(formData.get("timesPerDay") ?? "").trim();
+  const timesPerDay = timesPerDayRaw ? Number(timesPerDayRaw) : null;
+  const timing = String(formData.get("timing") ?? "").trim() || null;
   const startRaw = String(formData.get("startDate") ?? "");
   const endRaw = String(formData.get("endDate") ?? "");
   const status = String(formData.get("status") ?? "active").trim() || "active";
@@ -25,6 +28,11 @@ function readFields(formData: FormData) {
     category,
     dose,
     frequency,
+    timesPerDay:
+      timesPerDay != null && Number.isFinite(timesPerDay) && timesPerDay > 0
+        ? Math.round(timesPerDay)
+        : null,
+    timing,
     startDate: startRaw ? new Date(startRaw) : new Date(),
     endDate: endRaw ? new Date(endRaw) : null,
     status,
@@ -56,4 +64,34 @@ export async function deleteSupplement(id: string) {
   const user = await getActiveUser();
   await prisma.supplement.deleteMany({ where: { id, userId: user.id } });
   revalidatePath("/supplements");
+}
+
+/**
+ * Dose-timing adherence logging. A SupplementLog is a single logged intake,
+ * distinct from the continuous Supplement date range it belongs to.
+ */
+
+export async function logSupplementIntake(
+  supplementId: string,
+): Promise<{ id: string; takenAt: string }> {
+  const user = await getActiveUser();
+  const supplement = await prisma.supplement.findFirst({
+    where: { id: supplementId, userId: user.id },
+  });
+  if (!supplement) throw new Error("Supplement not found.");
+
+  const log = await prisma.supplementLog.create({
+    data: { userId: user.id, supplementId, takenAt: new Date() },
+  });
+  revalidatePath("/supplements");
+  revalidatePath("/");
+  return { id: log.id, takenAt: log.takenAt.toISOString() };
+}
+
+/** Undo for logSupplementIntake. */
+export async function deleteSupplementLog(id: string) {
+  const user = await getActiveUser();
+  await prisma.supplementLog.deleteMany({ where: { id, userId: user.id } });
+  revalidatePath("/supplements");
+  revalidatePath("/");
 }

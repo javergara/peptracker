@@ -15,6 +15,7 @@ import {
 import type { ScheduleConfig } from "@/lib/schedule";
 import { doseDefaultsByPeptide, parseDoseAmount } from "@/lib/cycles";
 import { toDateInputValue } from "@/lib/dates";
+import { asDosage } from "@/types/peptide";
 
 export const metadata = { title: "Edit Cycle" };
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export default async function EditCyclePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [user, cycle, peptides, stacksRaw] = await Promise.all([
+  const [user, cycle, peptidesRaw, stacksRaw] = await Promise.all([
     getCurrentUser(),
     getCycle(id),
     listPeptides(),
@@ -34,6 +35,12 @@ export default async function EditCyclePage({
   if (!cycle) notFound();
 
   const cfg = (cycle.scheduleConfig as ScheduleConfig | null) ?? null;
+
+  const peptides = peptidesRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    protocols: asDosage(p.dosage)?.protocols,
+  }));
 
   const stacks = stacksRaw.map((s) => ({
     id: s.id,
@@ -91,6 +98,7 @@ export default async function EditCyclePage({
             unit: cfg?.unit ?? "mcg",
             washoutDays: cycle.washoutDays ?? undefined,
             items: doseDefaultsByPeptide(cfg?.items),
+            titrationLabel: cfg?.titration?.label,
             notes: cycle.notes ?? undefined,
           }}
         />

@@ -8,15 +8,22 @@ import { Button } from "@/components/ui/button";
 import { createCycle } from "@/lib/actions/cycles";
 import { getCurrentUser, listPeptides, listStacks } from "@/lib/queries";
 import { parseDoseAmount } from "@/lib/cycles";
+import { asDosage } from "@/types/peptide";
 
 export const metadata = { title: "New Cycle" };
 
 export default async function NewCyclePage() {
-  const [user, peptides, stacksRaw] = await Promise.all([
+  const [user, peptidesRaw, stacksRaw] = await Promise.all([
     getCurrentUser(),
     listPeptides(),
     listStacks(),
   ]);
+
+  const peptides = peptidesRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    protocols: asDosage(p.dosage)?.protocols,
+  }));
 
   const stacks = stacksRaw.map((s) => ({
     id: s.id,

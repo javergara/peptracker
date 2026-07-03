@@ -9,6 +9,8 @@ import { Sparkline, MiniBars } from "@/components/common/sparkline";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { CheckInPrompt } from "@/components/dashboard/checkin-prompt";
+import { SupplementAdherence } from "@/components/dashboard/supplement-adherence";
+import { ReadinessTile } from "@/components/dashboard/readiness-tile";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
@@ -19,9 +21,12 @@ import {
   getActiveCycles,
   getCurrentUser,
   getDoseLogsInRange,
+  getReadinessMeasurements,
   getRecentDoseLogs,
   getStarterCounts,
   getStockLevels,
+  getSupplementAdherence,
+  getTodaysCheckIn,
   listPeptides,
 } from "@/lib/queries";
 import { computeAdherence, computeOverdue } from "@/lib/adherence";
@@ -34,6 +39,8 @@ import {
 import { formatDate } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
 import { activeLevelSeries, type PkDose } from "@/lib/pk";
+import { computeReadiness, deriveReadinessInputs } from "@/lib/readiness";
+import { asCheckInRatings } from "@/types/checkin";
 import { suggestNextSite } from "@/lib/sites";
 import { cn } from "@/lib/utils";
 
@@ -41,15 +48,36 @@ export default async function DashboardPage() {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [user, activeCycles, peptides, recentDoses, rangeLogs, stockLevels] =
-    await Promise.all([
-      getCurrentUser(),
-      getActiveCycles(),
-      listPeptides(),
-      getRecentDoseLogs(8),
-      getDoseLogsInRange(thirtyDaysAgo, now),
-      getStockLevels(),
-    ]);
+  const [
+    user,
+    activeCycles,
+    peptides,
+    recentDoses,
+    rangeLogs,
+    stockLevels,
+    supplementAdherence,
+    readinessMeasurements,
+    todaysCheckIn,
+  ] = await Promise.all([
+    getCurrentUser(),
+    getActiveCycles(),
+    listPeptides(),
+    getRecentDoseLogs(8),
+    getDoseLogsInRange(thirtyDaysAgo, now),
+    getStockLevels(),
+    getSupplementAdherence(),
+    getReadinessMeasurements(),
+    getTodaysCheckIn(),
+  ]);
+
+  // Readiness score — blends the latest sleep/HRV/resting-HR measurements with
+  // today's check-in mood (all optional; tile hides itself when nothing's on hand).
+  const readiness = computeReadiness(
+    deriveReadinessInputs({
+      measurements: readinessMeasurements,
+      checkInRatings: asCheckInRatings(todaysCheckIn?.ratings),
+    }),
+  );
 
   const accent = user.color ?? "#7C3AED";
 
@@ -268,8 +296,13 @@ export default async function DashboardPage() {
       <MissedDosesAlert overdue={overdue} />
       <LowStockAlert levels={stockLevels} />
 
-      {/* Daily wellbeing check-in — prompt or today's summary */}
-      <CheckInPrompt />
+      {/* Daily wellbeing — check-in prompt, readiness, supplement adherence.
+          Each piece renders only when it has something to show. */}
+      <div className="mb-[18px] grid gap-[18px] lg:grid-cols-[1fr_1fr]">
+        <CheckInPrompt />
+        {readiness ? <ReadinessTile readiness={readiness} /> : null}
+      </div>
+      <SupplementAdherence items={supplementAdherence} />
 
       {/* Row 2 — Three stat tiles */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">

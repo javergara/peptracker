@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { CorrelationExplorer } from "@/components/metrics/correlation-explorer";
+import { CorrelationInsights } from "@/components/metrics/correlation-insights";
 import {
   MetricsTrends,
   type TrendSeries,
@@ -50,8 +51,27 @@ const TYPE_LABELS: Record<string, string> = {
   bodyFat: "Body fat",
   sleep: "Sleep",
   recovery: "Recovery",
+  restingHr: "Resting HR",
+  hrv: "HRV",
+  steps: "Steps",
+  workout: "Workout duration",
   custom: "Custom",
 };
+
+/** Default unit shown for a measurement type when the row itself has none. */
+const TYPE_DEFAULT_UNIT: Record<string, string> = {
+  weight: "kg",
+  bodyFat: "%",
+  sleep: "h",
+  recovery: "/100",
+  restingHr: "bpm",
+  hrv: "ms",
+  steps: "steps",
+  workout: "min",
+};
+
+/** Types where a LOWER value is the improving direction (used for tile deltas). */
+const LOWER_IS_BETTER = new Set(["weight", "bodyFat", "restingHr"]);
 
 /** Convert a range string to milliseconds. */
 function rangeToDays(range: RangeValue): number {
@@ -185,8 +205,8 @@ export default async function MetricsPage({
     if (windowRows.length >= 2) {
       const first = windowRows[0].value;
       const diff = latest - first;
-      // "Improving" direction: weight & bodyFat lower is better; sleep & recovery higher is better.
-      const lowerIsBetter = key === "weight" || key === "bodyFat";
+      // "Improving" direction: see LOWER_IS_BETTER (e.g. weight, resting HR).
+      const lowerIsBetter = LOWER_IS_BETTER.has(key);
       improving = lowerIsBetter ? diff < -0.05 : diff > 0.05;
       if (Math.abs(diff) <= 0.05) improving = null; // stable
       const sign = diff >= 0 ? "▲" : "▼";
@@ -228,7 +248,7 @@ export default async function MetricsPage({
     corrSeries.push({
       key: `m:${type}`,
       label: TYPE_LABELS[type] ?? type,
-      unit: rows[0]?.unit ?? null,
+      unit: rows[0]?.unit ?? TYPE_DEFAULT_UNIT[type] ?? null,
       points: rows
         .map((r) => ({ t: r.recordedAt.getTime(), value: r.value }))
         .sort((a, b) => a.t - b.t),
@@ -283,7 +303,7 @@ export default async function MetricsPage({
       trendSeries.push({
         key: `m:${type}`,
         label: TYPE_LABELS[type] ?? type,
-        unit: rows[0]?.unit ?? null,
+        unit: rows[0]?.unit ?? TYPE_DEFAULT_UNIT[type] ?? null,
         color: nextColor(),
         points: windowed,
       });
@@ -431,6 +451,9 @@ export default async function MetricsPage({
           </Suspense>
         </CardContent>
       </Card>
+
+      {/* Proactive correlation insights — surfaces strongest pairs automatically */}
+      <CorrelationInsights series={corrSeries} />
 
       {/* Correlation explorer */}
       <section aria-label="Correlation explorer">

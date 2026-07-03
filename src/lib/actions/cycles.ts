@@ -4,11 +4,17 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/queries";
+import { protocolLabel } from "@/lib/titration";
+import { asDosage } from "@/types/peptide";
 
 export type CycleStatusValue = "planned" | "active" | "paused" | "completed";
 
-/** Parse the shared cycle form fields (used by create + update). */
-function parseCycleForm(formData: FormData) {
+/**
+ * Parse the shared cycle form fields (used by create + update). Titration
+ * (`titrationLabel`) is single-peptide only: validated against the source
+ * peptide's `dosage.protocols` so a stale/tampered label can't be stored.
+ */
+async function parseCycleForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const source = String(formData.get("source") ?? ""); // "peptide:<id>" | "stack:<id>"
   const startDate = String(formData.get("startDate") ?? "");
@@ -18,6 +24,7 @@ function parseCycleForm(formData: FormData) {
   const frequency = String(formData.get("frequency") ?? "daily");
   const dosePerAdmin = Number(formData.get("dosePerAdmin") ?? 0);
   const unit = String(formData.get("unit") ?? "mcg");
+  const titrationLabelRaw = String(formData.get("titrationLabel") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
 
   const washoutDaysRaw = formData.get("washoutDays");
@@ -61,13 +68,34 @@ function parseCycleForm(formData: FormData) {
     ...(daysOfWeek.length > 0 ? { daysOfWeek } : {}),
   };
 
+  // Titration is single-peptide only. Re-validate the submitted label against
+  // the peptide's own `dosage.protocols` (never trust the client) — an
+  // unmatched/tampered/stale label is silently dropped (falls back to the
+  // fixed dose).
+  let titration: { label: string } | undefined;
+  if (kind === "peptide" && id && titrationLabelRaw) {
+    const peptide = await prisma.peptide.findUnique({ where: { id } });
+    const protocols = peptide
+      ? (asDosage(peptide.dosage)?.protocols ?? [])
+      : [];
+    const match = protocols.find(
+      (proto, i) => protocolLabel(proto, i) === titrationLabelRaw,
+    );
+    if (match) titration = { label: titrationLabelRaw };
+  }
+
   // Stack cycles carry a per-peptide dose (different peptides, different doses),
   // submitted as `itemDose:<peptideId>` / `itemUnit:<peptideId>`. Single-peptide
-  // cycles keep the one `dosePerAdmin`/`unit`.
+  // cycles keep the one `dosePerAdmin`/`unit`, plus an optional `titration`.
   const scheduleConfig =
     kind === "stack"
       ? { ...schedule, items: parseStackItems(formData) }
-      : { ...schedule, dosePerAdmin, unit };
+      : {
+          ...schedule,
+          dosePerAdmin,
+          unit,
+          ...(titration ? { titration } : {}),
+        };
 
   return {
     name,
@@ -103,7 +131,7 @@ function parseStackItems(formData: FormData) {
 export async function createCycle(formData: FormData) {
   const user = await getCurrentUser();
   const cycle = await prisma.cycle.create({
-    data: { userId: user.id, ...parseCycleForm(formData) },
+    data: { userId: user.id, ...(await parseCycleForm(formData)) },
   });
   revalidatePath("/cycles");
   revalidatePath("/");
@@ -119,7 +147,10 @@ export async function updateCycle(id: string, formData: FormData) {
   });
   if (!owned) throw new Error("Cycle not found.");
 
-  await prisma.cycle.update({ where: { id }, data: parseCycleForm(formData) });
+  await prisma.cycle.update({
+    where: { id },
+    data: await parseCycleForm(formData),
+  });
   revalidatePath("/cycles");
   revalidatePath(`/cycles/${id}`);
   revalidatePath("/");

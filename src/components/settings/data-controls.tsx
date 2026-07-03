@@ -9,6 +9,7 @@ import {
   importUserData,
   exportDosesCsv,
   exportLabsCsv,
+  importMeasurementsCsv,
 } from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 export function DataControls() {
   const [isPending, startTransition] = useTransition();
   const [json, setJson] = useState("");
+  const [wearableCsv, setWearableCsv] = useState("");
 
   function downloadCsv(csv: string, filename: string) {
     const blob = new Blob([csv], { type: "text/csv" });
@@ -87,6 +89,22 @@ export function DataControls() {
     });
   }
 
+  function onImportWearableCsv() {
+    if (!wearableCsv.trim()) {
+      toast.error("Paste wearable CSV data first.");
+      return;
+    }
+    startTransition(async () => {
+      try {
+        const count = await importMeasurementsCsv(wearableCsv);
+        toast.success(`Imported ${count} measurement(s)`);
+        setWearableCsv("");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "CSV import failed.");
+      }
+    });
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -133,6 +151,34 @@ export function DataControls() {
           Restores cycles, doses, vials, stock, labs, measurements, journal,
           supplements and reminders. Additive — importing the same backup twice
           duplicates records. Photos are not included.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Import wearable CSV</label>
+        <Textarea
+          value={wearableCsv}
+          onChange={(e) => setWearableCsv(e.target.value)}
+          rows={4}
+          placeholder={
+            "date,type,value,unit\n2026-07-01,sleep,7.5,h\n2026-07-01,hrv,62,ms\n2026-07-01,restingHr,54,bpm"
+          }
+          className="resize-none font-mono text-xs"
+        />
+        <Button
+          variant="outline"
+          onClick={onImportWearableCsv}
+          disabled={isPending || !wearableCsv.trim()}
+        >
+          <Upload className="size-4" />
+          Import wearable CSV
+        </Button>
+        <p className="text-muted-foreground text-xs">
+          Header row <code className="font-mono">date,type,value,unit</code>{" "}
+          (unit optional). <code className="font-mono">type</code> must be one
+          of weight, bodyFat, sleep, recovery, restingHr, hrv, steps, workout,
+          custom. Invalid rows are skipped; each valid row becomes a new
+          measurement (additive, no dedup).
         </p>
       </div>
     </div>

@@ -259,6 +259,24 @@ export async function getMeasurementsInRange(start: Date, end: Date) {
   });
 }
 
+/**
+ * Recent sleep/HRV/resting-HR measurements (readiness score inputs), scoped
+ * to the last `days` (default 14 — enough to find the latest reading of each
+ * type without pulling full history).
+ */
+export async function getReadinessMeasurements(days = 14) {
+  const user = await getActiveUser();
+  const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  return prisma.measurement.findMany({
+    where: {
+      userId: user.id,
+      type: { in: ["sleep", "hrv", "restingHr"] },
+      recordedAt: { gte: start },
+    },
+    orderBy: { recordedAt: "asc" },
+  });
+}
+
 // --- Vials / inventory -----------------------------------------------------
 
 export async function listVials() {
@@ -464,6 +482,91 @@ export async function getActiveSupplements() {
   return prisma.supplement.findMany({
     where: { userId: user.id, status: "active" },
     orderBy: { startDate: "desc" },
+  });
+}
+
+export interface SupplementAdherence {
+  id: string;
+  name: string;
+  timesPerDay: number;
+  takenToday: number;
+  expectedToday: number;
+  windowLogged: number;
+  windowExpected: number;
+}
+
+/**
+ * Dose-timing adherence for active supplements that have `timesPerDay` set
+ * (supplements without it are continuous/untracked, so they're excluded).
+ * `windowDays` includes today. Not cached — user-scoped.
+ */
+export async function getSupplementAdherence(
+  windowDays = 7,
+): Promise<SupplementAdherence[]> {
+  const user = await getActiveUser();
+  const supplements = await prisma.supplement.findMany({
+    where: { userId: user.id, status: "active", timesPerDay: { not: null } },
+    orderBy: { startDate: "desc" },
+  });
+  if (supplements.length === 0) return [];
+
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const windowStart = new Date(now);
+  windowStart.setDate(windowStart.getDate() - (windowDays - 1));
+  windowStart.setHours(0, 0, 0, 0);
+
+  const logs = await prisma.supplementLog.findMany({
+    where: {
+      userId: user.id,
+      supplementId: { in: supplements.map((s) => s.id) },
+      takenAt: { gte: windowStart },
+    },
+    orderBy: { takenAt: "desc" },
+  });
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+
+  return supplements.map((s) => {
+    const timesPerDay = s.timesPerDay ?? 0;
+    const supplementLogs = logs.filter((l) => l.supplementId === s.id);
+    const takenToday = supplementLogs.filter(
+      (l) => l.takenAt >= todayStart,
+    ).length;
+    const windowLogged = supplementLogs.length;
+
+    // Expected count over the window, clamped to the days the supplement was
+    // actually active within it (handles supplements started mid-window).
+    const rangeStart = s.startDate > windowStart ? s.startDate : windowStart;
+    const activeDays = Math.max(
+      0,
+      Math.min(
+        windowDays,
+        Math.floor((now.getTime() - rangeStart.getTime()) / msPerDay) + 1,
+      ),
+    );
+    const windowExpected = activeDays * timesPerDay;
+
+    return {
+      id: s.id,
+      name: s.name,
+      timesPerDay,
+      takenToday,
+      expectedToday: timesPerDay,
+      windowLogged,
+      windowExpected,
+    };
+  });
+}
+
+/** Recent intake log entries for one supplement (most recent first). */
+export async function listSupplementLogs(supplementId: string, limit = 20) {
+  const user = await getActiveUser();
+  return prisma.supplementLog.findMany({
+    where: { userId: user.id, supplementId },
+    orderBy: { takenAt: "desc" },
+    take: limit,
   });
 }
 

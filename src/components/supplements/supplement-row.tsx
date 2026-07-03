@@ -14,7 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LogIntakeButton } from "@/components/supplements/log-intake-button";
 import { updateSupplement, deleteSupplement } from "@/lib/actions/supplements";
+import type { SupplementAdherence } from "@/lib/queries";
 
 const CATEGORIES = [
   "vitamin",
@@ -67,6 +69,8 @@ export interface SupplementRowData {
   category: string | null;
   dose: string | null;
   frequency: string | null;
+  timesPerDay: number | null;
+  timing: string | null;
   startDate: Date;
   endDate: Date | null;
   status: string;
@@ -94,9 +98,12 @@ function toDateValue(d: Date): string {
 export function SupplementRow({
   supplement,
   accentColor,
+  adherence,
 }: {
   supplement: SupplementRowData;
   accentColor?: string;
+  /** Today/window intake progress — only present when timesPerDay is set. */
+  adherence?: SupplementAdherence;
 }) {
   const [editing, setEditing] = useState(false);
   const [isDeleting, startDelete] = useTransition();
@@ -154,10 +161,49 @@ export function SupplementRow({
                 {formatDateRange(s.startDate, s.endDate)}
               </span>
             </div>
+            {s.timing ? (
+              <p className="text-muted-foreground text-xs">{s.timing}</p>
+            ) : null}
             {s.notes ? (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
                 {s.notes}
               </p>
+            ) : null}
+            {adherence && s.status === "active" ? (
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="bg-accent h-1.5 w-24 overflow-hidden rounded-full">
+                    <div
+                      className="h-full rounded-full [background:var(--gradient-gauge)]"
+                      style={{
+                        width: `${
+                          adherence.expectedToday > 0
+                            ? Math.min(
+                                100,
+                                Math.round(
+                                  (adherence.takenToday /
+                                    adherence.expectedToday) *
+                                    100,
+                                ),
+                              )
+                            : 0
+                        }%`,
+                      }}
+                      role="progressbar"
+                      aria-valuenow={adherence.takenToday}
+                      aria-valuemin={0}
+                      aria-valuemax={adherence.expectedToday}
+                    />
+                  </div>
+                  <span className="num text-muted-foreground text-xs">
+                    today {adherence.takenToday}/{adherence.expectedToday}
+                  </span>
+                </div>
+                <LogIntakeButton
+                  supplementId={s.id}
+                  accentColor={accentColor}
+                />
+              </div>
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-1">
@@ -260,6 +306,40 @@ export function SupplementRow({
                 defaultValue={s.frequency ?? ""}
                 placeholder="e.g. daily"
                 maxLength={40}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor={`timesPerDay-${s.id}`}
+                className="text-sm font-medium"
+              >
+                Times per day{" "}
+                <span className="text-muted-foreground font-normal">
+                  — optional
+                </span>
+              </label>
+              <Input
+                id={`timesPerDay-${s.id}`}
+                name="timesPerDay"
+                type="number"
+                min={1}
+                max={12}
+                step={1}
+                defaultValue={s.timesPerDay ?? ""}
+                placeholder="e.g. 2"
+                className="num"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor={`timing-${s.id}`} className="text-sm font-medium">
+                Timing
+              </label>
+              <Input
+                id={`timing-${s.id}`}
+                name="timing"
+                defaultValue={s.timing ?? ""}
+                placeholder="e.g. morning, with food"
+                maxLength={80}
               />
             </div>
             <div className="space-y-1.5">

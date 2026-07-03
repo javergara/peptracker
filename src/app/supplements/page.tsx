@@ -15,19 +15,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addSupplement } from "@/lib/actions/supplements";
-import { listSupplements, getCurrentUser } from "@/lib/queries";
+import {
+  listSupplements,
+  getCurrentUser,
+  getSupplementAdherence,
+} from "@/lib/queries";
 import { toDateInputValue } from "@/lib/dates";
 
 export const metadata = { title: "Supplements" };
 export const dynamic = "force-dynamic";
 
 export default async function SupplementsPage() {
-  const [supplements, user] = await Promise.all([
+  const [supplements, user, adherence] = await Promise.all([
     listSupplements(),
     getCurrentUser(),
+    getSupplementAdherence(),
   ]);
 
   const accentColor = user.color ?? undefined;
+  const adherenceById = new Map(adherence.map((a) => [a.id, a]));
 
   const active = supplements.filter((s) => s.status === "active");
   const inactive = supplements.filter(
@@ -117,6 +123,38 @@ export default async function SupplementsPage() {
               />
             </div>
             <div className="space-y-1.5">
+              <label htmlFor="supp-timesPerDay" className="text-sm font-medium">
+                Times per day{" "}
+                <span className="text-muted-foreground font-normal">
+                  — optional
+                </span>
+              </label>
+              <Input
+                id="supp-timesPerDay"
+                name="timesPerDay"
+                type="number"
+                min={1}
+                max={12}
+                step={1}
+                placeholder="e.g. 2"
+                className="num"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="supp-timing" className="text-sm font-medium">
+                Timing{" "}
+                <span className="text-muted-foreground font-normal">
+                  — optional
+                </span>
+              </label>
+              <Input
+                id="supp-timing"
+                name="timing"
+                placeholder="e.g. morning, with food"
+                maxLength={80}
+              />
+            </div>
+            <div className="space-y-1.5">
               <label htmlFor="supp-start" className="text-sm font-medium">
                 Start date
               </label>
@@ -195,6 +233,7 @@ export default async function SupplementsPage() {
                     key={s.id}
                     supplement={s}
                     accentColor={accentColor}
+                    adherence={adherenceById.get(s.id)}
                   />
                 ))}
               </div>

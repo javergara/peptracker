@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CYCLE_STATUSES } from "@/types/peptide";
+import { CYCLE_STATUSES, type DosingProtocol } from "@/types/peptide";
+import { protocolLabel } from "@/lib/titration";
 import { cn } from "@/lib/utils";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -49,6 +50,8 @@ export interface CycleFormDefaults {
   notes?: string;
   /** Edit-mode per-peptide dose prefill (peptideId → dose/unit). */
   items?: Record<string, { dose?: number; unit?: string }>;
+  /** Chosen titration protocol label, for single-peptide cycles (see `protocolLabel`). */
+  titrationLabel?: string;
 }
 
 /**
@@ -63,21 +66,35 @@ export function CycleForm({
   submitLabel,
   defaults = {},
 }: {
-  peptides: { id: string; name: string }[];
+  peptides: { id: string; name: string; protocols?: DosingProtocol[] }[];
   stacks: StackOption[];
   action: (formData: FormData) => void | Promise<void>;
   submitLabel: string;
   defaults?: CycleFormDefaults;
 }) {
-  const [source, setSource] = React.useState(defaults.source ?? "");
+  const [source, setSourceRaw] = React.useState(defaults.source ?? "");
   const [frequency, setFrequency] = React.useState(
     defaults.frequency ?? "daily",
   );
   const [days, setDays] = React.useState<number[]>(defaults.daysOfWeek ?? []);
+  const [titrationLabel, setTitrationLabel] = React.useState(
+    defaults.titrationLabel ?? "",
+  );
   const isStack = source.startsWith("stack:");
   const selectedStack = isStack
     ? stacks.find((s) => `stack:${s.id}` === source)
     : undefined;
+  const selectedPeptide = !isStack
+    ? peptides.find((p) => `peptide:${p.id}` === source)
+    : undefined;
+  const protocols = selectedPeptide?.protocols ?? [];
+
+  // Changing the "based on" source invalidates any previously chosen
+  // titration protocol (it belongs to the old peptide).
+  const setSource = (v: string) => {
+    setSourceRaw(v);
+    setTitrationLabel("");
+  };
   // These frequencies only fire on explicitly picked weekdays.
   const needsDays = frequency === "twice-weekly" || frequency === "custom";
 
@@ -361,35 +378,76 @@ export function CycleForm({
             </p>
           )
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label htmlFor="dosePerAdmin" className="text-sm font-medium">
-                Dose per administration
-              </label>
-              <Input
-                id="dosePerAdmin"
-                name="dosePerAdmin"
-                type="number"
-                step="any"
-                min="0"
-                inputMode="decimal"
-                defaultValue={defaults.dosePerAdmin}
-                placeholder="e.g. 250"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="unit" className="text-sm font-medium">
-                Unit
-              </label>
-              <Select name="unit" defaultValue={defaults.unit ?? "mcg"}>
-                <SelectTrigger id="unit">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mcg">mcg</SelectItem>
-                  <SelectItem value="mg">mg</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="space-y-4">
+            {protocols.length > 0 ? (
+              <div className="space-y-1.5">
+                <label htmlFor="titrationLabel" className="text-sm font-medium">
+                  Titration protocol
+                </label>
+                <Select
+                  name="titrationLabel"
+                  value={titrationLabel || "none"}
+                  onValueChange={(v) =>
+                    setTitrationLabel(v && v !== "none" ? v : "")
+                  }
+                >
+                  <SelectTrigger id="titrationLabel">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (fixed dose)</SelectItem>
+                    {protocols.map((proto, i) => {
+                      const label = protocolLabel(proto, i);
+                      return (
+                        <SelectItem key={label} value={label}>
+                          {label}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  {titrationLabel
+                    ? "The logged dose default auto-advances weekly per this protocol's schedule — the fixed dose below is unused."
+                    : "Optional. Pick a protocol to auto-advance the dose week-over-week instead of a fixed amount."}
+                </p>
+              </div>
+            ) : null}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="dosePerAdmin" className="text-sm font-medium">
+                  Dose per administration
+                </label>
+                <Input
+                  id="dosePerAdmin"
+                  name="dosePerAdmin"
+                  type="number"
+                  step="any"
+                  min="0"
+                  inputMode="decimal"
+                  defaultValue={defaults.dosePerAdmin}
+                  placeholder="e.g. 250"
+                  disabled={!!titrationLabel}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="unit" className="text-sm font-medium">
+                  Unit
+                </label>
+                <Select
+                  name="unit"
+                  defaultValue={defaults.unit ?? "mcg"}
+                  disabled={!!titrationLabel}
+                >
+                  <SelectTrigger id="unit">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mcg">mcg</SelectItem>
+                    <SelectItem value="mg">mg</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         )}

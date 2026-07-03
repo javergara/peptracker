@@ -58,6 +58,7 @@ model User {
   photos       Photo[]
   pushSubscriptions PushSubscription[]
   supplements       Supplement[]
+  supplementLogs    SupplementLog[]
   labReminders      LabReminder[]
   checkIns          CheckIn[]
 
@@ -351,21 +352,41 @@ model Biomarker {
 // date ranges — they overlay the biomarker timeline as confounder bands. No
 // per-dose logging (these are taken continuously).
 model Supplement {
-  id        String    @id @default(cuid())
-  userId    String
-  name      String
-  category  String? // vitamin | mineral | omega | amino | herbal | other
-  dose      String? // free-form, e.g. "5 g", "2000 IU"
-  frequency String? // free-form, e.g. "daily"
-  startDate DateTime
-  endDate   DateTime?
-  status    String    @default("active") // active | paused | stopped
-  notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  category    String? // vitamin | mineral | omega | amino | herbal | other
+  dose        String? // free-form, e.g. "5 g", "2000 IU"
+  frequency   String? // free-form, e.g. "daily"
+  timesPerDay Int? // planned intakes/day — drives adherence math (null = untracked)
+  timing      String? // free-form, e.g. "morning, with food"
+  startDate   DateTime
+  endDate     DateTime?
+  status      String    @default("active") // active | paused | stopped
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  logs SupplementLog[]
 
   @@index([userId])
+}
+
+// One logged supplement intake (adherence). Distinct from the continuous
+// date-range Supplement it belongs to.
+model SupplementLog {
+  id           String   @id @default(cuid())
+  userId       String
+  supplementId String
+  takenAt      DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supplement Supplement @relation(fields: [supplementId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([supplementId])
 }
 
 // One-off lab-recheck action items (e.g. "Recheck ALT", "Cistatin C off creatine").

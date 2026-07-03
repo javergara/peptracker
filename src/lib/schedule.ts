@@ -33,6 +33,12 @@ export interface ScheduleConfig {
   unit?: string;
   /** Per-peptide doses for STACK cycles (peptideId → dose/unit). */
   items?: CyclePeptideDose[];
+  /**
+   * Chosen titration protocol for a SINGLE-peptide cycle (see
+   * `src/lib/titration.ts`). When set, the current week's dose comes from the
+   * peptide's `dosage.protocols` schedule instead of `dosePerAdmin`/`unit`.
+   */
+  titration?: { label: string };
 }
 
 export interface CycleLike {
