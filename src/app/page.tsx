@@ -8,6 +8,7 @@ import { AdherenceRing } from "@/components/common/adherence-ring";
 import { Sparkline, MiniBars } from "@/components/common/sparkline";
 import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
+import { CheckInPrompt } from "@/components/dashboard/checkin-prompt";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
@@ -266,6 +267,9 @@ export default async function DashboardPage() {
       {onboarding ? <OnboardingChecklist status={onboarding} /> : null}
       <MissedDosesAlert overdue={overdue} />
       <LowStockAlert levels={stockLevels} />
+
+      {/* Daily wellbeing check-in — prompt or today's summary */}
+      <CheckInPrompt />
 
       {/* Row 2 — Three stat tiles */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">

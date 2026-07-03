@@ -36,9 +36,11 @@ import {
   listMeasurements,
   getCurrentUser,
   getDoseLogsInRange,
+  listCheckIns,
   listLabs,
 } from "@/lib/queries";
 import { toDateInputValue } from "@/lib/dates";
+import { asCheckInRatings, CHECKIN_MARKERS } from "@/types/checkin";
 import { GitCompareArrows } from "lucide-react";
 
 export const metadata = { title: "Metrics" };
@@ -138,11 +140,12 @@ export default async function MetricsPage({
   const fetchStart = new Date(now);
   fetchStart.setDate(fetchStart.getDate() - 365);
 
-  const [measurements, user, doseLogs, labs] = await Promise.all([
+  const [measurements, user, doseLogs, labs, checkIns] = await Promise.all([
     listMeasurements(),
     getCurrentUser(),
     getDoseLogsInRange(fetchStart, now),
     listLabs(),
+    listCheckIns(),
   ]);
 
   const profileColor = user.color ?? "var(--chart-1)";
@@ -320,6 +323,35 @@ export default async function MetricsPage({
       color: "#22d3ee",
       points: energyPts,
     });
+
+  // Daily check-in markers (mood, energy, sleep, libido, …) — each becomes
+  // its own selectable trend series, same 1-5 scale as mood/energy above.
+  const checkInsByMarker = new Map<string, { t: number; value: number }[]>();
+  for (const c of checkIns) {
+    const ratings = asCheckInRatings(c.ratings);
+    for (const [key, value] of Object.entries(ratings)) {
+      const arr = checkInsByMarker.get(key) ?? [];
+      arr.push({ t: c.date.getTime(), value });
+      checkInsByMarker.set(key, arr);
+    }
+  }
+  for (const marker of CHECKIN_MARKERS) {
+    const rows = checkInsByMarker.get(marker.key);
+    if (!rows || rows.length === 0) continue;
+    const allPoints = [...rows].sort((a, b) => a.t - b.t);
+    const windowed = clipPoints(allPoints, windowStart);
+    if (windowed.length > 0) {
+      trendSeries.push({
+        key: `c:${marker.key}`,
+        label: marker.label,
+        unit: "/5",
+        color: nextColor(),
+        points: windowed,
+      });
+    } else {
+      nextColor();
+    }
+  }
 
   for (const [marker, rows] of lByMarker) {
     const allPoints = rows

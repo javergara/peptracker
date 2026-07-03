@@ -24,6 +24,7 @@ import {
   isLowStock,
   toMcg,
 } from "@/lib/stock";
+import { costPerDose, costPerMonth, formatCost } from "@/lib/cost";
 import { cn } from "@/lib/utils";
 
 interface StockItemView {
@@ -34,6 +35,7 @@ interface StockItemView {
   dose: number | null;
   doseUnit: string;
   frequency: string;
+  price: number | null;
   peptide: { name: string };
 }
 
@@ -132,6 +134,8 @@ export function StockInventory({
               item.dose != null
                 ? `${item.dose} ${item.doseUnit} · ${FREQUENCY_LABELS[item.frequency] ?? item.frequency}`
                 : null;
+            const perDoseCost = costPerDose(item.price, item.vialMcg, doseMcg);
+            const perMonthCost = costPerMonth(perDoseCost, item.frequency);
 
             return (
               <div
@@ -180,6 +184,14 @@ export function StockInventory({
                       "Set a dose to estimate supply"
                     )}
                   </p>
+                  {perDoseCost != null ? (
+                    <p className="num text-muted-foreground mt-0.5 text-[11.5px]">
+                      {formatCost(perDoseCost)}/dose
+                      {perMonthCost != null
+                        ? ` · ~${formatCost(perMonthCost)}/mo`
+                        : ""}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="border-border mt-auto space-y-2 border-t pt-3">
@@ -290,6 +302,23 @@ export function StockInventory({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="s-price" className="text-sm font-medium">
+              Price (per vial){" "}
+              <span className="text-muted-foreground font-normal">
+                — optional
+              </span>
+            </label>
+            <Input
+              id="s-price"
+              name="price"
+              type="number"
+              step="any"
+              min="0"
+              inputMode="decimal"
+              placeholder="e.g. 45.00"
+            />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="s-notes" className="text-sm font-medium">

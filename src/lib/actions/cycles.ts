@@ -20,6 +20,16 @@ function parseCycleForm(formData: FormData) {
   const unit = String(formData.get("unit") ?? "mcg");
   const notes = String(formData.get("notes") ?? "").trim();
 
+  const washoutDaysRaw = formData.get("washoutDays");
+  const washoutDaysNum =
+    washoutDaysRaw != null && washoutDaysRaw !== ""
+      ? Number(washoutDaysRaw)
+      : null;
+  const washoutDays =
+    washoutDaysNum != null && Number.isFinite(washoutDaysNum)
+      ? Math.max(0, Math.round(washoutDaysNum))
+      : null;
+
   const timesPerDayRaw = Number(formData.get("timesPerDay") ?? 1);
   const timesPerDay =
     Number.isFinite(timesPerDayRaw) && timesPerDayRaw >= 1
@@ -67,6 +77,7 @@ function parseCycleForm(formData: FormData) {
     peptideId: kind === "peptide" ? id : null,
     stackId: kind === "stack" ? id : null,
     scheduleConfig,
+    washoutDays,
     notes: notes || null,
   };
 }

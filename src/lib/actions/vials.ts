@@ -17,6 +17,8 @@ export async function createVial(formData: FormData) {
   const totalMcg = Number(formData.get("totalMcg") ?? 0);
   const bacRaw = formData.get("bacWaterMl");
   const bacWaterMl = bacRaw != null && bacRaw !== "" ? Number(bacRaw) : null;
+  const priceRaw = formData.get("price");
+  const price = priceRaw != null && priceRaw !== "" ? Number(priceRaw) : null;
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!peptideId || !totalMcg || totalMcg <= 0) {
@@ -41,6 +43,7 @@ export async function createVial(formData: FormData) {
       reconstitutedAt,
       expiresAt,
       status: reconstituted ? "active" : "sealed",
+      price: price != null && price >= 0 ? price : null,
       notes: notes || null,
     },
   });

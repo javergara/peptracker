@@ -44,6 +44,8 @@ export interface CycleFormDefaults {
   timesPerDay?: number;
   dosePerAdmin?: number | string;
   unit?: string;
+  /** Planned rest period after the cycle ends, in days (optional). */
+  washoutDays?: number | string;
   notes?: string;
   /** Edit-mode per-peptide dose prefill (peptideId → dose/unit). */
   items?: Record<string, { dose?: number; unit?: string }>;
@@ -269,6 +271,21 @@ export function CycleForm({
               step="1"
               inputMode="numeric"
               defaultValue={defaults.timesPerDay ?? 1}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="washoutDays" className="text-sm font-medium">
+              Rest period after cycle (days)
+            </label>
+            <Input
+              id="washoutDays"
+              name="washoutDays"
+              type="number"
+              min="0"
+              step="1"
+              inputMode="numeric"
+              defaultValue={defaults.washoutDays ?? ""}
+              placeholder="e.g. 28"
             />
           </div>
         </div>

@@ -29,6 +29,8 @@ export async function addStock(formData: FormData) {
   const dose = doseRaw != null && doseRaw !== "" ? Number(doseRaw) : null;
   const doseUnit = String(formData.get("doseUnit") ?? "mcg");
   const frequency = String(formData.get("frequency") ?? "daily");
+  const priceRaw = formData.get("price");
+  const price = priceRaw != null && priceRaw !== "" ? Number(priceRaw) : null;
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!peptideId || !vialMg || vialMg <= 0) {
@@ -48,6 +50,7 @@ export async function addStock(formData: FormData) {
         dose,
         doseUnit,
         frequency,
+        price: price != null && price >= 0 ? price : null,
         notes: notes || null,
       },
     });
@@ -61,6 +64,7 @@ export async function addStock(formData: FormData) {
         dose,
         doseUnit,
         frequency,
+        price: price != null && price >= 0 ? price : null,
         notes: notes || null,
       },
     });

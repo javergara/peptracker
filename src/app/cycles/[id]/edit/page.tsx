@@ -89,6 +89,7 @@ export default async function EditCyclePage({
             timesPerDay: cfg?.timesPerDay,
             dosePerAdmin: cfg?.dosePerAdmin ?? undefined,
             unit: cfg?.unit ?? "mcg",
+            washoutDays: cycle.washoutDays ?? undefined,
             items: doseDefaultsByPeptide(cfg?.items),
             notes: cycle.notes ?? undefined,
           }}

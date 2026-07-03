@@ -148,6 +148,29 @@ export async function getActiveCycles() {
   });
 }
 
+/**
+ * Peptide IDs currently in play across the active profile's ACTIVE cycles — a
+ * stack cycle contributes every peptide in its stack. Powers the cycle-detail
+ * "live interaction guard" (checks for synergy/caution/avoid edges among
+ * everything actively being dosed right now).
+ */
+export async function getActiveCyclePeptideIds(): Promise<string[]> {
+  const user = await getActiveUser();
+  const cycles = await prisma.cycle.findMany({
+    where: { status: "active", userId: user.id },
+    select: {
+      peptideId: true,
+      stack: { select: { items: { select: { peptideId: true } } } },
+    },
+  });
+  const ids = new Set<string>();
+  for (const c of cycles) {
+    if (c.peptideId) ids.add(c.peptideId);
+    for (const item of c.stack?.items ?? []) ids.add(item.peptideId);
+  }
+  return Array.from(ids);
+}
+
 /** Cycles the active profile can log doses against (for select inputs). */
 export async function getLoggableCycles() {
   const user = await getActiveUser();
@@ -223,6 +246,15 @@ export async function listMeasurements(type?: string) {
   const user = await getActiveUser();
   return prisma.measurement.findMany({
     where: { userId: user.id, ...(type ? { type } : {}) },
+    orderBy: { recordedAt: "asc" },
+  });
+}
+
+/** Measurements for the active profile within a date range (cycle insights). */
+export async function getMeasurementsInRange(start: Date, end: Date) {
+  const user = await getActiveUser();
+  return prisma.measurement.findMany({
+    where: { userId: user.id, recordedAt: { gte: start, lte: end } },
     orderBy: { recordedAt: "asc" },
   });
 }
@@ -332,6 +364,35 @@ export async function getStockLevels(): Promise<StockLevel[]> {
 }
 
 /**
+ * The most recently priced vial or stock item for a peptide (whichever is
+ * newer), reduced to `{ price, vialMcg }`. Drives the cycle-detail cost
+ * estimate — returns null when the profile has never set a `price` on any
+ * vial/stock row for this peptide.
+ */
+export async function getPricedSupplyForPeptide(
+  peptideId: string,
+): Promise<{ price: number; vialMcg: number } | null> {
+  const user = await getActiveUser();
+  const [vial, stock] = await Promise.all([
+    prisma.vial.findFirst({
+      where: { userId: user.id, peptideId, price: { not: null } },
+      orderBy: { createdAt: "desc" },
+      select: { price: true, totalMcg: true, createdAt: true },
+    }),
+    prisma.stockItem.findFirst({
+      where: { userId: user.id, peptideId, price: { not: null } },
+      orderBy: { createdAt: "desc" },
+      select: { price: true, vialMcg: true, createdAt: true },
+    }),
+  ]);
+  if (!vial && !stock) return null;
+  if (vial && (!stock || vial.createdAt >= stock.createdAt)) {
+    return { price: vial.price as number, vialMcg: vial.totalMcg };
+  }
+  return { price: stock!.price as number, vialMcg: stock!.vialMcg };
+}
+
+/**
  * Counts for the getting-started checklist. Only queried by the dashboard
  * while the account is still new (it skips this once cycles + doses exist),
  * so these extra reads don't ride every dashboard render.
@@ -361,6 +422,15 @@ export async function listLabsForBiomarker(slug: string) {
   const user = await getActiveUser();
   return prisma.labResult.findMany({
     where: { userId: user.id, biomarkerSlug: slug },
+    orderBy: { takenAt: "asc" },
+  });
+}
+
+/** Lab results for the active profile within a date range (cycle insights). */
+export async function getLabResultsInRange(start: Date, end: Date) {
+  const user = await getActiveUser();
+  return prisma.labResult.findMany({
+    where: { userId: user.id, takenAt: { gte: start, lte: end } },
     orderBy: { takenAt: "asc" },
   });
 }
@@ -495,4 +565,31 @@ export async function listJournalEntries() {
     where: { userId: user.id },
     orderBy: { date: "desc" },
   });
+}
+
+// --- Daily check-ins --------------------------------------------------
+
+/** The active profile's daily wellbeing check-ins, newest first. */
+export async function listCheckIns(limit?: number) {
+  const user = await getActiveUser();
+  return prisma.checkIn.findMany({
+    where: { userId: user.id },
+    orderBy: { date: "desc" },
+    take: limit,
+  });
+}
+
+/** The check-in for a specific local-midnight `date`, or null if unlogged. */
+export async function getCheckIn(date: Date) {
+  const user = await getActiveUser();
+  return prisma.checkIn.findUnique({
+    where: { userId_date: { userId: user.id, date } },
+  });
+}
+
+/** Today's check-in (local midnight), or null if not yet logged. */
+export async function getTodaysCheckIn() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return getCheckIn(today);
 }

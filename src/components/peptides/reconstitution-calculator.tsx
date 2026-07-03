@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { calculateReconstitution } from "@/lib/reconstitution";
 import { createVial } from "@/lib/actions/vials";
+import { SyringeGauge } from "@/components/peptides/syringe-gauge";
 
 interface ReconstitutionCalculatorProps {
   defaultVialMg?: number;
@@ -129,28 +130,40 @@ export function ReconstitutionCalculator({
 
         {/* Results */}
         {hasResult ? (
-          <div className="bg-accent/50 grid grid-cols-2 gap-3 rounded-xl p-4 @lg:grid-cols-4">
-            <ResultItem
-              label="CONCENTRATION"
-              value={`${result.concentrationMcgPerMl}`}
-              unit="mcg/mL"
-              sub={`${result.concentrationMgPerMl} mg/mL`}
-            />
-            <ResultItem
-              label="DRAW VOLUME"
-              value={`${result.drawMl}`}
-              unit="mL"
-            />
-            <ResultItem
-              label="INSULIN UNITS"
-              value={`${result.insulinUnits}`}
-              unit="U"
-              sub="U-100 syringe"
-            />
-            <ResultItem
-              label="DOSES / VIAL"
-              value={String(result.dosesPerVial)}
-            />
+          <div className="space-y-4">
+            <div className="bg-accent/50 grid grid-cols-2 gap-3 rounded-xl p-4 @lg:grid-cols-4">
+              <ResultItem
+                label="CONCENTRATION"
+                value={`${result.concentrationMcgPerMl}`}
+                unit="mcg/mL"
+                sub={`${result.concentrationMgPerMl} mg/mL`}
+              />
+              <ResultItem
+                label="DRAW VOLUME"
+                value={`${result.drawMl}`}
+                unit="mL"
+              />
+              <ResultItem
+                label="INSULIN UNITS"
+                value={`${result.insulinUnits}`}
+                unit="U"
+                sub="U-100 syringe"
+              />
+              <ResultItem
+                label="DOSES / VIAL"
+                value={String(result.dosesPerVial)}
+              />
+            </div>
+            <div className="flex flex-col items-center gap-2 py-1">
+              <SyringeGauge units={result.insulinUnits} capacity={100} />
+              <p className="text-muted-foreground text-center text-xs">
+                Draw to the{" "}
+                <span className="num text-foreground font-medium">
+                  {result.insulinUnits} U
+                </span>{" "}
+                mark on a U-100 insulin syringe.
+              </p>
+            </div>
           </div>
         ) : (
           <p className="text-muted-foreground text-center text-sm">

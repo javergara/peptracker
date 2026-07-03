@@ -1,6 +1,5 @@
 "use client";
 
-import { INJECTION_SITES } from "@/lib/sites";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { BodyMapSelect } from "@/components/log/body-map-select";
 
 interface Vial {
   id: string;
@@ -105,25 +105,15 @@ export function DoseFormFields({
       )}
 
       {/* Injection site */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 sm:col-span-2">
         <label className="text-sm font-medium">Injection site</label>
         {lastSite && (
           <p className="text-muted-foreground text-xs">Last used: {lastSite}</p>
         )}
-        <Select name="site" defaultValue={siteDefault}>
-          <SelectTrigger>
-            <SelectValue placeholder="— Select site —" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">— Select site —</SelectItem>
-            {INJECTION_SITES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-                {s === suggestedSite ? " ✓ suggested" : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <BodyMapSelect
+          defaultValue={siteDefault}
+          suggestedSite={suggestedSite}
+        />
       </div>
 
       {/* Mood */}

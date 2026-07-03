@@ -24,6 +24,9 @@ import {
   vialFillPercent,
   vialGaugeStatus,
 } from "@/lib/vials";
+import { costPerDose, formatCost } from "@/lib/cost";
+import { toMcg } from "@/lib/stock";
+import { asDosage } from "@/types/peptide";
 import { VIAL_STATUS_STYLE } from "@/lib/constants";
 import { DeleteVialButton } from "@/components/inventory/delete-vial-button";
 import { ReconstituteForm } from "@/components/inventory/reconstitute-form";
@@ -31,6 +34,21 @@ import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Inventory" };
 export const dynamic = "force-dynamic";
+
+/**
+ * Best-effort typical dose (in mcg) parsed from a peptide's dosage.standard
+ * field (e.g. "250-500" mcg → 250, "1.2-2.4" mg → 1200). Used only to derive
+ * a cost-per-dose estimate on active vials; returns null when unparseable.
+ */
+function typicalDoseMcg(dosage: unknown): number | null {
+  const d = asDosage(dosage);
+  if (!d) return null;
+  const match = d.standard.match(/[\d.]+/);
+  if (!match) return null;
+  const n = Number(match[0]);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return toMcg(n, d.unit);
+}
 
 type InventoryMode = "active" | "stock";
 
@@ -274,6 +292,16 @@ export default async function InventoryPage({
                     })
                   : null;
 
+                // Cost — per-dose when a typical dose is derivable, else total.
+                const doseMcg = typicalDoseMcg(vial.peptide.dosage);
+                const perDose = costPerDose(vial.price, vial.totalMcg, doseMcg);
+                const costLabel =
+                  vial.price == null
+                    ? null
+                    : perDose != null
+                      ? `${formatCost(perDose)}/dose`
+                      : `${formatCost(vial.price)} total`;
+
                 return (
                   <div
                     key={vial.id}
@@ -323,6 +351,7 @@ export default async function InventoryPage({
                         {concentration != null
                           ? `${concentration >= 1000 ? (concentration / 1000).toFixed(1) + " mg/mL" : concentration.toFixed(0) + " mcg/mL"}`
                           : "Not reconstituted"}
+                        {costLabel ? ` · ${costLabel}` : ""}
                       </p>
 
                       {/* Remaining amount — big mono */}
@@ -455,6 +484,23 @@ export default async function InventoryPage({
                   min="0"
                   inputMode="decimal"
                   placeholder="e.g. 2 (optional)"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="v-price" className="text-sm font-medium">
+                  Price (per vial){" "}
+                  <span className="text-muted-foreground font-normal">
+                    — optional
+                  </span>
+                </label>
+                <Input
+                  id="v-price"
+                  name="price"
+                  type="number"
+                  step="any"
+                  min="0"
+                  inputMode="decimal"
+                  placeholder="e.g. 45.00"
                 />
               </div>
               <div className="space-y-1.5">

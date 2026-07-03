@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Pencil } from "lucide-react";
+import {
+  ArrowLeft,
+  Minus,
+  Pencil,
+  ShieldAlert,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { Eyebrow } from "@/components/common/eyebrow";
@@ -12,21 +19,76 @@ import { CycleLogFields } from "@/components/cycles/cycle-log-fields";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { logDose } from "@/lib/actions/doses";
 import {
+  getActiveCyclePeptideIds,
+  getAllInteractionRows,
   getCurrentUser,
   getCycle,
   getActiveVialsForPeptide,
+  getLabResultsInRange,
+  getMeasurementsInRange,
+  getPricedSupplyForPeptide,
+  listBiomarkers,
+  listPeptides,
 } from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { doseDefaultsByPeptide } from "@/lib/cycles";
-import { formatDate } from "@/lib/dates";
+import { addDays, formatDate } from "@/lib/dates";
 import { activeLevelSeries, type PkDose } from "@/lib/pk";
 import { suggestNextSite } from "@/lib/sites";
+import { findInteractions } from "@/lib/interactions";
+import {
+  BASELINE_WINDOW_DAYS,
+  computeCycleInsights,
+  type MetricPoint,
+} from "@/lib/cycle-insights";
+import {
+  estimateCyclePeptideCost,
+  sumCyclePeptideCosts,
+} from "@/lib/cycle-cost";
+import { formatCost } from "@/lib/cost";
+import { toMcg } from "@/lib/stock";
+import { cn } from "@/lib/utils";
 
 const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const MEASUREMENT_LABELS: Record<string, string> = {
+  weight: "Weight",
+  bodyFat: "Body fat",
+  sleep: "Sleep",
+  recovery: "Recovery",
+};
+
+/** Clinical-tone pill classes for an interaction kind (ok/warn/bad tokens). */
+const INTERACTION_TONE: Record<string, string> = {
+  avoid: "bg-bad-wash text-bad border-transparent",
+  caution: "bg-warn-wash text-warn-foreground border-transparent",
+  synergy: "bg-ok-wash text-ok border-transparent",
+};
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/**
+ * Whether an insight's direction is clinically/goal meaningful, and which way
+ * is "good" — only for metrics we know a direction for (the four measurement
+ * types with an obvious goal, or a biomarker with a catalog `direction`).
+ * Everything else renders neutral (no ok/bad coloring).
+ */
+function insightGoodDirection(
+  key: string,
+  biomarkerDirection: Map<string, string | null>,
+): "up" | "down" | null {
+  if (key === "weight" || key === "bodyFat") return "down";
+  if (key === "sleep" || key === "recovery") return "up";
+  const dir = biomarkerDirection.get(key);
+  if (dir === "high") return "down"; // higher is worse -> good direction is down
+  if (dir === "low") return "up"; // lower is worse -> good direction is up
+  return null;
+}
 
 export default async function CycleDetailPage({
   params,
@@ -112,6 +174,129 @@ export default async function CycleDetailPage({
     remainingMcg: v.remainingMcg,
     peptideName: cycle.peptide?.name ?? undefined,
   }));
+
+  // --- Cycle insights ("what changed during this cycle") --------------------
+  // Compares each measurement/lab metric's pre-cycle baseline (avg of the
+  // BASELINE_WINDOW_DAYS before start) against its latest in-cycle value.
+  // Correlational only — see the disclaimer + the card's own caption.
+  const insightsWindowEnd = cycle.endDate ?? now;
+  const baselineStart = new Date(
+    cycle.startDate.getTime() - BASELINE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  );
+  const [measurementsInRange, labsInRange, biomarkers] = await Promise.all([
+    getMeasurementsInRange(baselineStart, insightsWindowEnd),
+    getLabResultsInRange(baselineStart, insightsWindowEnd),
+    listBiomarkers(),
+  ]);
+  const biomarkerDirection = new Map(
+    biomarkers.map((b) => [b.slug, b.direction]),
+  );
+  const metricPoints: MetricPoint[] = [
+    ...measurementsInRange.map((m) => ({
+      key: m.type === "custom" ? `custom:${m.label ?? "Custom"}` : m.type,
+      label:
+        m.type === "custom"
+          ? (m.label ?? "Custom")
+          : (MEASUREMENT_LABELS[m.type] ?? m.type),
+      unit: m.unit,
+      date: m.recordedAt,
+      value: m.value,
+    })),
+    ...labsInRange.map((l) => ({
+      key: l.biomarkerSlug ?? `lab:${l.marker}`,
+      label: l.marker,
+      unit: l.unit,
+      date: l.takenAt,
+      value: l.value,
+    })),
+  ];
+  const insights = computeCycleInsights(
+    metricPoints,
+    cycle.startDate,
+    insightsWindowEnd,
+  );
+
+  // --- Live interaction guard -------------------------------------------
+  // Only meaningful while THIS cycle is active — checks for synergy/caution/
+  // avoid edges among every peptide currently in play across ALL active
+  // cycles (a stack cycle's own peptides included), read-only.
+  let activeInteractionEdges: {
+    aName: string;
+    bName: string;
+    kind: string;
+    note: string;
+  }[] = [];
+  if (cycle.status === "active") {
+    const [activePeptideIds, interactionRows, allPeptides] = await Promise.all([
+      getActiveCyclePeptideIds(),
+      getAllInteractionRows(),
+      listPeptides(),
+    ]);
+    const peptideNameById = new Map(allPeptides.map((p) => [p.id, p.name]));
+    activeInteractionEdges = findInteractions(
+      activePeptideIds,
+      interactionRows,
+    ).map((edge) => ({
+      aName: peptideNameById.get(edge.peptideAId) ?? "Unknown",
+      bName: peptideNameById.get(edge.peptideBId) ?? "Unknown",
+      kind: edge.kind,
+      note: edge.note,
+    }));
+  }
+
+  // --- Cost per cycle ---------------------------------------------------
+  // One cost input per dosed peptide (single-peptide cycles have one; stack
+  // cycles have one per stack item), priced from the peptide's most recently
+  // priced vial/stock. `prog.totalDays` is null for an open-ended cycle, so
+  // the projection falls back to a per-month estimate.
+  const peptideCostInputs: { peptideId: string; doseMcg: number | null }[] =
+    cycle.peptide
+      ? [
+          {
+            peptideId: cycle.peptide.id,
+            doseMcg: toMcg(cfg?.dosePerAdmin, cfg?.unit),
+          },
+        ]
+      : (cfg?.items ?? []).map((it) => ({
+          peptideId: it.peptideId,
+          doseMcg: toMcg(it.dose, it.unit),
+        }));
+  const doseCountByPeptide = new Map<string, number>();
+  for (const d of cycle.doseLogs) {
+    doseCountByPeptide.set(
+      d.peptideId,
+      (doseCountByPeptide.get(d.peptideId) ?? 0) + 1,
+    );
+  }
+  const supplies =
+    peptideCostInputs.length > 0
+      ? await Promise.all(
+          peptideCostInputs.map((i) => getPricedSupplyForPeptide(i.peptideId)),
+        )
+      : [];
+  const peptideCosts = peptideCostInputs.map((input, i) =>
+    estimateCyclePeptideCost(
+      {
+        peptideId: input.peptideId,
+        doseMcg: input.doseMcg,
+        frequency: cfg?.frequency ?? "daily",
+        supply: supplies[i],
+        loggedDoseCount: doseCountByPeptide.get(input.peptideId) ?? 0,
+      },
+      prog.totalDays,
+    ),
+  );
+  const costSummary = sumCyclePeptideCosts(peptideCosts);
+
+  // --- Washout ------------------------------------------------------------
+  const washoutUntil =
+    cycle.washoutDays != null && cycle.endDate
+      ? addDays(cycle.endDate, cycle.washoutDays)
+      : null;
+  const inWashout =
+    washoutUntil != null && cycle.endDate != null
+      ? now >= cycle.endDate && now <= washoutUntil
+      : false;
 
   const pct = prog.percent ?? 0;
   const weekNum =
@@ -221,6 +406,158 @@ export default async function CycleDetailPage({
           <Eyebrow className="mb-2">Notes</Eyebrow>
           <p className="text-foreground text-sm whitespace-pre-wrap">
             {cycle.notes}
+          </p>
+        </section>
+      ) : null}
+
+      {/* Live interaction guard — active cycle only, edges among everything
+          currently being dosed together. */}
+      {activeInteractionEdges.length > 0 ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-1 flex items-center gap-1.5">
+            <ShieldAlert className="size-3.5" aria-hidden />
+            Live interaction guard
+          </Eyebrow>
+          <p className="text-muted-foreground mb-4 text-xs">
+            Peptides currently active together across your cycles.
+          </p>
+          <div className="space-y-2.5">
+            {activeInteractionEdges.map((edge, i) => (
+              <div
+                key={`${edge.aName}-${edge.bName}-${i}`}
+                className="border-border flex items-start gap-3 rounded-xl border p-3"
+              >
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "mt-0.5 shrink-0 capitalize",
+                    INTERACTION_TONE[edge.kind],
+                  )}
+                >
+                  {edge.kind}
+                </Badge>
+                <div className="min-w-0">
+                  <p className="text-foreground text-sm font-medium">
+                    {edge.aName} + {edge.bName}
+                  </p>
+                  <p className="text-muted-foreground text-xs">{edge.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Cycle insights — what changed during this cycle vs. its baseline. */}
+      {insights.length > 0 ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-1">What changed during this cycle</Eyebrow>
+          <p className="text-muted-foreground mb-4 text-xs">
+            Associations only — not proof of cause.
+          </p>
+          <div>
+            {insights.map((insight, i) => {
+              const good = insightGoodDirection(
+                insight.key,
+                biomarkerDirection,
+              );
+              const color =
+                insight.direction === "flat" || good == null
+                  ? "var(--muted-foreground)"
+                  : insight.direction === good
+                    ? "var(--ok)"
+                    : "var(--bad)";
+              const Icon =
+                insight.direction === "up"
+                  ? TrendingUp
+                  : insight.direction === "down"
+                    ? TrendingDown
+                    : Minus;
+              return (
+                <div
+                  key={insight.key}
+                  className={cn(
+                    "flex items-center justify-between gap-3 py-2.5",
+                    i < insights.length - 1 && "border-border border-b",
+                  )}
+                >
+                  <span className="text-foreground text-sm font-medium">
+                    {insight.label}
+                  </span>
+                  <span className="num flex items-center gap-1.5 text-sm">
+                    <span className="text-muted-foreground">
+                      {round1(insight.baseline)}
+                    </span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="text-foreground font-semibold">
+                      {round1(insight.latest)}
+                    </span>
+                    {insight.unit ? (
+                      <span className="text-muted-foreground text-xs">
+                        {insight.unit}
+                      </span>
+                    ) : null}
+                    <Icon className="size-3.5" style={{ color }} aria-hidden />
+                    {insight.deltaPct != null ? (
+                      <span style={{ color }} className="text-xs">
+                        {insight.deltaPct > 0 ? "+" : ""}
+                        {round1(insight.deltaPct)}%
+                      </span>
+                    ) : null}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Cost per cycle — only when a priced vial/stock exists for a dosed peptide. */}
+      {costSummary.hasData ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-4">Cost estimate</Eyebrow>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-muted-foreground text-xs">Spent so far</p>
+              <p className="num text-foreground text-2xl font-semibold">
+                {formatCost(costSummary.spentSoFar)}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">
+                {cycle.endDate
+                  ? "Projected for full cycle"
+                  : "Projected per month"}
+              </p>
+              <p className="num text-foreground text-2xl font-semibold">
+                {formatCost(costSummary.projected)}
+              </p>
+            </div>
+          </div>
+          <p className="text-muted-foreground mt-3 text-xs">
+            Estimated from your most recently priced vial/stock — actual prices
+            may vary.
+          </p>
+        </section>
+      ) : null}
+
+      {/* Washout — planned rest period after the cycle ends. */}
+      {washoutUntil ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-2">Washout</Eyebrow>
+          <p className="text-foreground text-sm">
+            Rest period until{" "}
+            <span className="num font-semibold">
+              {formatDate(washoutUntil)}
+            </span>
+            {inWashout ? (
+              <Badge
+                variant="outline"
+                className="bg-warn-wash text-warn-foreground ml-2 border-transparent align-middle"
+              >
+                Currently in washout
+              </Badge>
+            ) : null}
           </p>
         </section>
       ) : null}
