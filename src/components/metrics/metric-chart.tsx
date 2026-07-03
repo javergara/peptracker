@@ -106,6 +106,7 @@ export function MetricChart({
           strokeWidth={2}
           dot={mood ? <MoodDot /> : { r: 3, fill: color }}
           activeDot={{ r: 5 }}
+          isAnimationActive={false}
         />
       </LineChart>
     </ResponsiveContainer>

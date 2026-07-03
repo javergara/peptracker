@@ -2,14 +2,12 @@ import { UserPlus } from "lucide-react";
 
 import { getActiveUser, getAllUsers } from "@/lib/active-user";
 import { createProfile, updateProfile } from "@/lib/actions/profiles";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { DeleteProfileButton } from "./delete-profile-button";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export async function ProfilesCard() {
   const [users, active] = await Promise.all([getAllUsers(), getActiveUser()]);
@@ -29,8 +27,10 @@ export async function ProfilesCard() {
         <ul className="space-y-2">
           {users.map((u) => (
             <li key={u.id} className="rounded-lg border p-3">
-              <form
+              <ActionForm
                 action={updateProfile}
+                success="Profile saved"
+                resetOnSuccess={false}
                 className="flex flex-wrap items-center gap-2"
               >
                 <input type="hidden" name="id" value={u.id} />
@@ -41,29 +41,32 @@ export async function ProfilesCard() {
                   aria-label="Profile color"
                   className="border-input h-9 w-10 cursor-pointer rounded-lg border bg-transparent p-1"
                 />
-                <input
+                <Input
                   name="name"
                   defaultValue={u.name}
-                  className={`${inputCls} min-w-40 flex-1`}
+                  required
+                  maxLength={60}
+                  className="min-w-40 flex-1"
                 />
                 {u.id === active.id ? (
                   <Badge variant="secondary">Active</Badge>
                 ) : null}
-                <Button type="submit" variant="outline" size="sm">
+                <SubmitButton variant="outline" size="sm">
                   Save
-                </Button>
+                </SubmitButton>
                 <DeleteProfileButton
                   id={u.id}
                   name={u.name}
                   disabled={users.length <= 1}
                 />
-              </form>
+              </ActionForm>
             </li>
           ))}
         </ul>
 
-        <form
+        <ActionForm
           action={createProfile}
+          success="Profile added"
           className="flex flex-wrap items-center gap-2 border-t pt-4"
         >
           <input
@@ -73,21 +76,22 @@ export async function ProfilesCard() {
             aria-label="New profile color"
             className="border-input h-9 w-10 cursor-pointer rounded-lg border bg-transparent p-1"
           />
-          <input
+          <Input
             name="name"
             required
             placeholder="New profile name"
-            className={`${inputCls} min-w-40 flex-1`}
+            maxLength={60}
+            className="min-w-40 flex-1"
           />
           <label className="text-muted-foreground flex items-center gap-1.5 text-sm">
             <input type="checkbox" name="makeActive" defaultChecked />
             Switch to it
           </label>
-          <Button type="submit">
+          <SubmitButton>
             <UserPlus className="size-4" />
             Add profile
-          </Button>
-        </form>
+          </SubmitButton>
+        </ActionForm>
       </CardContent>
     </Card>
   );

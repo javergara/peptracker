@@ -14,6 +14,15 @@ import {
 import { Eyebrow } from "@/components/common/eyebrow";
 import { InteractionBadge } from "@/components/common/badges";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GOAL_TAGS, GOAL_LABELS, type GoalTag } from "@/types/peptide";
 
 interface PeptideOption {
@@ -101,9 +110,6 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
           ? "border-indigo-500/40 bg-indigo-500/10"
           : "border-border bg-muted/30";
 
-  const inputCls =
-    "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
-
   return (
     <form action={handleSubmit} className="space-y-6">
       {/* Stack metadata */}
@@ -114,48 +120,52 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
             <label htmlFor="name" className="text-sm font-medium">
               Name <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               id="name"
               name="name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Recovery Protocol"
-              className={inputCls}
+              maxLength={80}
             />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="goal" className="text-sm font-medium">
               Goal
             </label>
-            <select
-              id="goal"
+            <Select
               name="goal"
               value={goal}
-              onChange={(e) => setGoal(e.target.value as GoalTag | "")}
-              className={inputCls}
+              onValueChange={(v) => setGoal(v as GoalTag | "")}
             >
-              <option value="">— Select a goal —</option>
-              {GOAL_TAGS.map((tag) => (
-                <option key={tag} value={tag}>
-                  {GOAL_LABELS[tag]}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="goal">
+                <SelectValue placeholder="— Select a goal —" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— Select a goal —</SelectItem>
+                {GOAL_TAGS.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {GOAL_LABELS[tag]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="description" className="text-sm font-medium">
             Description
           </label>
-          <textarea
+          <Textarea
             id="description"
             name="description"
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the purpose and context of this stack…"
-            className={`${inputCls} resize-none`}
+            className="resize-none"
+            maxLength={1000}
           />
         </div>
       </section>
@@ -211,7 +221,7 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
                       >
                         Dose
                       </label>
-                      <input
+                      <Input
                         id={`dose-${p.id}`}
                         name={`dose:${p.id}`}
                         value={doseById[p.id] ?? ""}
@@ -222,7 +232,8 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
                           }))
                         }
                         placeholder="e.g. 250 mcg"
-                        className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
+                        maxLength={40}
+                        className="rounded-md px-2 py-1 text-xs"
                       />
                     </div>
                     <div className="space-y-1">
@@ -232,7 +243,7 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
                       >
                         Notes
                       </label>
-                      <input
+                      <Input
                         id={`notes-${p.id}`}
                         name={`notes:${p.id}`}
                         value={notesById[p.id] ?? ""}
@@ -243,7 +254,8 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
                           }))
                         }
                         placeholder="optional"
-                        className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
+                        maxLength={80}
+                        className="rounded-md px-2 py-1 text-xs"
                       />
                     </div>
                   </div>
@@ -315,7 +327,7 @@ export function StackBuilder({ peptides, interactionRows, stack }: Props) {
         <Button
           type="submit"
           disabled={isPending || selectedIds.size === 0 || !name.trim()}
-          className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)] disabled:opacity-50 disabled:[box-shadow:none]"
+          className="btn-gradient"
         >
           {isPending
             ? stack

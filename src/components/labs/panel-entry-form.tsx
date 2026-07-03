@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, FlaskConical } from "lucide-react";
 
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { Input } from "@/components/ui/input";
 import { addLabPanel } from "@/lib/actions/labs";
 import { SYSTEM_LABELS, BIOMARKER_SYSTEMS } from "@/types/biomarker";
 import { cn } from "@/lib/utils";
@@ -15,9 +16,6 @@ export interface PanelBiomarker {
   system: string;
   unit: string;
 }
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export function PanelEntryForm({
   biomarkers,
@@ -64,24 +62,23 @@ export function PanelEntryForm({
           <label htmlFor="panel-takenAt" className="text-sm font-medium">
             Date taken <span className="text-destructive">*</span>
           </label>
-          <input
+          <Input
             id="panel-takenAt"
             name="takenAt"
             type="date"
             required
             defaultValue={today}
-            className={inputCls}
           />
         </div>
         <div className="space-y-1.5">
           <label htmlFor="panel-notes" className="text-sm font-medium">
             Notes (optional)
           </label>
-          <input
+          <Input
             id="panel-notes"
             name="notes"
             placeholder="Lab name, fasting, etc."
-            className={inputCls}
+            maxLength={120}
           />
         </div>
       </div>
@@ -137,14 +134,15 @@ export function PanelEntryForm({
                           {bm.unit}
                         </span>
                       </label>
-                      <input
+                      <Input
                         id={`panel-val-${bm.slug}`}
                         name="value"
                         type="number"
                         step="any"
                         inputMode="decimal"
+                        min="0"
                         placeholder={bm.unit}
-                        className="border-input bg-background focus-visible:ring-ring w-28 rounded-lg border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
+                        className="w-28 py-1.5"
                       />
                     </div>
                   ))}

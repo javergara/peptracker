@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { calculateReconstitution } from "@/lib/reconstitution";
 import { createVial } from "@/lib/actions/vials";
 
@@ -15,9 +16,6 @@ interface ReconstitutionCalculatorProps {
   /** When provided, the "Save as vial" button becomes available. */
   peptideId?: string;
 }
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export function ReconstitutionCalculator({
   defaultVialMg = 5,
@@ -80,14 +78,14 @@ export function ReconstitutionCalculator({
             >
               Vial size (mg)
             </label>
-            <input
+            <Input
               id="recon-vial-mg"
               type="number"
               min="0"
               step="0.1"
+              inputMode="decimal"
               value={vialMg}
               onChange={(e) => setVialMg(e.target.value)}
-              className={inputCls}
               placeholder="e.g. 5"
             />
           </div>
@@ -98,14 +96,14 @@ export function ReconstitutionCalculator({
             >
               BAC water (mL)
             </label>
-            <input
+            <Input
               id="recon-bac-ml"
               type="number"
               min="0"
               step="0.1"
+              inputMode="decimal"
               value={bacWaterMl}
               onChange={(e) => setBacWaterMl(e.target.value)}
-              className={inputCls}
               placeholder="e.g. 2"
             />
           </div>
@@ -116,14 +114,14 @@ export function ReconstitutionCalculator({
             >
               Target dose (mcg)
             </label>
-            <input
+            <Input
               id="recon-dose-mcg"
               type="number"
               min="0"
               step="1"
+              inputMode="decimal"
               value={doseMcg}
               onChange={(e) => setDoseMcg(e.target.value)}
-              className={inputCls}
               placeholder="e.g. 250"
             />
           </div>
@@ -192,7 +190,7 @@ function ResultItem({
 }) {
   return (
     <div className="space-y-0.5 text-center">
-      <p className="eyebrow text-[#8B86AD]">{label}</p>
+      <p className="eyebrow">{label}</p>
       <p className="text-foreground text-lg font-semibold">
         <span className="num">{value}</span>
         {unit && (

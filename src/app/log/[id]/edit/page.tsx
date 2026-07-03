@@ -4,8 +4,17 @@ import { ArrowLeft, Save } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateDose } from "@/lib/actions/doses";
 import { getDoseLog, listCycles, listPeptides } from "@/lib/queries";
 import { toDateTimeLocalValue } from "@/lib/dates";
@@ -13,9 +22,6 @@ import { asStringArray, ROUTES, ROUTE_LABELS } from "@/types/peptide";
 
 export const metadata = { title: "Edit Dose" };
 export const dynamic = "force-dynamic";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function EditDosePage({
   params,
@@ -58,90 +64,115 @@ export default async function EditDosePage({
 
       <Card>
         <CardContent className="p-6">
-          <form action={action} className="grid gap-4 sm:grid-cols-2">
+          <ActionForm
+            action={action}
+            success="Dose updated"
+            resetOnSuccess={false}
+            className="grid gap-4 sm:grid-cols-2"
+          >
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="ed-peptide" className="text-sm font-medium">
                 Peptide <span className="text-destructive">*</span>
               </label>
-              <select
-                name="peptideId"
-                required
-                defaultValue={dose.peptideId}
-                className={inputCls}
-              >
-                {peptides.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="peptideId" defaultValue={dose.peptideId} required>
+                <SelectTrigger id="ed-peptide">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {peptides.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Cycle (optional)</label>
-              <select
-                name="cycleId"
-                defaultValue={dose.cycleId ?? ""}
-                className={inputCls}
-              >
-                <option value="">— None —</option>
-                {cycles.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <label htmlFor="ed-cycle" className="text-sm font-medium">
+                Cycle (optional)
+              </label>
+              <Select name="cycleId" defaultValue={dose.cycleId ?? ""}>
+                <SelectTrigger id="ed-cycle">
+                  <SelectValue placeholder="— None —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— None —</SelectItem>
+                  {cycles.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <label htmlFor="ed-amount" className="text-sm font-medium">
                 Amount <span className="text-destructive">*</span>
               </label>
-              <input
+              <Input
+                id="ed-amount"
                 name="amount"
                 type="number"
                 step="any"
                 min="0"
+                inputMode="decimal"
                 required
                 defaultValue={dose.amount}
-                className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Unit</label>
-              <select name="unit" defaultValue={dose.unit} className={inputCls}>
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
+              <label htmlFor="ed-unit" className="text-sm font-medium">
+                Unit
+              </label>
+              <Select name="unit" defaultValue={dose.unit}>
+                <SelectTrigger id="ed-unit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcg">mcg</SelectItem>
+                  <SelectItem value="mg">mg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Route</label>
-              <select
-                name="route"
-                defaultValue={dose.route ?? ""}
-                className={inputCls}
-              >
-                <option value="">— Select —</option>
-                {ROUTES.map((r) => (
-                  <option key={r} value={r}>
-                    {ROUTE_LABELS[r]}
-                  </option>
-                ))}
-              </select>
+              <label htmlFor="ed-route" className="text-sm font-medium">
+                Route
+              </label>
+              <Select name="route" defaultValue={dose.route ?? ""}>
+                <SelectTrigger id="ed-route">
+                  <SelectValue placeholder="— Select —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— Select —</SelectItem>
+                  {ROUTES.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {ROUTE_LABELS[r]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">When</label>
-              <input
+              <label htmlFor="ed-when" className="text-sm font-medium">
+                When
+              </label>
+              <Input
+                id="ed-when"
                 name="takenAt"
                 type="datetime-local"
                 defaultValue={toDateTimeLocalValue(dose.takenAt)}
-                className={inputCls}
+                required
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Notes</label>
-              <input
+              <label htmlFor="ed-notes" className="text-sm font-medium">
+                Notes
+              </label>
+              <Input
+                id="ed-notes"
                 name="notes"
                 defaultValue={dose.notes ?? ""}
-                className={inputCls}
+                maxLength={280}
               />
             </div>
 
@@ -155,12 +186,12 @@ export default async function EditDosePage({
             />
 
             <div className="sm:col-span-2">
-              <Button type="submit">
+              <SubmitButton>
                 <Save className="size-4" />
                 Save changes
-              </Button>
+              </SubmitButton>
             </div>
-          </form>
+          </ActionForm>
 
           <p className="text-muted-foreground mt-4 text-xs">
             Editing a dose updates its recorded details only — it doesn&apos;t

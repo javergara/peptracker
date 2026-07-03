@@ -83,6 +83,7 @@ export function CorrelationChart({
           strokeWidth={2}
           dot={{ r: 3, fill: leftColor }}
           connectNulls
+          isAnimationActive={false}
         />
         <Line
           yAxisId="right"
@@ -93,6 +94,7 @@ export function CorrelationChart({
           strokeWidth={2}
           dot={{ r: 3, fill: rightColor }}
           connectNulls
+          isAnimationActive={false}
         />
       </LineChart>
     </ResponsiveContainer>

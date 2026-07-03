@@ -162,24 +162,18 @@ export function CorrelationExplorer({
 
             {/* Ink result panel */}
             <InkPanel className="flex flex-col justify-center p-6">
-              <Eyebrow className="text-[#C4B5FD]">Pearson Correlation</Eyebrow>
+              <Eyebrow className="text-ink-accent">Pearson Correlation</Eyebrow>
 
               {/* Giant r value */}
               <div className="my-3 flex items-baseline gap-2">
-                <span
-                  className="num text-[58px] leading-none font-semibold"
-                  style={{ color: "#EFEBFA" }}
-                >
+                <span className="num text-ink-foreground text-[58px] leading-none font-semibold">
                   {reg.r >= 0 ? "" : "−"}
                   {Math.abs(reg.r).toFixed(2)}
                 </span>
               </div>
 
               {/* Plain-language sentence */}
-              <p
-                className="mb-5 text-[13px] leading-[1.55]"
-                style={{ color: "#A8A2CC" }}
-              >
+              <p className="text-ink-muted mb-5 text-[13px] leading-[1.55]">
                 {corrSentence(
                   reg.r,
                   strength,
@@ -192,43 +186,34 @@ export function CorrelationExplorer({
               <div className="flex gap-6">
                 <div>
                   <div
-                    className="eyebrow"
-                    style={{ color: "#8E88B4", fontSize: "10px" }}
+                    className="eyebrow text-ink-caption"
+                    style={{ fontSize: "10px" }}
                   >
                     R²
                   </div>
-                  <div
-                    className="num mt-0.5 text-xl font-semibold"
-                    style={{ color: "#EFEBFA" }}
-                  >
+                  <div className="num text-ink-foreground mt-0.5 text-xl font-semibold">
                     {reg.r2.toFixed(2)}
                   </div>
                 </div>
                 <div>
                   <div
-                    className="eyebrow"
-                    style={{ color: "#8E88B4", fontSize: "10px" }}
+                    className="eyebrow text-ink-caption"
+                    style={{ fontSize: "10px" }}
                   >
                     Samples
                   </div>
-                  <div
-                    className="num mt-0.5 text-xl font-semibold"
-                    style={{ color: "#EFEBFA" }}
-                  >
+                  <div className="num text-ink-foreground mt-0.5 text-xl font-semibold">
                     n = {reg.n}
                   </div>
                 </div>
                 <div>
                   <div
-                    className="eyebrow"
-                    style={{ color: "#8E88B4", fontSize: "10px" }}
+                    className="eyebrow text-ink-caption"
+                    style={{ fontSize: "10px" }}
                   >
                     Strength
                   </div>
-                  <div
-                    className="num mt-0.5 text-xl font-semibold capitalize"
-                    style={{ color: "#C4B5FD" }}
-                  >
+                  <div className="num text-ink-accent mt-0.5 text-xl font-semibold capitalize">
                     {strength}
                   </div>
                 </div>

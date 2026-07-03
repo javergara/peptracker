@@ -146,7 +146,7 @@ export function PhotoBoard({ photos }: { photos: PhotoItem[] }) {
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="card-surface group relative overflow-hidden rounded-xl transition-shadow hover:[box-shadow:var(--shadow-card-hover)]"
+              className="card-surface group relative overflow-hidden rounded-xl"
             >
               <ZoomButton
                 id={photo.id}
@@ -226,6 +226,8 @@ function ZoomButton({
       <img
         src={src(id)}
         alt={alt}
+        width={640}
+        height={480}
         className={`w-full rounded-lg object-contain ${className ?? ""}`}
       />
       <span className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition group-hover/zoom:bg-black/10 group-hover/zoom:opacity-100">

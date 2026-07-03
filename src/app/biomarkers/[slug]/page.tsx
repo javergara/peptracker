@@ -261,10 +261,7 @@ export default async function BiomarkerDetailPage({
                               <div className="text-foreground text-sm font-medium">
                                 Latest reading
                               </div>
-                              <span
-                                className="num text-[11px]"
-                                style={{ color: "#8B86AD" }}
-                              >
+                              <span className="num text-muted-foreground text-[11px]">
                                 {trackLow !== null && trackHigh !== null
                                   ? `ref ${trackLow}–${trackHigh}`
                                   : trackHigh !== null
@@ -285,10 +282,7 @@ export default async function BiomarkerDetailPage({
                                 {latest.value}
                               </span>
                               {biomarker.unit ? (
-                                <span
-                                  className="ml-1 text-[11px]"
-                                  style={{ color: "#8B86AD" }}
-                                >
+                                <span className="text-muted-foreground ml-1 text-[11px]">
                                   {biomarker.unit}
                                 </span>
                               ) : null}

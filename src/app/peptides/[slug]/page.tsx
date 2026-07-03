@@ -154,7 +154,7 @@ export default async function PeptideDetailPage({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {benefits.length > 0 && (
               <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
-                <Eyebrow className="mb-3 text-[#16A06A]">BENEFITS</Eyebrow>
+                <Eyebrow className="text-ok mb-3">BENEFITS</Eyebrow>
                 <ul className="text-muted-foreground space-y-1.5 text-sm">
                   {benefits.map((b, i) => (
                     <li key={i} className="flex gap-2">
@@ -167,7 +167,7 @@ export default async function PeptideDetailPage({
             )}
             {risks.length > 0 && (
               <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
-                <Eyebrow className="mb-3 text-[#B97608]">RISKS</Eyebrow>
+                <Eyebrow className="text-warn-foreground mb-3">RISKS</Eyebrow>
                 <ul className="text-muted-foreground space-y-1.5 text-sm">
                   {risks.map((r, i) => (
                     <li key={i} className="flex gap-2">

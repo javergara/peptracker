@@ -115,7 +115,7 @@ export default async function CalendarPage({
         }
       />
 
-      <div className="mb-4 inline-flex rounded-[10px] border border-[#ECE8F7] bg-white p-0.5 text-sm [box-shadow:var(--shadow-card)]">
+      <div className="border-border bg-card mb-4 inline-flex rounded-[10px] border p-0.5 text-sm [box-shadow:var(--shadow-card)]">
         {toggle.map((t) => (
           <Link
             key={t.label}

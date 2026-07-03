@@ -25,12 +25,7 @@ export function RangeTrack({
   const style = LAB_STATUS_STYLE[rail.status];
 
   return (
-    <div
-      className={cn(
-        "relative h-2.5 rounded-full bg-[#F1EEF9] dark:bg-white/10",
-        className,
-      )}
-    >
+    <div className={cn("bg-muted relative h-2.5 rounded-full", className)}>
       {/* normal band */}
       <div
         className="bg-accent absolute inset-y-0 rounded-full"

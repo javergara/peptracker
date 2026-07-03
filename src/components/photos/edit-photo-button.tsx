@@ -12,11 +12,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { Input } from "@/components/ui/input";
 import { updatePhotoCaption } from "@/lib/actions/photos";
 import { toDateInputValue } from "@/lib/dates";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2 py-1.5 text-sm outline-none focus-visible:ring-2";
 
 export interface EditPhotoButtonProps {
   id: string;
@@ -67,12 +65,13 @@ export function EditPhotoButton({
             >
               Caption
             </label>
-            <input
+            <Input
               id={`edit-photo-caption-${id}`}
               name="caption"
               defaultValue={caption ?? ""}
               placeholder="e.g. Week 4 front"
-              className={inputCls}
+              maxLength={120}
+              className="px-2 py-1.5"
             />
           </div>
           <div className="space-y-1">
@@ -82,12 +81,13 @@ export function EditPhotoButton({
             >
               Date taken
             </label>
-            <input
+            <Input
               id={`edit-photo-date-${id}`}
               name="takenAt"
               type="date"
               defaultValue={toDateInputValue(takenAt)}
-              className={inputCls}
+              required
+              className="px-2 py-1.5"
             />
           </div>
           <SubmitButton size="sm">Save</SubmitButton>

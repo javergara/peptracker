@@ -44,7 +44,7 @@ export function AdherenceRing({
         cy="60"
         r="50"
         fill="none"
-        stroke="#EDE9FE"
+        stroke="var(--accent)"
         strokeWidth="13"
       />
       <circle
@@ -70,14 +70,20 @@ export function AdherenceRing({
         {center}
       </text>
       {showSubtitle ? (
-        <text x="60" y="76" textAnchor="middle" fontSize="10.5" fill="#8B86AD">
+        <text
+          x="60"
+          y="76"
+          textAnchor="middle"
+          fontSize="10.5"
+          fill="var(--muted-foreground)"
+        >
           {subtitle}
         </text>
       ) : null}
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="120" y2="120">
-          <stop stopColor="#A855F7" />
-          <stop offset="1" stopColor="#6D28D9" />
+          <stop stopColor="var(--gauge-start)" />
+          <stop offset="1" stopColor="var(--gauge-end)" />
         </linearGradient>
       </defs>
     </svg>

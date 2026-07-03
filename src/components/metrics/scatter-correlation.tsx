@@ -99,7 +99,7 @@ export function ScatterCorrelation({
           strokeWidth={2}
           strokeDasharray="6 4"
         />
-        <Scatter data={points} fill={color} />
+        <Scatter data={points} fill={color} isAnimationActive={false} />
       </ScatterChart>
     </ResponsiveContainer>
   );

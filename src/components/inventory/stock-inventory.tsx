@@ -6,6 +6,15 @@ import { InkPanel } from "@/components/common/ink-panel";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { ActivateStockForm } from "@/components/inventory/activate-stock-form";
 import { StockQuantityControls } from "@/components/inventory/stock-quantity-controls";
+import { SearchableSelect } from "@/components/common/searchable-select";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { addStock } from "@/lib/actions/stock";
 import type { StockLevel } from "@/lib/queries";
 import {
@@ -16,9 +25,6 @@ import {
   toMcg,
 } from "@/lib/stock";
 import { cn } from "@/lib/utils";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 interface StockItemView {
   id: string;
@@ -69,29 +75,29 @@ export function StockInventory({
       <InkPanel variant="strip" className="p-[18px_24px]">
         <div className="flex divide-x divide-white/10">
           <div className="flex-1 pr-6">
-            <Eyebrow className="text-[#8E88B4]">Reserve Vials</Eyebrow>
-            <div className="num mt-1 text-[28px] font-semibold text-[#EFEBFA]">
+            <Eyebrow className="text-ink-caption">Reserve Vials</Eyebrow>
+            <div className="num text-ink-foreground mt-1 text-[28px] font-semibold">
               {totalReserve}
             </div>
           </div>
           <div className="flex-1 px-6">
-            <Eyebrow className="text-[#8E88B4]">Running Low</Eyebrow>
+            <Eyebrow className="text-ink-caption">Running Low</Eyebrow>
             <div
               className={cn(
                 "num mt-1 text-[28px] font-semibold",
-                lowCount > 0 ? "text-[#F59E0B]" : "text-[#EFEBFA]",
+                lowCount > 0 ? "text-warn" : "text-ink-foreground",
               )}
             >
               {lowCount}
             </div>
           </div>
           <div className="flex-[1.3] pl-6">
-            <Eyebrow className="text-[#8E88B4]">Next To Run Out</Eyebrow>
-            <div className="num mt-1 text-[28px] font-semibold text-[#EFEBFA]">
+            <Eyebrow className="text-ink-caption">Next To Run Out</Eyebrow>
+            <div className="num text-ink-foreground mt-1 text-[28px] font-semibold">
               {soonestDays != null ? (
                 <>
                   {soonestDays}
-                  <span className="ml-1 text-sm font-normal text-[#A8A2CC]">
+                  <span className="text-ink-muted ml-1 text-sm font-normal">
                     days
                   </span>
                 </>
@@ -131,7 +137,7 @@ export function StockInventory({
               <div
                 key={item.id}
                 className={cn(
-                  "card-surface flex flex-col gap-3 rounded-[18px] p-[18px] transition-shadow hover:[box-shadow:var(--shadow-card-hover)]",
+                  "card-surface flex flex-col gap-3 rounded-[18px] p-[18px]",
                   low && "border-warn/40",
                 )}
               >
@@ -140,7 +146,7 @@ export function StockInventory({
                     <p className="font-display text-foreground truncate text-[15px] font-semibold">
                       {item.peptide.name}
                     </p>
-                    <p className="num text-[11.5px] text-[#8B86AD]">
+                    <p className="num text-muted-foreground text-[11.5px]">
                       {vialMgLabel(item.vialMcg)} each
                     </p>
                   </div>
@@ -155,7 +161,7 @@ export function StockInventory({
                 <div>
                   <div className="num text-foreground text-[22px] font-semibold">
                     ×{item.quantity}
-                    <span className="ml-1 text-xs font-normal text-[#8B86AD]">
+                    <span className="text-muted-foreground ml-1 text-xs font-normal">
                       vials
                     </span>
                   </div>
@@ -176,7 +182,7 @@ export function StockInventory({
                   </p>
                 </div>
 
-                <div className="mt-auto space-y-2 border-t border-[#F1EEF9] pt-3">
+                <div className="border-border mt-auto space-y-2 border-t pt-3">
                   <StockQuantityControls
                     id={item.id}
                     quantity={item.quantity}
@@ -205,25 +211,19 @@ export function StockInventory({
             <label htmlFor="s-peptide" className="text-sm font-medium">
               Peptide <span className="text-destructive">*</span>
             </label>
-            <select
+            <SearchableSelect
               id="s-peptide"
               name="peptideId"
               required
-              className={inputCls}
-            >
-              <option value="">— Select peptide —</option>
-              {peptides.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              placeholder="— Select peptide —"
+              options={peptides.map((p) => ({ value: p.id, label: p.name }))}
+            />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="s-vialmg" className="text-sm font-medium">
               Vial size (mg) <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               id="s-vialmg"
               name="vialMg"
               type="number"
@@ -232,22 +232,21 @@ export function StockInventory({
               inputMode="decimal"
               required
               placeholder="e.g. 5"
-              className={inputCls}
             />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="s-qty" className="text-sm font-medium">
               Quantity <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               id="s-qty"
               name="quantity"
               type="number"
               step="1"
               min="1"
+              inputMode="numeric"
               defaultValue={1}
               required
-              className={inputCls}
             />
           </div>
           <div className="space-y-1.5">
@@ -255,7 +254,7 @@ export function StockInventory({
               Planned dose
             </label>
             <div className="flex gap-2">
-              <input
+              <Input
                 id="s-dose"
                 name="dose"
                 type="number"
@@ -263,45 +262,44 @@ export function StockInventory({
                 min="0"
                 inputMode="decimal"
                 placeholder="e.g. 250"
-                className={inputCls}
               />
-              <select
-                name="doseUnit"
-                defaultValue="mcg"
-                aria-label="Dose unit"
-                className={inputCls}
-              >
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
+              <Select name="doseUnit" defaultValue="mcg">
+                <SelectTrigger aria-label="Dose unit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcg">mcg</SelectItem>
+                  <SelectItem value="mg">mg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="s-freq" className="text-sm font-medium">
               Frequency
             </label>
-            <select
-              id="s-freq"
-              name="frequency"
-              defaultValue="daily"
-              className={inputCls}
-            >
-              {FREQUENCY_OPTIONS.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
+            <Select name="frequency" defaultValue="daily">
+              <SelectTrigger id="s-freq">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FREQUENCY_OPTIONS.map((f) => (
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="s-notes" className="text-sm font-medium">
               Notes
             </label>
-            <input
+            <Input
               id="s-notes"
               name="notes"
               placeholder="Optional notes"
-              className={inputCls}
+              maxLength={280}
             />
           </div>
           <div className="flex items-end">

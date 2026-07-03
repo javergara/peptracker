@@ -132,9 +132,9 @@ export function PeptideBrowser({ peptides }: PeptideBrowserProps) {
                 href={`/peptides/${peptide.slug}`}
                 className="group block focus-visible:outline-none"
               >
-                <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-3 rounded-[18px] p-5 [box-shadow:var(--shadow-card)] transition-shadow duration-150 group-hover:[box-shadow:var(--shadow-card-hover)] group-focus-visible:ring-2">
+                <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-3 rounded-[18px] p-5 group-focus-visible:ring-2">
                   {/* Category eyebrow */}
-                  <Eyebrow className="text-[#8B86AD]">
+                  <Eyebrow>
                     {CATEGORY_LABELS[peptide.category as PeptideCategory] ??
                       peptide.category}
                   </Eyebrow>

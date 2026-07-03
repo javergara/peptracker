@@ -11,6 +11,7 @@ import { CycleLogFields } from "@/components/cycles/cycle-log-fields";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { Button } from "@/components/ui/button";
+import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { logDose } from "@/lib/actions/doses";
 import {
   getCurrentUser,
@@ -101,21 +102,24 @@ export default async function CycleDetailPage({
 
       {/* Ink hero — dominant metric for this cycle */}
       <InkPanel variant="hero" className="mb-6 p-6">
-        <Eyebrow className="text-[#C4B5FD]">CYCLE PROGRESS</Eyebrow>
+        <Eyebrow className="text-ink-accent">CYCLE PROGRESS</Eyebrow>
         <div className="mt-3 flex items-end gap-4">
-          <span className="num text-[56px] leading-[.9] font-semibold text-[#EFEBFA]">
+          <span className="num text-ink-foreground text-[56px] leading-[.9] font-semibold">
             {pct}
-            <span className="text-[28px] font-medium text-[#A8A2CC]">%</span>
+            <span className="text-ink-muted text-[28px] font-medium">%</span>
           </span>
           {totalWeeks != null ? (
-            <span className="num pb-2 text-[18px] text-[#A8A2CC]">
-              wk <span className="font-semibold text-[#EFEBFA]">{weekNum}</span>
-              <span className="text-[#6D648E]"> / {totalWeeks}</span>
+            <span className="num text-ink-muted pb-2 text-[18px]">
+              wk{" "}
+              <span className="text-ink-foreground font-semibold">
+                {weekNum}
+              </span>
+              <span className="text-ink-faint"> / {totalWeeks}</span>
             </span>
           ) : (
-            <span className="num pb-2 text-[16px] text-[#A8A2CC]">
+            <span className="num text-ink-muted pb-2 text-[16px]">
               day{" "}
-              <span className="font-semibold text-[#EFEBFA]">
+              <span className="text-ink-foreground font-semibold">
                 {prog.daysElapsed + 1}
               </span>
             </span>
@@ -133,7 +137,7 @@ export default async function CycleDetailPage({
           />
         </div>
         {cfg ? (
-          <p className="mt-3 text-[13px] text-[#A8A2CC]">
+          <p className="text-ink-muted mt-3 text-[13px]">
             {cfg.frequency}
             {cfg.daysOfWeek?.length
               ? ` (${cfg.daysOfWeek.map((d) => DAY_ABBR[d] ?? d).join(", ")})`
@@ -161,8 +165,9 @@ export default async function CycleDetailPage({
 
       <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
         <Eyebrow className="mb-4">Log a dose for this cycle</Eyebrow>
-        <form
+        <ActionForm
           action={logDose}
+          success="Dose logged"
           className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
         >
           <input type="hidden" name="cycleId" value={cycle.id} />
@@ -182,9 +187,9 @@ export default async function CycleDetailPage({
           </div>
 
           <div className="sm:col-span-2 lg:col-span-4">
-            <Button type="submit">Log dose</Button>
+            <SubmitButton>Log dose</SubmitButton>
           </div>
-        </form>
+        </ActionForm>
       </section>
 
       <section className="card-surface rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
@@ -196,7 +201,7 @@ export default async function CycleDetailPage({
         ) : (
           <div>
             {/* Column headers */}
-            <div className="eyebrow mb-0.5 grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.5fr] border-b border-[#F1EEF9] px-1 pb-[9px] text-[#9A95B8]">
+            <div className="eyebrow border-border text-muted-foreground mb-0.5 grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.5fr] border-b px-1 pb-[9px]">
               <span>PEPTIDE</span>
               <span>AMOUNT</span>
               <span>WHEN</span>
@@ -207,9 +212,7 @@ export default async function CycleDetailPage({
               <div
                 key={d.id}
                 className={`grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.5fr] items-center px-1 py-[11px] text-[13px] ${
-                  i < cycle.doseLogs.length - 1
-                    ? "border-b border-[#F6F4FB]"
-                    : ""
+                  i < cycle.doseLogs.length - 1 ? "border-border border-b" : ""
                 }`}
               >
                 <span className="text-foreground flex items-center gap-[9px] font-medium">

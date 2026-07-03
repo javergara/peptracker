@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
  *   dashboard "doses due" hero and the Metrics correlation result.
  * - `strip`: flatter Ink gradient, for the Inventory summary strip.
  *
- * Text colors are baked to the Ink-panel palette (`#EFEBFA` / `#A8A2CC` muted)
- * so children read correctly regardless of the app theme. The eyebrow color
- * (`#C4B5FD`) is the violet-tinted variant for dark surfaces.
+ * Text colors are baked to the Ink-panel palette (`--ink-foreground` /
+ * `--ink-muted`) so children read correctly regardless of the app theme. The
+ * eyebrow color (`--ink-accent`) is the violet-tinted variant for dark
+ * surfaces. See the `--ink-*` tokens in globals.css.
  */
 export function InkPanel({
   variant = "hero",
@@ -27,7 +28,7 @@ export function InkPanel({
   return (
     <div
       className={cn(
-        "relative overflow-hidden text-[#EFEBFA]",
+        "text-ink-foreground relative overflow-hidden",
         variant === "hero"
           ? "rounded-[20px] [background:var(--gradient-ink-panel)]"
           : "rounded-2xl [background:var(--gradient-ink-strip)]",

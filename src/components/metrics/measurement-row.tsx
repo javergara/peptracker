@@ -5,14 +5,12 @@ import { Check, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   deleteMeasurement,
   updateMeasurement,
 } from "@/lib/actions/measurements";
 import { formatDate, toDateInputValue } from "@/lib/dates";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring rounded-lg border px-2 py-1 text-xs outline-none focus-visible:ring-2";
 
 export interface MeasurementRowProps {
   id: string;
@@ -75,28 +73,30 @@ export function MeasurementRow({
           <span className="text-muted-foreground w-20 shrink-0 text-xs">
             {typeLabel}
           </span>
-          <input
+          <Input
             name="value"
             type="number"
             step="any"
             inputMode="decimal"
+            min="0"
             defaultValue={value}
             required
-            className={`${inputCls} w-24`}
+            className="w-24 px-2 py-1 text-xs"
             aria-label="Value"
           />
-          <input
+          <Input
             name="label"
             defaultValue={label ?? ""}
             placeholder="label"
-            className={`${inputCls} w-28`}
+            maxLength={80}
+            className="w-28 px-2 py-1 text-xs"
             aria-label="Label"
           />
-          <input
+          <Input
             name="recordedAt"
             type="date"
             defaultValue={toDateInputValue(recordedAt)}
-            className={`${inputCls} w-36`}
+            className="w-36 px-2 py-1 text-xs"
             aria-label="Date"
           />
           <Button

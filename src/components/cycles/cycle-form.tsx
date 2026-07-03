@@ -4,13 +4,20 @@ import * as React from "react";
 
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Eyebrow } from "@/components/common/eyebrow";
+import { SearchableSelect } from "@/components/common/searchable-select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CYCLE_STATUSES } from "@/types/peptide";
 import { cn } from "@/lib/utils";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 /** A stack option with its peptides + suggested per-peptide doses. */
 export interface StackOption {
@@ -93,13 +100,13 @@ export function CycleForm({
           <label htmlFor="name" className="text-sm font-medium">
             Name <span className="text-destructive">*</span>
           </label>
-          <input
+          <Input
             id="name"
             name="name"
             required
             defaultValue={defaults.name}
             placeholder="e.g. Recovery block"
-            className={inputCls}
+            maxLength={80}
           />
         </div>
 
@@ -107,32 +114,26 @@ export function CycleForm({
           <label htmlFor="source" className="text-sm font-medium">
             Based on <span className="text-destructive">*</span>
           </label>
-          <select
+          <SearchableSelect
             id="source"
             name="source"
             required
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            className={inputCls}
-          >
-            <option value="" disabled>
-              — Select —
-            </option>
-            <optgroup label="Peptides">
-              {peptides.map((p) => (
-                <option key={p.id} value={`peptide:${p.id}`}>
-                  {p.name}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Stacks">
-              {stacks.map((s) => (
-                <option key={s.id} value={`stack:${s.id}`}>
-                  {s.name}
-                </option>
-              ))}
-            </optgroup>
-          </select>
+            placeholder="— Select —"
+            value={source || null}
+            onValueChange={(v) => setSource(v ?? "")}
+            options={[
+              ...peptides.map((p) => ({
+                value: `peptide:${p.id}`,
+                label: p.name,
+                group: "Peptides",
+              })),
+              ...stacks.map((s) => ({
+                value: `stack:${s.id}`,
+                label: s.name,
+                group: "Stacks",
+              })),
+            ]}
+          />
         </div>
       </div>
 
@@ -144,25 +145,23 @@ export function CycleForm({
             <label htmlFor="startDate" className="text-sm font-medium">
               Start date <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               id="startDate"
               name="startDate"
               type="date"
               required
               defaultValue={defaults.startDate}
-              className={inputCls}
             />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="endDate" className="text-sm font-medium">
               End date
             </label>
-            <input
+            <Input
               id="endDate"
               name="endDate"
               type="date"
               defaultValue={defaults.endDate}
-              className={inputCls}
             />
           </div>
         </div>
@@ -172,36 +171,39 @@ export function CycleForm({
             <label htmlFor="status" className="text-sm font-medium">
               Status
             </label>
-            <select
-              id="status"
-              name="status"
-              defaultValue={defaults.status ?? "active"}
-              className={inputCls}
-            >
-              {CYCLE_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <Select name="status" defaultValue={defaults.status ?? "active"}>
+              <SelectTrigger id="status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CYCLE_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="frequency" className="text-sm font-medium">
               Frequency
             </label>
-            <select
-              id="frequency"
+            <Select
               name="frequency"
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className={inputCls}
+              onValueChange={(v) => setFrequency(v ?? "daily")}
             >
-              <option value="daily">Daily</option>
-              <option value="eod">Every other day</option>
-              <option value="twice-weekly">Twice weekly</option>
-              <option value="weekly">Weekly</option>
-              <option value="custom">Custom days</option>
-            </select>
+              <SelectTrigger id="frequency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="eod">Every other day</SelectItem>
+                <SelectItem value="twice-weekly">Twice weekly</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="custom">Custom days</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -258,7 +260,7 @@ export function CycleForm({
             <label htmlFor="timesPerDay" className="text-sm font-medium">
               Times per day
             </label>
-            <input
+            <Input
               id="timesPerDay"
               name="timesPerDay"
               type="number"
@@ -267,7 +269,6 @@ export function CycleForm({
               step="1"
               inputMode="numeric"
               defaultValue={defaults.timesPerDay ?? 1}
-              className={inputCls}
             />
           </div>
         </div>
@@ -302,15 +303,15 @@ export function CycleForm({
                       >
                         Dose
                       </label>
-                      <input
+                      <Input
                         id={`itemDose-${it.peptideId}`}
                         name={`itemDose:${it.peptideId}`}
                         type="number"
                         step="any"
                         min="0"
+                        inputMode="decimal"
                         defaultValue={dose ?? ""}
                         placeholder="e.g. 250"
-                        className={inputCls}
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -320,15 +321,18 @@ export function CycleForm({
                       >
                         Unit
                       </label>
-                      <select
-                        id={`itemUnit-${it.peptideId}`}
+                      <Select
                         name={`itemUnit:${it.peptideId}`}
                         defaultValue={unit}
-                        className={inputCls}
                       >
-                        <option value="mcg">mcg</option>
-                        <option value="mg">mg</option>
-                      </select>
+                        <SelectTrigger id={`itemUnit-${it.peptideId}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mcg">mcg</SelectItem>
+                          <SelectItem value="mg">mg</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 );
@@ -345,30 +349,30 @@ export function CycleForm({
               <label htmlFor="dosePerAdmin" className="text-sm font-medium">
                 Dose per administration
               </label>
-              <input
+              <Input
                 id="dosePerAdmin"
                 name="dosePerAdmin"
                 type="number"
                 step="any"
                 min="0"
+                inputMode="decimal"
                 defaultValue={defaults.dosePerAdmin}
                 placeholder="e.g. 250"
-                className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="unit" className="text-sm font-medium">
                 Unit
               </label>
-              <select
-                id="unit"
-                name="unit"
-                defaultValue={defaults.unit ?? "mcg"}
-                className={inputCls}
-              >
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
+              <Select name="unit" defaultValue={defaults.unit ?? "mcg"}>
+                <SelectTrigger id="unit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcg">mcg</SelectItem>
+                  <SelectItem value="mg">mg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
@@ -381,12 +385,13 @@ export function CycleForm({
           <label htmlFor="notes" className="text-sm font-medium">
             Notes
           </label>
-          <textarea
+          <Textarea
             id="notes"
             name="notes"
             rows={3}
             defaultValue={defaults.notes}
-            className={`${inputCls} resize-none`}
+            className="resize-none"
+            maxLength={2000}
           />
         </div>
       </div>

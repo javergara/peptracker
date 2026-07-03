@@ -23,6 +23,14 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { addMeasurement } from "@/lib/actions/measurements";
 import {
   listMeasurements,
@@ -30,12 +38,10 @@ import {
   getDoseLogsInRange,
   listLabs,
 } from "@/lib/queries";
+import { toDateInputValue } from "@/lib/dates";
 import { GitCompareArrows } from "lucide-react";
 
 export const metadata = { title: "Metrics" };
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 const TYPE_LABELS: Record<string, string> = {
   weight: "Weight",
@@ -90,9 +96,7 @@ function MetricTile({
         <span className="num text-foreground text-2xl font-semibold">
           {value}
         </span>
-        <span className="text-xs" style={{ color: "#8B86AD" }}>
-          {unit}
-        </span>
+        <span className="text-muted-foreground text-xs">{unit}</span>
       </div>
       <div
         className="mt-0.5 text-xs"
@@ -102,7 +106,7 @@ function MetricTile({
               ? "var(--ok)"
               : improving === false
                 ? "var(--bad)"
-                : "#8B86AD",
+                : "var(--muted-foreground)",
         }}
       >
         {delta !== null
@@ -125,6 +129,7 @@ export default async function MetricsPage({
     rawRange && validRanges.includes(rawRange) ? rawRange : DEFAULT_RANGE;
 
   const now = new Date();
+  const today = toDateInputValue(now);
   const rangeMs = rangeToDays(range) * 86_400_000;
   const windowStart = now.getTime() - rangeMs;
 
@@ -349,11 +354,7 @@ export default async function MetricsPage({
             {/* Add measurement — opens the form card below via scroll or anchor */}
             <a
               href="#add-measurement"
-              className="focus-visible:ring-ring inline-flex h-10 items-center gap-2 rounded-[11px] px-4 text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none"
-              style={{
-                background: "linear-gradient(180deg,#8B47F0,#7C3AED)",
-                boxShadow: "0 10px 22px -10px rgba(124,58,237,.85)",
-              }}
+              className="btn-gradient focus-visible:ring-ring inline-flex h-10 items-center gap-2 rounded-[11px] px-4 text-[13.5px] font-semibold text-white focus-visible:ring-2 focus-visible:outline-none"
             >
               <Plus className="size-[15px]" strokeWidth={1.8} />
               Add
@@ -471,64 +472,65 @@ export default async function MetricsPage({
               <label htmlFor="m-type" className="text-sm font-medium">
                 Type
               </label>
-              <select
-                id="m-type"
-                name="type"
-                defaultValue="weight"
-                className={inputCls}
-              >
-                {Object.entries(TYPE_LABELS).map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </select>
+              <Select name="type" defaultValue="weight">
+                <SelectTrigger id="m-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(TYPE_LABELS).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="m-label" className="text-sm font-medium">
                 Label
               </label>
-              <input
+              <Input
                 id="m-label"
                 name="label"
                 placeholder="optional"
-                className={inputCls}
+                maxLength={80}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="m-value" className="text-sm font-medium">
                 Value <span className="text-destructive">*</span>
               </label>
-              <input
+              <Input
                 id="m-value"
                 name="value"
                 type="number"
                 step="any"
                 inputMode="decimal"
+                min="0"
                 required
-                className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="m-unit" className="text-sm font-medium">
                 Unit
               </label>
-              <input
+              <Input
                 id="m-unit"
                 name="unit"
                 placeholder="kg, %, hrs…"
-                className={inputCls}
+                maxLength={20}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="m-date" className="text-sm font-medium">
                 Date
               </label>
-              <input
+              <Input
                 id="m-date"
                 name="recordedAt"
                 type="date"
-                className={inputCls}
+                defaultValue={today}
+                required
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-5">

@@ -6,10 +6,15 @@ import { toast } from "sonner";
 
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateSupplement, deleteSupplement } from "@/lib/actions/supplements";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 const CATEGORIES = [
   "vitamin",
@@ -201,12 +206,12 @@ export function SupplementRow({
               <label htmlFor={`name-${s.id}`} className="text-sm font-medium">
                 Name <span className="text-destructive">*</span>
               </label>
-              <input
+              <Input
                 id={`name-${s.id}`}
                 name="name"
                 required
                 defaultValue={s.name}
-                className={inputCls}
+                maxLength={120}
               />
             </div>
             <div className="space-y-1.5">
@@ -216,30 +221,30 @@ export function SupplementRow({
               >
                 Category
               </label>
-              <select
-                id={`category-${s.id}`}
-                name="category"
-                defaultValue={s.category ?? ""}
-                className={inputCls}
-              >
-                <option value="">— None —</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {categoryLabel(c)}
-                  </option>
-                ))}
-              </select>
+              <Select name="category" defaultValue={s.category ?? ""}>
+                <SelectTrigger id={`category-${s.id}`}>
+                  <SelectValue placeholder="— None —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— None —</SelectItem>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {categoryLabel(c)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor={`dose-${s.id}`} className="text-sm font-medium">
                 Dose
               </label>
-              <input
+              <Input
                 id={`dose-${s.id}`}
                 name="dose"
                 defaultValue={s.dose ?? ""}
                 placeholder="e.g. 5 g"
-                className={inputCls}
+                maxLength={40}
               />
             </div>
             <div className="space-y-1.5">
@@ -249,12 +254,12 @@ export function SupplementRow({
               >
                 Frequency
               </label>
-              <input
+              <Input
                 id={`frequency-${s.id}`}
                 name="frequency"
                 defaultValue={s.frequency ?? ""}
                 placeholder="e.g. daily"
-                className={inputCls}
+                maxLength={40}
               />
             </div>
             <div className="space-y-1.5">
@@ -264,12 +269,12 @@ export function SupplementRow({
               >
                 Start date
               </label>
-              <input
+              <Input
                 id={`startDate-${s.id}`}
                 name="startDate"
                 type="date"
                 defaultValue={toDateValue(s.startDate)}
-                className={inputCls}
+                required
               />
             </div>
             <div className="space-y-1.5">
@@ -279,39 +284,38 @@ export function SupplementRow({
               >
                 End date
               </label>
-              <input
+              <Input
                 id={`endDate-${s.id}`}
                 name="endDate"
                 type="date"
                 defaultValue={s.endDate ? toDateValue(s.endDate) : ""}
-                className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor={`status-${s.id}`} className="text-sm font-medium">
                 Status
               </label>
-              <select
-                id={`status-${s.id}`}
-                name="status"
-                defaultValue={s.status}
-                className={inputCls}
-              >
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="stopped">Stopped</option>
-              </select>
+              <Select name="status" defaultValue={s.status}>
+                <SelectTrigger id={`status-${s.id}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="stopped">Stopped</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label htmlFor={`notes-${s.id}`} className="text-sm font-medium">
                 Notes
               </label>
-              <input
+              <Input
                 id={`notes-${s.id}`}
                 name="notes"
                 defaultValue={s.notes ?? ""}
                 placeholder="optional"
-                className={inputCls}
+                maxLength={280}
               />
             </div>
             <div className="flex items-end gap-2">

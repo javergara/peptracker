@@ -77,8 +77,8 @@ export function SuggestionExplorer({ peptides, stacks }: Props) {
                     href={`/peptides/${p.slug}`}
                     className="group block focus-visible:outline-none"
                   >
-                    <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-2 rounded-[18px] p-4 [box-shadow:var(--shadow-card)] transition-shadow duration-150 group-hover:[box-shadow:var(--shadow-card-hover)] group-focus-visible:ring-2">
-                      <Eyebrow className="text-[#8B86AD]">PEPTIDE</Eyebrow>
+                    <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-2 rounded-[18px] p-4 group-focus-visible:ring-2">
+                      <Eyebrow>PEPTIDE</Eyebrow>
                       <span className="font-display text-foreground text-sm font-semibold">
                         {p.name}
                       </span>
@@ -122,13 +122,9 @@ export function SuggestionExplorer({ peptides, stacks }: Props) {
                     href={`/stacks/${s.slug}`}
                     className="group block focus-visible:outline-none"
                   >
-                    <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-2 rounded-[18px] p-4 [box-shadow:var(--shadow-card)] transition-shadow duration-150 group-hover:[box-shadow:var(--shadow-card-hover)] group-focus-visible:ring-2">
-                      {s.goal && (
-                        <Eyebrow className="text-[#8B86AD]">{s.goal}</Eyebrow>
-                      )}
-                      {!s.goal && (
-                        <Eyebrow className="text-[#8B86AD]">STACK</Eyebrow>
-                      )}
+                    <div className="card-surface group-focus-visible:ring-ring flex h-full flex-col gap-2 rounded-[18px] p-4 group-focus-visible:ring-2">
+                      {s.goal && <Eyebrow>{s.goal}</Eyebrow>}
+                      {!s.goal && <Eyebrow>STACK</Eyebrow>}
                       <span className="font-display text-foreground text-sm font-semibold">
                         {s.name}
                       </span>

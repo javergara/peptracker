@@ -6,9 +6,7 @@ import { FlaskConical } from "lucide-react";
 
 import { activateStock } from "@/lib/actions/stock";
 import { Button } from "@/components/ui/button";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
+import { Input } from "@/components/ui/input";
 
 /**
  * Inline "activate a vial from stock" form. Asks for the diluent volume, then
@@ -64,14 +62,14 @@ export function ActivateStockForm({
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1">
           <label className="text-xs font-medium">BAC water (mL)</label>
-          <input
+          <Input
             name="bacWaterMl"
             type="number"
             step="0.1"
             min="0.1"
+            inputMode="decimal"
             required
             placeholder="e.g. 2"
-            className={inputCls}
           />
         </div>
         <Button type="submit" size="sm" disabled={isPending}>

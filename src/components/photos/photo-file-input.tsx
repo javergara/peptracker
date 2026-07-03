@@ -3,6 +3,8 @@
 import * as React from "react";
 import { ImageDown, Loader2 } from "lucide-react";
 
+import { Input } from "@/components/ui/input";
+
 /**
  * File picker that downscales + re-encodes the chosen image in the browser
  * BEFORE it's uploaded. This keeps stored blobs tiny (so far more users fit in
@@ -136,7 +138,7 @@ export function PhotoFileInput({
 
   return (
     <>
-      <input
+      <Input
         id={id}
         type="file"
         accept="image/*"

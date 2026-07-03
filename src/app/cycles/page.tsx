@@ -34,10 +34,7 @@ export default async function CyclesPage() {
         description={`${user.name}'s peptide protocols and their progress.`}
         accentColor={accent}
         actions={
-          <Button
-            className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)]"
-            render={<Link href="/cycles/new" />}
-          >
+          <Button className="btn-gradient" render={<Link href="/cycles/new" />}>
             <Plus className="size-4" />
             New cycle
           </Button>
@@ -69,7 +66,7 @@ export default async function CyclesPage() {
                 key={c.id}
                 href={`/cycles/${c.id}`}
                 className={cn(
-                  "card-surface block rounded-[18px] p-5 no-underline transition-shadow hover:[box-shadow:var(--shadow-card-hover)]",
+                  "card-surface block rounded-[18px] p-5 no-underline",
                 )}
                 style={{ borderLeft: `4px solid ${accent}` }}
               >
@@ -110,7 +107,7 @@ export default async function CyclesPage() {
                       <span className="text-muted-foreground text-[11px]">
                         Progress
                       </span>
-                      <span className="num text-[11px] text-[#8B86AD]">
+                      <span className="num text-muted-foreground text-[11px]">
                         {pct}%
                         {totalWeeks != null
                           ? ` · wk ${weekNum}/${totalWeeks}`

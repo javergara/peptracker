@@ -97,7 +97,7 @@ export function VialGauge({
       ? ["#F7B73E", "#E08C0B"]
       : status === "sealed"
         ? ["#94A3D8", "#6470B0"]
-        : ["#A855F7", "#6D28D9"];
+        : ["var(--gauge-start)", "var(--gauge-end)"];
 
   return (
     <svg

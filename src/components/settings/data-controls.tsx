@@ -11,6 +11,7 @@ import {
   exportLabsCsv,
 } from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 export function DataControls() {
   const [isPending, startTransition] = useTransition();
@@ -113,12 +114,12 @@ export function DataControls() {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Import backup</label>
-        <textarea
+        <Textarea
           value={json}
           onChange={(e) => setJson(e.target.value)}
           rows={4}
           placeholder="Paste exported JSON here…"
-          className="border-input bg-background focus-visible:ring-ring w-full resize-none rounded-lg border px-3 py-2 font-mono text-xs outline-none focus-visible:ring-2"
+          className="resize-none font-mono text-xs"
         />
         <Button
           variant="outline"

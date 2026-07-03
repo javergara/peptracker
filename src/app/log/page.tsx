@@ -5,7 +5,16 @@ import { EmptyState } from "@/components/common/empty-state";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { SearchableSelect } from "@/components/common/searchable-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -22,16 +31,13 @@ import {
   listActiveVials,
   getCurrentUser,
 } from "@/lib/queries";
-import { formatDate } from "@/lib/dates";
+import { formatDate, toDateTimeLocalValue } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
 import { asStringArray, ROUTES, ROUTE_LABELS } from "@/types/peptide";
 import { suggestNextSite } from "@/lib/sites";
 
 export const metadata = { title: "Log Dose" };
 export const dynamic = "force-dynamic";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function LogPage() {
   const [peptides, cycles, recent, activeVials, user] = await Promise.all([
@@ -72,42 +78,37 @@ export default async function LogPage() {
               <label htmlFor="l-peptide" className="text-sm font-medium">
                 Peptide <span className="text-destructive">*</span>
               </label>
-              <select
+              <SearchableSelect
                 id="l-peptide"
                 name="peptideId"
                 required
-                className={inputCls}
-              >
-                {peptides.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+                placeholder="— Select peptide —"
+                options={peptides.map((p) => ({ value: p.id, label: p.name }))}
+              />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-cycle" className="text-sm font-medium">
                 Cycle (optional)
               </label>
-              <select
-                id="l-cycle"
-                name="cycleId"
-                defaultValue=""
-                className={inputCls}
-              >
-                <option value="">— None —</option>
-                {cycles.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="cycleId" defaultValue="">
+                <SelectTrigger id="l-cycle">
+                  <SelectValue placeholder="— None —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— None —</SelectItem>
+                  {cycles.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-amount" className="text-sm font-medium">
                 Amount <span className="text-destructive">*</span>
               </label>
-              <input
+              <Input
                 id="l-amount"
                 name="amount"
                 type="number"
@@ -115,57 +116,56 @@ export default async function LogPage() {
                 min="0"
                 inputMode="decimal"
                 required
-                className={inputCls}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-unit" className="text-sm font-medium">
                 Unit
               </label>
-              <select
-                id="l-unit"
-                name="unit"
-                defaultValue="mcg"
-                className={inputCls}
-              >
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
+              <Select name="unit" defaultValue="mcg">
+                <SelectTrigger id="l-unit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcg">mcg</SelectItem>
+                  <SelectItem value="mg">mg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-route" className="text-sm font-medium">
                 Route
               </label>
-              <select
-                id="l-route"
-                name="route"
-                defaultValue=""
-                className={inputCls}
-              >
-                <option value="">— Select —</option>
-                {ROUTES.map((r) => (
-                  <option key={r} value={r}>
-                    {ROUTE_LABELS[r]}
-                  </option>
-                ))}
-              </select>
+              <Select name="route" defaultValue="">
+                <SelectTrigger id="l-route">
+                  <SelectValue placeholder="— Select —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— Select —</SelectItem>
+                  {ROUTES.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {ROUTE_LABELS[r]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-when" className="text-sm font-medium">
                 When
               </label>
-              <input
+              <Input
                 id="l-when"
                 name="takenAt"
                 type="datetime-local"
-                className={inputCls}
+                defaultValue={toDateTimeLocalValue(new Date())}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="l-notes" className="text-sm font-medium">
                 Notes
               </label>
-              <input id="l-notes" name="notes" className={inputCls} />
+              <Input id="l-notes" name="notes" maxLength={280} />
             </div>
 
             {/* Enriched optional fields */}

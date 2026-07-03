@@ -12,11 +12,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { Input } from "@/components/ui/input";
 import { updateLab } from "@/lib/actions/labs";
 import { toDateInputValue } from "@/lib/dates";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2 py-1.5 text-sm outline-none focus-visible:ring-2";
 
 export interface EditLabButtonProps {
   id: string;
@@ -74,15 +72,16 @@ export function EditLabButton({
             >
               Value
             </label>
-            <input
+            <Input
               id={`edit-lab-value-${id}`}
               name="value"
               type="number"
               step="any"
               inputMode="decimal"
+              min="0"
               defaultValue={value}
               required
-              className={inputCls}
+              className="px-2 py-1.5"
             />
           </div>
           <div className="space-y-1">
@@ -92,12 +91,13 @@ export function EditLabButton({
             >
               Date taken
             </label>
-            <input
+            <Input
               id={`edit-lab-date-${id}`}
               name="takenAt"
               type="date"
               defaultValue={toDateInputValue(takenAt)}
-              className={inputCls}
+              required
+              className="px-2 py-1.5"
             />
           </div>
           <div className="space-y-1">
@@ -107,12 +107,13 @@ export function EditLabButton({
             >
               Notes
             </label>
-            <input
+            <Input
               id={`edit-lab-notes-${id}`}
               name="notes"
               defaultValue={notes ?? ""}
               placeholder="optional"
-              className={inputCls}
+              maxLength={280}
+              className="px-2 py-1.5"
             />
           </div>
           <SubmitButton size="sm">Save</SubmitButton>

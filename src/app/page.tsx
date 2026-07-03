@@ -28,6 +28,7 @@ import {
 } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
+import { cn } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const now = new Date();
@@ -89,10 +90,7 @@ export default async function DashboardPage() {
         description={`${user.name}'s protocols at a glance · ${formatDate(now, "EEEE, MMMM d")}`}
         accentColor={accent}
         actions={
-          <Button
-            className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)]"
-            render={<Link href="/cycles/new" />}
-          >
+          <Button className="btn-gradient" render={<Link href="/cycles/new" />}>
             <Plus className="size-4" />
             New cycle
           </Button>
@@ -104,16 +102,16 @@ export default async function DashboardPage() {
       <div className="mb-[18px] grid gap-[18px] lg:grid-cols-[1.55fr_1fr]">
         {/* Ink hero */}
         <InkPanel variant="hero" molecule className="p-7">
-          <Eyebrow className="text-[#C4B5FD]">TODAY · DUE NOW</Eyebrow>
+          <Eyebrow className="text-ink-accent">TODAY · DUE NOW</Eyebrow>
           <div className="mt-2.5 mb-1 flex items-end gap-3.5">
-            <span className="num text-[74px] leading-[.85] font-semibold text-[#EFEBFA]">
+            <span className="num text-ink-foreground text-[74px] leading-[.85] font-semibold">
               {todaysDue}
             </span>
-            <span className="pb-[9px] text-base text-[#C9C3E6]">
+            <span className="text-ink-subtle pb-[9px] text-base">
               {todaysDue === 1 ? "dose due" : "doses due"}
             </span>
           </div>
-          <p className="mt-1.5 mb-5 max-w-[340px] text-[13.5px] text-[#A8A2CC]">
+          <p className="text-ink-muted mt-1.5 mb-5 max-w-[340px] text-[13.5px]">
             {todaysDue === 0
               ? "Nothing scheduled — you're all caught up for today."
               : "Log each dose as you take it to keep your adherence streak alive."}
@@ -132,11 +130,11 @@ export default async function DashboardPage() {
                     style={{ background: accent }}
                     aria-hidden
                   />
-                  <span className="text-[13px] font-medium text-[#EFEBFA]">
+                  <span className="text-ink-foreground text-[13px] font-medium">
                     {cycle.peptide?.name ?? cycle.stack?.name ?? cycle.name}
                   </span>
                   {cycle.scheduleConfig?.dosePerAdmin ? (
-                    <span className="num text-xs text-[#A8A2CC]">
+                    <span className="num text-ink-muted text-xs">
                       {cycle.scheduleConfig.dosePerAdmin}{" "}
                       {cycle.scheduleConfig.unit ?? "mcg"}
                     </span>
@@ -148,7 +146,7 @@ export default async function DashboardPage() {
 
           {/* White "Log dose" CTA */}
           <Button
-            className="h-[42px] rounded-[11px] bg-white text-sm font-semibold text-[#16102E] hover:bg-white/90"
+            className="text-ink h-[42px] rounded-[11px] bg-white text-sm font-semibold hover:bg-white/90"
             render={<Link href="/log" />}
           >
             <Syringe className="size-4" />
@@ -277,7 +275,7 @@ export default async function DashboardPage() {
               description="Active cycles with a dose scheduled for today will appear here."
             />
           ) : (
-            <div className="flex flex-col divide-y divide-[#F1EEF9]">
+            <div className="divide-border flex flex-col divide-y">
               {todays.map(({ cycle }) => {
                 // Check if there's a log today for this cycle
                 const todayStart = new Date(now);
@@ -307,7 +305,7 @@ export default async function DashboardPage() {
                             cycle.stack?.name ??
                             cycle.name}
                         </Link>
-                        <p className="text-[12px] text-[#8B86AD]">
+                        <p className="text-muted-foreground text-[12px]">
                           {cycle.name}
                         </p>
                       </div>
@@ -329,7 +327,7 @@ export default async function DashboardPage() {
                               {cycle.scheduleConfig.unit ?? "mcg"}
                             </div>
                           ) : null}
-                          <div className="text-[11px] text-[#8B86AD]">
+                          <div className="text-muted-foreground text-[11px]">
                             pending
                           </div>
                         </>
@@ -378,7 +376,7 @@ export default async function DashboardPage() {
                       >
                         {c.name}
                       </Link>
-                      <span className="num text-[12px] text-[#8B86AD]">
+                      <span className="num text-muted-foreground text-[12px]">
                         {pct}%
                         {totalWeeks != null
                           ? ` · wk ${weekNum}/${totalWeeks}`
@@ -422,8 +420,8 @@ export default async function DashboardPage() {
           />
         ) : (
           <div>
-            {/* Column headers */}
-            <div className="eyebrow mb-0.5 grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.8fr] border-b border-[#F1EEF9] px-1 pb-[9px] text-[#9A95B8]">
+            {/* Column headers — 5-col grid from sm up; hidden on phones */}
+            <div className="eyebrow border-border text-muted-foreground mb-0.5 hidden border-b px-1 pb-[9px] sm:grid sm:grid-cols-[1.6fr_.8fr_1fr_.9fr_.8fr]">
               <span>PEPTIDE</span>
               <span>AMOUNT</span>
               <span>WHEN</span>
@@ -433,44 +431,85 @@ export default async function DashboardPage() {
             {/* Rows */}
             {recentDoses.map((d, i) => {
               const mood = moodFace(d.mood);
+              const isLast = i === recentDoses.length - 1;
               return (
                 <div
                   key={d.id}
-                  className={`grid grid-cols-[1.6fr_.8fr_1fr_.9fr_.8fr] items-center px-1 py-[11px] text-[13px] ${
-                    i < recentDoses.length - 1
-                      ? "border-b border-[#F6F4FB]"
-                      : ""
-                  }`}
+                  className={cn(
+                    "px-1 py-[11px] text-[13px]",
+                    !isLast && "border-border border-b",
+                  )}
                 >
-                  {/* Peptide name with 3px violet accent bar */}
-                  <span className="text-foreground flex items-center gap-[9px] font-medium">
-                    <span
-                      className="block h-[18px] w-[3px] shrink-0 rounded-full"
-                      style={{ background: accent }}
-                      aria-hidden
-                    />
-                    {d.peptide.name}
-                  </span>
-                  <span className="num text-foreground">
-                    {d.amount} {d.unit}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {formatDate(d.takenAt, "MMM d · HH:mm")}
-                  </span>
-                  <span className="text-muted-foreground">{d.site ?? "—"}</span>
-                  <span className="text-right text-base">
-                    {mood ? (
+                  {/* sm+: original 5-column grid row */}
+                  <div className="hidden sm:grid sm:grid-cols-[1.6fr_.8fr_1fr_.9fr_.8fr] sm:items-center">
+                    <span className="text-foreground flex items-center gap-[9px] font-medium">
                       <span
-                        role="img"
-                        aria-label={mood.label}
-                        title={mood.label}
-                      >
-                        {mood.emoji}
+                        className="block h-[18px] w-[3px] shrink-0 rounded-full"
+                        style={{ background: accent }}
+                        aria-hidden
+                      />
+                      {d.peptide.name}
+                    </span>
+                    <span className="num text-foreground">
+                      {d.amount} {d.unit}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {formatDate(d.takenAt, "MMM d · HH:mm")}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {d.site ?? "—"}
+                    </span>
+                    <span className="text-right text-base">
+                      {mood ? (
+                        <span
+                          role="img"
+                          aria-label={mood.label}
+                          title={mood.label}
+                        >
+                          {mood.emoji}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Below sm: compact 2-line stacked row (no horizontal scroll) */}
+                  <div className="flex flex-col gap-1 sm:hidden">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-foreground flex min-w-0 items-center gap-[9px] font-medium">
+                        <span
+                          className="block h-[18px] w-[3px] shrink-0 rounded-full"
+                          style={{ background: accent }}
+                          aria-hidden
+                        />
+                        <span className="truncate">{d.peptide.name}</span>
                       </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </span>
+                      <span className="num text-foreground shrink-0">
+                        {d.amount} {d.unit}
+                      </span>
+                    </div>
+                    <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 pl-[12px] text-xs">
+                      <span className="shrink-0">
+                        {formatDate(d.takenAt, "MMM d · HH:mm")}
+                      </span>
+                      <span aria-hidden>·</span>
+                      <span className="truncate">{d.site ?? "—"}</span>
+                      {mood ? (
+                        <>
+                          <span aria-hidden>·</span>
+                          <span
+                            role="img"
+                            aria-label={mood.label}
+                            title={mood.label}
+                            className="shrink-0 text-sm"
+                          >
+                            {mood.emoji}
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               );
             })}

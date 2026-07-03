@@ -224,6 +224,7 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
                   dot={{ r: 2.5, fill: s.color, strokeWidth: 0 }}
                   activeDot={{ r: 5, strokeWidth: 0 }}
                   connectNulls
+                  isAnimationActive={false}
                 />
               ) : (
                 <Line
@@ -237,6 +238,7 @@ export function MetricsTrends({ series }: { series: TrendSeries[] }) {
                   dot={{ r: 2.5, fill: s.color, strokeWidth: 0 }}
                   activeDot={{ r: 5, strokeWidth: 0 }}
                   connectNulls
+                  isAnimationActive={false}
                 />
               ),
             )}

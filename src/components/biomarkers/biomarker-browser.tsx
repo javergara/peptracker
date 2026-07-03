@@ -144,8 +144,7 @@ export function BiomarkerBrowser({ biomarkers }: BiomarkerBrowserProps) {
             >
               <div
                 className={cn(
-                  "card-surface h-full rounded-2xl px-5 py-4 transition-shadow duration-150",
-                  "group-hover:[box-shadow:var(--shadow-card-hover)]",
+                  "card-surface h-full rounded-2xl px-5 py-4",
                   "group-focus-visible:ring-ring group-focus-visible:ring-2",
                 )}
               >

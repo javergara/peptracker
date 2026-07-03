@@ -5,14 +5,12 @@ import { Eyebrow } from "@/components/common/eyebrow";
 import { PhotoBoard } from "@/components/photos/photo-board";
 import { PhotoFileInput } from "@/components/photos/photo-file-input";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { Input } from "@/components/ui/input";
 import { uploadPhoto } from "@/lib/actions/photos";
 import { listPhotos, getCurrentUser } from "@/lib/queries";
-import { formatDate } from "@/lib/dates";
+import { formatDate, toDateInputValue } from "@/lib/dates";
 
 export const metadata = { title: "Progress Photos" };
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function PhotosPage() {
   const [photos, user] = await Promise.all([listPhotos(), getCurrentUser()]);
@@ -55,7 +53,7 @@ export default async function PhotosPage() {
               <label htmlFor="p-file" className="text-sm font-medium">
                 Image <span className="text-destructive">*</span>
               </label>
-              <PhotoFileInput id="p-file" className={inputCls} />
+              <PhotoFileInput id="p-file" />
               <p className="text-muted-foreground text-xs">
                 On a phone you can take a photo or pick one from your library.
                 Large images are optimized before upload.
@@ -65,22 +63,22 @@ export default async function PhotosPage() {
               <label htmlFor="p-caption" className="text-sm font-medium">
                 Caption
               </label>
-              <input
+              <Input
                 id="p-caption"
                 name="caption"
                 placeholder="e.g. Week 4 front"
-                className={inputCls}
+                maxLength={120}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="p-date" className="text-sm font-medium">
                 Date taken
               </label>
-              <input
+              <Input
                 id="p-date"
                 name="takenAt"
                 type="date"
-                className={inputCls}
+                defaultValue={toDateInputValue(new Date())}
               />
             </div>
             <div className="flex items-end">

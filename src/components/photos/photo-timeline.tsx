@@ -48,6 +48,8 @@ export function PhotoTimeline({
           <img
             src={src(photo.id)}
             alt={photo.caption ?? photo.dateLabel}
+            width={640}
+            height={480}
             className="h-[26rem] w-full object-contain"
           />
           <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition group-hover/stage:bg-black/10 group-hover/stage:opacity-100">
@@ -123,6 +125,8 @@ export function PhotoTimeline({
             <img
               src={src(p.id)}
               alt=""
+              width={64}
+              height={64}
               className={cn(
                 "bg-muted/30 h-16 w-16 rounded-md object-cover",
                 idx === i

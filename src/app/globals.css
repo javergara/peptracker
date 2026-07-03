@@ -49,6 +49,15 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Ink-panel-scoped text tokens (always-dark surface — same value in both
+   * app themes; see `.brand-rail` comment below for the same pattern). */
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-caption: var(--ink-caption);
+  --color-ink-accent: var(--ink-accent);
+  --color-ink-faint: var(--ink-faint);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -104,11 +113,33 @@
     linear-gradient(155deg, #241a4e 0%, #16102e 70%);
   --gradient-ink-strip: linear-gradient(155deg, #241a4e, #16102e);
   --gradient-ink-bar: linear-gradient(180deg, #1c1442, #16102e);
-  --gradient-gauge: linear-gradient(180deg, #a855f7, #6d28d9);
+  --gauge-start: #a855f7;
+  --gauge-end: #6d28d9;
+  --gradient-gauge: linear-gradient(
+    180deg,
+    var(--gauge-start),
+    var(--gauge-end)
+  );
+  /* "New X" CTA gradient button (dashboard/cycles/stacks/inventory/metrics). */
+  --gradient-button: linear-gradient(180deg, #8b47f0, #7c3aed);
+  --gradient-button-hover: linear-gradient(180deg, #9b57f0, #8c4aed);
+  /* Ink-panel-scoped text tokens — fixed values (the Ink surface itself never
+   * changes with the app theme), used by InkPanel + its consumers. */
+  --ink: #16102e;
+  --ink-foreground: #efebfa;
+  --ink-subtle: #c9c3e6;
+  --ink-muted: #a8a2cc;
+  --ink-caption: #8e88b4;
+  --ink-accent: #c4b5fd;
+  --ink-faint: #6d648e;
   --shadow-card:
     0 1px 2px rgba(22, 16, 46, 0.04), 0 12px 28px -20px rgba(22, 16, 46, 0.18);
   --shadow-card-hover: 0 8px 24px -12px rgba(22, 16, 46, 0.16);
   --radius: 0.75rem;
+  /* Motion vocabulary — a small shared set, not a framework. */
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
   /* Sidebar = dark Ink brand rail (same in light & dark). */
   --sidebar: #16102e;
   --sidebar-foreground: #efebfa;
@@ -203,14 +234,16 @@
   font-feature-settings: "tnum";
 }
 
-/* Small mono-uppercase section labels ("eyebrows") above stats/cards. */
+/* Small mono-uppercase section labels ("eyebrows") above stats/cards. Default
+ * color is --muted-foreground (darkened for 4.5:1 contrast at this size);
+ * Ink-panel consumers override with text-ink-accent/text-ink-caption. */
 @utility eyebrow {
   font-family: var(--font-mono);
   font-size: 0.65625rem; /* 10.5px */
   line-height: 1.4;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8b86ad;
+  color: var(--muted-foreground);
 }
 
 /* Layered card surface: white card, cool hairline, soft depth; hover lifts. */
@@ -218,6 +251,31 @@
   background-color: var(--card);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
+  }
+}
+
+/* "New X" violet CTA gradient button (dashboard/cycles/stacks/inventory/
+ * metrics headers) — consolidates a repeated inline gradient into one
+ * reusable utility so the colors live as tokens, not per-call-site literals. */
+@utility btn-gradient {
+  background: var(--gradient-button);
+  box-shadow: 0 10px 22px -10px rgba(124, 58, 237, 0.85);
+
+  &:hover {
+    background: var(--gradient-button-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+  }
 }
 
 @layer base {

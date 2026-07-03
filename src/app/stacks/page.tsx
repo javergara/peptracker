@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { Layers, Plus, Trash2 } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
 
 import { listStacks } from "@/lib/queries";
-import { deleteStack } from "@/lib/actions/stacks";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { GoalBadges } from "@/components/common/badges";
@@ -10,6 +9,7 @@ import { Eyebrow } from "@/components/common/eyebrow";
 import { Disclaimer } from "@/components/disclaimer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DeleteStackButton } from "@/components/stacks/delete-stack-button";
 import { asStringArray } from "@/types/peptide";
 
 export const metadata = { title: "Stacks" };
@@ -23,10 +23,7 @@ export default async function StacksPage() {
         title="Stacks"
         description="Curated peptide protocol combinations."
         actions={
-          <Button
-            render={<Link href="/stacks/new" />}
-            className="[box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)] hover:[background:linear-gradient(180deg,#9B57F0,#8C4AED)]"
-          >
+          <Button render={<Link href="/stacks/new" />} className="btn-gradient">
             <Plus className="size-4" />
             Build a stack
           </Button>
@@ -63,15 +60,10 @@ type Stack = Awaited<ReturnType<typeof listStacks>>[number];
 function StackCard({ stack }: { stack: Stack }) {
   const tags = asStringArray(stack.tags);
 
-  async function handleDelete() {
-    "use server";
-    await deleteStack(stack.id);
-  }
-
   return (
-    <div className="card-surface relative flex flex-col gap-3 rounded-[18px] p-5 [box-shadow:var(--shadow-card)] transition-shadow hover:[box-shadow:var(--shadow-card-hover)]">
+    <div className="card-surface relative flex flex-col gap-3 rounded-[18px] p-5">
       {/* Goal eyebrow */}
-      {stack.goal && <Eyebrow className="text-[#8B86AD]">{stack.goal}</Eyebrow>}
+      {stack.goal && <Eyebrow>{stack.goal}</Eyebrow>}
 
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
@@ -89,15 +81,7 @@ function StackCard({ stack }: { stack: Stack }) {
           )}
         </div>
         {!stack.isPreset && (
-          <form action={handleDelete}>
-            <button
-              type="submit"
-              aria-label={`Delete ${stack.name}`}
-              className="text-muted-foreground hover:text-destructive rounded p-1 transition-colors"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </form>
+          <DeleteStackButton id={stack.id} name={stack.name} />
         )}
       </div>
 

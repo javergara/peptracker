@@ -9,6 +9,8 @@ import { InkPanel } from "@/components/common/ink-panel";
 import { VialGauge } from "@/components/common/vial-gauge";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { StockInventory } from "@/components/inventory/stock-inventory";
+import { SearchableSelect } from "@/components/common/searchable-select";
+import { Input } from "@/components/ui/input";
 import { createVial } from "@/lib/actions/vials";
 import {
   listVials,
@@ -29,9 +31,6 @@ import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Inventory" };
 export const dynamic = "force-dynamic";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 type InventoryMode = "active" | "stock";
 
@@ -95,7 +94,7 @@ export default async function InventoryPage({
         actions={
           <a
             href={mode === "stock" ? "#add-stock" : "#add-vial"}
-            className="flex items-center gap-2 rounded-[11px] px-4 py-2.5 text-sm font-semibold text-white no-underline [box-shadow:0_10px_22px_-10px_rgba(124,58,237,.85)] [background:linear-gradient(180deg,#8B47F0,#7C3AED)]"
+            className="btn-gradient flex items-center gap-2 rounded-[11px] px-4 py-2.5 text-sm font-semibold text-white no-underline"
           >
             <Plus className="size-3.5" />
             {mode === "stock" ? "Add to stock" : "Add vial"}
@@ -142,40 +141,40 @@ export default async function InventoryPage({
           <InkPanel variant="strip" className="p-[18px_24px]">
             <div className="flex divide-x divide-white/10">
               <div className="flex-1 pr-6">
-                <Eyebrow className="text-[#8E88B4]">Active Vials</Eyebrow>
-                <div className="num mt-1 text-[28px] font-semibold text-[#EFEBFA]">
+                <Eyebrow className="text-ink-caption">Active Vials</Eyebrow>
+                <div className="num text-ink-foreground mt-1 text-[28px] font-semibold">
                   {activeAndSealed.length}
                 </div>
               </div>
               <div className="flex-[1.2] px-6">
-                <Eyebrow className="text-[#8E88B4]">Peptide on Hand</Eyebrow>
-                <div className="num mt-1 text-[28px] font-semibold text-[#EFEBFA]">
+                <Eyebrow className="text-ink-caption">Peptide on Hand</Eyebrow>
+                <div className="num text-ink-foreground mt-1 text-[28px] font-semibold">
                   {totalOnHand.toLocaleString("en-US", {
                     maximumFractionDigits: 0,
                   })}
-                  <span className="ml-1 text-sm font-normal text-[#A8A2CC]">
+                  <span className="text-ink-muted ml-1 text-sm font-normal">
                     mcg
                   </span>
                 </div>
               </div>
               <div className="flex-[1.4] pl-6">
-                <Eyebrow className="text-[#8E88B4]">Next Expiry</Eyebrow>
+                <Eyebrow className="text-ink-caption">Next Expiry</Eyebrow>
                 <div className="mt-1 flex items-baseline gap-2">
                   {nextExpiryDays !== null ? (
                     <>
-                      <span className="num text-[28px] font-semibold text-[#F59E0B]">
+                      <span className="num text-warn text-[28px] font-semibold">
                         {nextExpiryDays === 0
                           ? "Today"
                           : nextExpiryDays === 1
                             ? "1 day"
                             : `${nextExpiryDays} days`}
                       </span>
-                      <span className="text-sm text-[#A8A2CC]">
+                      <span className="text-ink-muted text-sm">
                         {nextExpiryVial?.peptide.name}
                       </span>
                     </>
                   ) : (
-                    <span className="num text-[28px] font-semibold text-[#EFEBFA]">
+                    <span className="num text-ink-foreground text-[28px] font-semibold">
                       —
                     </span>
                   )}
@@ -219,7 +218,7 @@ export default async function InventoryPage({
                   <div
                     key={vial.id}
                     className={cn(
-                      "card-surface flex gap-4 rounded-[18px] p-[18px] transition-shadow hover:[box-shadow:var(--shadow-card-hover)]",
+                      "card-surface flex gap-4 rounded-[18px] p-[18px]",
                       gaugeStatus === "soon" && "border-warn/40",
                       gaugeStatus === "expired" && "border-bad/30",
                       isInactive && "opacity-70",
@@ -260,7 +259,7 @@ export default async function InventoryPage({
                       </div>
 
                       {/* Concentration */}
-                      <p className="num mt-0.5 text-[11.5px] text-[#8B86AD]">
+                      <p className="num text-muted-foreground mt-0.5 text-[11.5px]">
                         {concentration != null
                           ? `${concentration >= 1000 ? (concentration / 1000).toFixed(1) + " mg/mL" : concentration.toFixed(0) + " mcg/mL"}`
                           : "Not reconstituted"}
@@ -281,7 +280,7 @@ export default async function InventoryPage({
                           {vial.remainingMcg.toLocaleString("en-US", {
                             maximumFractionDigits: 0,
                           })}
-                          <span className="ml-0.5 text-xs font-normal text-[#8B86AD]">
+                          <span className="text-muted-foreground ml-0.5 text-xs font-normal">
                             {" "}
                             mcg
                           </span>
@@ -317,7 +316,7 @@ export default async function InventoryPage({
                               "flex items-center gap-1.5 text-[11.5px]",
                               gaugeStatus === "soon"
                                 ? "text-warn-foreground font-medium"
-                                : "text-[#8B86AD]",
+                                : "text-muted-foreground",
                             )}
                           >
                             <Clock className="size-3 shrink-0" />
@@ -344,36 +343,33 @@ export default async function InventoryPage({
                 <label htmlFor="v-peptide" className="text-sm font-medium">
                   Peptide <span className="text-destructive">*</span>
                 </label>
-                <select
+                <SearchableSelect
                   id="v-peptide"
                   name="peptideId"
                   required
-                  className={inputCls}
-                >
-                  <option value="">— Select peptide —</option>
-                  {peptides.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="— Select peptide —"
+                  options={peptides.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                  }))}
+                />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="v-label" className="text-sm font-medium">
                   Label / lot
                 </label>
-                <input
+                <Input
                   id="v-label"
                   name="label"
                   placeholder="e.g. Lot A, Vial 1"
-                  className={inputCls}
+                  maxLength={60}
                 />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="v-total" className="text-sm font-medium">
                   Total amount (mcg) <span className="text-destructive">*</span>
                 </label>
-                <input
+                <Input
                   id="v-total"
                   name="totalMcg"
                   type="number"
@@ -382,7 +378,6 @@ export default async function InventoryPage({
                   inputMode="decimal"
                   required
                   placeholder="e.g. 5000"
-                  className={inputCls}
                 />
               </div>
               <div className="space-y-1.5">
@@ -392,7 +387,7 @@ export default async function InventoryPage({
                     — fill to reconstitute now
                   </span>
                 </label>
-                <input
+                <Input
                   id="v-bac"
                   name="bacWaterMl"
                   type="number"
@@ -400,18 +395,17 @@ export default async function InventoryPage({
                   min="0"
                   inputMode="decimal"
                   placeholder="e.g. 2 (optional)"
-                  className={inputCls}
                 />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="v-notes" className="text-sm font-medium">
                   Notes
                 </label>
-                <input
+                <Input
                   id="v-notes"
                   name="notes"
                   placeholder="Optional notes"
-                  className={inputCls}
+                  maxLength={280}
                 />
               </div>
               <div className="flex items-end">

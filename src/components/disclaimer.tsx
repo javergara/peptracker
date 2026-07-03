@@ -9,7 +9,7 @@ export function Disclaimer({ className }: { className?: string }) {
     <div
       role="note"
       className={cn(
-        "flex gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200",
+        "border-warn/30 bg-warn-wash text-warn-foreground flex gap-3 rounded-lg border p-3 text-sm",
         className,
       )}
     >

@@ -8,6 +8,14 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import { logDose } from "@/lib/actions/doses";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { averageMood, moodFace } from "@/lib/mood";
 import { suggestNextSite } from "@/lib/sites";
@@ -58,9 +66,6 @@ function shortSite(site: string) {
 function byTime(a: CalendarDose, b: CalendarDose) {
   return a.takenAtISO.localeCompare(b.takenAtISO) || a.id.localeCompare(b.id);
 }
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2";
 
 function ProfileDot({ color }: { color: string | null }) {
   return (
@@ -226,7 +231,10 @@ export function DoseCalendar({
 
         <div className="hidden grid-cols-7 gap-1 sm:grid">
           {WEEKDAYS.map((w) => (
-            <div key={w} className="eyebrow py-1 text-center text-[#9A95B8]">
+            <div
+              key={w}
+              className="eyebrow text-muted-foreground py-1 text-center"
+            >
               {w}
             </div>
           ))}
@@ -362,7 +370,7 @@ export function DoseCalendar({
                   )}
                 >
                   <div className="flex w-9 shrink-0 flex-col items-center">
-                    <span className="eyebrow text-[#9A95B8]">
+                    <span className="eyebrow text-muted-foreground">
                       {new Date(year, monthIndex, day).toLocaleString(
                         undefined,
                         { weekday: "short" },
@@ -421,7 +429,7 @@ export function DoseCalendar({
       <aside className="space-y-3">
         {nextSite ? (
           <div className="card-surface rounded-[14px] p-3 [box-shadow:var(--shadow-card)]">
-            <div className="eyebrow text-[#9A95B8]">SITE ROTATION</div>
+            <div className="eyebrow text-muted-foreground">SITE ROTATION</div>
             <div className="mt-1.5 flex items-baseline justify-between gap-2 text-sm">
               <span className="text-muted-foreground text-xs">Last used</span>
               <span className="text-foreground font-medium">{lastSite}</span>
@@ -436,7 +444,7 @@ export function DoseCalendar({
         ) : null}
         <div className="flex items-center justify-between">
           <div>
-            <div className="eyebrow text-[#9A95B8]">SELECTED DAY</div>
+            <div className="eyebrow text-muted-foreground">SELECTED DAY</div>
             <h3 className="font-display text-foreground mt-0.5 text-[15px] font-semibold">
               {new Date(year, monthIndex, selected).toLocaleString(undefined, {
                 weekday: "long",
@@ -464,27 +472,38 @@ export function DoseCalendar({
             className="card-surface space-y-2 rounded-[14px] p-3"
           >
             <input type="hidden" name="takenAt" value={selectedTakenAt} />
-            <select name="peptideId" required className={inputCls}>
-              {peptides.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <Select name="peptideId" required>
+              <SelectTrigger className="px-2.5 py-1.5">
+                <SelectValue placeholder="— Select peptide —" />
+              </SelectTrigger>
+              <SelectContent>
+                {peptides.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
-              <input
+              <Input
                 name="amount"
                 type="number"
                 step="any"
                 min="0"
+                inputMode="decimal"
                 required
                 placeholder="Amount"
-                className={inputCls}
+                className="px-2.5 py-1.5"
               />
-              <select name="unit" defaultValue="mcg" className={inputCls}>
-                <option value="mcg">mcg</option>
-                <option value="mg">mg</option>
-              </select>
+              <Select name="unit" defaultValue="mcg">
+                <SelectTrigger className="px-2.5 py-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcg">mcg</SelectItem>
+                  <SelectItem value="mg">mg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button
               type="submit"

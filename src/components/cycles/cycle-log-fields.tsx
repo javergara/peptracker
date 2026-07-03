@@ -2,8 +2,14 @@
 
 import * as React from "react";
 
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /**
  * The peptide / amount / unit trio for a cycle's "log a dose" form. Selecting a
@@ -40,51 +46,57 @@ export function CycleLogFields({
         <label htmlFor="cd-peptide" className="text-sm font-medium">
           Peptide
         </label>
-        <select
-          id="cd-peptide"
+        <Select
           name="peptideId"
           required
           value={peptideId}
-          onChange={(e) => onPeptideChange(e.target.value)}
-          className={inputCls}
+          onValueChange={(v) => onPeptideChange(v ?? "")}
         >
-          {peptideOptions.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="cd-peptide">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {peptideOptions.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-1.5">
         <label htmlFor="cd-amount" className="text-sm font-medium">
           Amount
         </label>
-        <input
+        <Input
           id="cd-amount"
           name="amount"
           type="number"
           step="any"
           min="0"
+          inputMode="decimal"
           required
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className={inputCls}
         />
       </div>
       <div className="space-y-1.5">
         <label htmlFor="cd-unit" className="text-sm font-medium">
           Unit
         </label>
-        <select
-          id="cd-unit"
+        <Select
           name="unit"
           value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          className={inputCls}
+          onValueChange={(v) => setUnit(v ?? "mcg")}
         >
-          <option value="mcg">mcg</option>
-          <option value="mg">mg</option>
-        </select>
+          <SelectTrigger id="cd-unit">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="mcg">mcg</SelectItem>
+            <SelectItem value="mg">mg</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </>
   );

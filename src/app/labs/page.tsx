@@ -17,6 +17,16 @@ import { PanelEntryForm } from "@/components/labs/panel-entry-form";
 import { RecheckRow } from "@/components/labs/recheck-row";
 import { MarkerTimelineChart } from "@/components/metrics/marker-timeline-chart";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { addLab } from "@/lib/actions/labs";
 import { addLabReminder } from "@/lib/actions/labReminders";
@@ -36,9 +46,6 @@ import { cn } from "@/lib/utils";
 export const metadata = { title: "Labs & Bloodwork" };
 export const dynamic = "force-dynamic";
 
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
-
 // ---------------------------------------------------------------------------
 // RangeBadge — preserved for per-entry detail rows
 // ---------------------------------------------------------------------------
@@ -56,18 +63,18 @@ function RangeBadge({
   const tooHigh = refHigh !== null && value > refHigh;
   if (tooLow)
     return (
-      <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+      <span className="bg-bad-wash text-bad inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">
         Low
       </span>
     );
   if (tooHigh)
     return (
-      <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+      <span className="bg-bad-wash text-bad inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">
         High
       </span>
     );
   return (
-    <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+    <span className="bg-ok-wash text-ok inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">
       In range
     </span>
   );
@@ -107,9 +114,7 @@ function DeltaBadge({
     <span
       className={cn(
         "num inline-flex items-center gap-0.5 text-xs font-medium",
-        good
-          ? "text-emerald-700 dark:text-emerald-300"
-          : "text-amber-700 dark:text-amber-300",
+        good ? "text-ok" : "text-warn-foreground",
       )}
     >
       {sign} {display}
@@ -156,7 +161,7 @@ function RefRangeCaption({
   const u = unit ? ` ${unit}` : "";
   if (refLow !== null && refHigh !== null) {
     return (
-      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+      <span className="num text-muted-foreground text-[11px]">
         ref {refLow}–{refHigh}
         {u}
       </span>
@@ -164,7 +169,7 @@ function RefRangeCaption({
   }
   if (refHigh !== null) {
     return (
-      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+      <span className="num text-muted-foreground text-[11px]">
         optimal &lt; {refHigh}
         {u}
       </span>
@@ -172,7 +177,7 @@ function RefRangeCaption({
   }
   if (refLow !== null) {
     return (
-      <span className="num text-[11px]" style={{ color: "#8B86AD" }}>
+      <span className="num text-muted-foreground text-[11px]">
         optimal &gt; {refLow}
         {u}
       </span>
@@ -379,7 +384,7 @@ export default async function LabsPage() {
                             "grid items-center gap-[18px] py-[15px]",
                             "grid-cols-1 sm:grid-cols-[185px_1fr_132px]",
                             i < keysWithRange.length - 1 &&
-                              "border-b border-[#F4F1FA] dark:border-white/5",
+                              "border-border border-b",
                           )}
                         >
                           {/* LEFT: name + ref caption */}
@@ -407,10 +412,7 @@ export default async function LabsPage() {
                               {latest.value}
                             </span>
                             {latest.unit ? (
-                              <span
-                                className="ml-1 text-[11px]"
-                                style={{ color: "#8B86AD" }}
-                              >
+                              <span className="text-muted-foreground ml-1 text-[11px]">
                                 {latest.unit}
                               </span>
                             ) : null}
@@ -619,27 +621,30 @@ export default async function LabsPage() {
                   >
                     Catalog marker
                   </label>
-                  <select
-                    id="lab-biomarker"
-                    name="biomarkerSlug"
-                    defaultValue=""
-                    className={inputCls}
-                  >
-                    <option value="">— custom entry —</option>
-                    {BIOMARKER_SYSTEMS.map((sys) => {
-                      const group = biomarkers.filter((b) => b.system === sys);
-                      if (group.length === 0) return null;
-                      return (
-                        <optgroup key={sys} label={SYSTEM_LABELS[sys]}>
-                          {group.map((b) => (
-                            <option key={b.slug} value={b.slug}>
-                              {b.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      );
-                    })}
-                  </select>
+                  <Select name="biomarkerSlug" defaultValue="">
+                    <SelectTrigger id="lab-biomarker">
+                      <SelectValue placeholder="— custom entry —" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">— custom entry —</SelectItem>
+                      {BIOMARKER_SYSTEMS.map((sys) => {
+                        const group = biomarkers.filter(
+                          (b) => b.system === sys,
+                        );
+                        if (group.length === 0) return null;
+                        return (
+                          <SelectGroup key={sys}>
+                            <SelectLabel>{SYSTEM_LABELS[sys]}</SelectLabel>
+                            {group.map((b) => (
+                              <SelectItem key={b.slug} value={b.slug}>
+                                {b.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Custom marker name (free-form fallback) */}
@@ -650,11 +655,11 @@ export default async function LabsPage() {
                       (required for custom)
                     </span>
                   </label>
-                  <input
+                  <Input
                     id="lab-marker"
                     name="marker"
                     placeholder="e.g. IGF-1, Free T, HbA1c"
-                    className={inputCls}
+                    maxLength={120}
                   />
                 </div>
 
@@ -662,15 +667,15 @@ export default async function LabsPage() {
                   <label htmlFor="lab-value" className="text-sm font-medium">
                     Value <span className="text-destructive">*</span>
                   </label>
-                  <input
+                  <Input
                     id="lab-value"
                     name="value"
                     type="number"
                     step="any"
                     inputMode="decimal"
+                    min="0"
                     required
                     placeholder="0"
-                    className={inputCls}
                   />
                 </div>
 
@@ -681,11 +686,11 @@ export default async function LabsPage() {
                       (auto-filled from catalog)
                     </span>
                   </label>
-                  <input
+                  <Input
                     id="lab-unit"
                     name="unit"
                     placeholder="ng/mL, pg/mL…"
-                    className={inputCls}
+                    maxLength={40}
                   />
                 </div>
 
@@ -693,14 +698,14 @@ export default async function LabsPage() {
                   <label htmlFor="lab-low" className="text-sm font-medium">
                     Ref Low
                   </label>
-                  <input
+                  <Input
                     id="lab-low"
                     name="refLow"
                     type="number"
                     step="any"
                     inputMode="decimal"
+                    min="0"
                     placeholder="optional"
-                    className={inputCls}
                   />
                 </div>
 
@@ -708,14 +713,14 @@ export default async function LabsPage() {
                   <label htmlFor="lab-high" className="text-sm font-medium">
                     Ref High
                   </label>
-                  <input
+                  <Input
                     id="lab-high"
                     name="refHigh"
                     type="number"
                     step="any"
                     inputMode="decimal"
+                    min="0"
                     placeholder="optional"
-                    className={inputCls}
                   />
                 </div>
 
@@ -723,12 +728,12 @@ export default async function LabsPage() {
                   <label htmlFor="lab-date" className="text-sm font-medium">
                     Date taken
                   </label>
-                  <input
+                  <Input
                     id="lab-date"
                     name="takenAt"
                     type="date"
                     defaultValue={today}
-                    className={inputCls}
+                    required
                   />
                 </div>
 
@@ -736,11 +741,11 @@ export default async function LabsPage() {
                   <label htmlFor="lab-notes" className="text-sm font-medium">
                     Notes
                   </label>
-                  <input
+                  <Input
                     id="lab-notes"
                     name="notes"
                     placeholder="optional"
-                    className={inputCls}
+                    maxLength={280}
                   />
                 </div>
 
@@ -798,12 +803,12 @@ export default async function LabsPage() {
                   >
                     Label <span className="text-destructive">*</span>
                   </label>
-                  <input
+                  <Input
                     id="reminder-label"
                     name="label"
                     required
                     placeholder="e.g. Recheck ALT / AST"
-                    className={inputCls}
+                    maxLength={120}
                   />
                 </div>
 
@@ -811,13 +816,7 @@ export default async function LabsPage() {
                   <label htmlFor="reminder-due" className="text-sm font-medium">
                     Due date <span className="text-destructive">*</span>
                   </label>
-                  <input
-                    id="reminder-due"
-                    name="dueAt"
-                    type="date"
-                    required
-                    className={inputCls}
-                  />
+                  <Input id="reminder-due" name="dueAt" type="date" required />
                 </div>
 
                 <div className="space-y-1.5">
@@ -830,27 +829,30 @@ export default async function LabsPage() {
                       (optional)
                     </span>
                   </label>
-                  <select
-                    id="reminder-biomarker"
-                    name="biomarkerSlug"
-                    defaultValue=""
-                    className={inputCls}
-                  >
-                    <option value="">— none —</option>
-                    {BIOMARKER_SYSTEMS.map((sys) => {
-                      const group = biomarkers.filter((b) => b.system === sys);
-                      if (group.length === 0) return null;
-                      return (
-                        <optgroup key={sys} label={SYSTEM_LABELS[sys]}>
-                          {group.map((b) => (
-                            <option key={b.slug} value={b.slug}>
-                              {b.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      );
-                    })}
-                  </select>
+                  <Select name="biomarkerSlug" defaultValue="">
+                    <SelectTrigger id="reminder-biomarker">
+                      <SelectValue placeholder="— none —" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">— none —</SelectItem>
+                      {BIOMARKER_SYSTEMS.map((sys) => {
+                        const group = biomarkers.filter(
+                          (b) => b.system === sys,
+                        );
+                        if (group.length === 0) return null;
+                        return (
+                          <SelectGroup key={sys}>
+                            <SelectLabel>{SYSTEM_LABELS[sys]}</SelectLabel>
+                            {group.map((b) => (
+                              <SelectItem key={b.slug} value={b.slug}>
+                                {b.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
@@ -863,11 +865,11 @@ export default async function LabsPage() {
                       (optional)
                     </span>
                   </label>
-                  <input
+                  <Input
                     id="reminder-note"
                     name="note"
                     placeholder="e.g. Fast for 12 h beforehand"
-                    className={inputCls}
+                    maxLength={280}
                   />
                 </div>
 

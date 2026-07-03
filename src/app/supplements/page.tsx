@@ -6,15 +6,20 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { SupplementRow } from "@/components/supplements/supplement-row";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { addSupplement } from "@/lib/actions/supplements";
 import { listSupplements, getCurrentUser } from "@/lib/queries";
 import { toDateInputValue } from "@/lib/dates";
 
 export const metadata = { title: "Supplements" };
 export const dynamic = "force-dynamic";
-
-const inputCls =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 
 export default async function SupplementsPage() {
   const [supplements, user] = await Promise.all([
@@ -62,65 +67,65 @@ export default async function SupplementsPage() {
               <label htmlFor="supp-name" className="text-sm font-medium">
                 Name <span className="text-destructive">*</span>
               </label>
-              <input
+              <Input
                 id="supp-name"
                 name="name"
                 required
                 placeholder="e.g. Creatine, Vitamin D"
-                className={inputCls}
+                maxLength={120}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="supp-category" className="text-sm font-medium">
                 Category
               </label>
-              <select
-                id="supp-category"
-                name="category"
-                defaultValue=""
-                className={inputCls}
-              >
-                <option value="">— None —</option>
-                <option value="vitamin">Vitamin</option>
-                <option value="mineral">Mineral</option>
-                <option value="omega">Omega</option>
-                <option value="amino">Amino Acid</option>
-                <option value="herbal">Herbal</option>
-                <option value="other">Other</option>
-              </select>
+              <Select name="category" defaultValue="">
+                <SelectTrigger id="supp-category">
+                  <SelectValue placeholder="— None —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— None —</SelectItem>
+                  <SelectItem value="vitamin">Vitamin</SelectItem>
+                  <SelectItem value="mineral">Mineral</SelectItem>
+                  <SelectItem value="omega">Omega</SelectItem>
+                  <SelectItem value="amino">Amino Acid</SelectItem>
+                  <SelectItem value="herbal">Herbal</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="supp-dose" className="text-sm font-medium">
                 Dose
               </label>
-              <input
+              <Input
                 id="supp-dose"
                 name="dose"
                 placeholder="e.g. 5 g"
-                className={inputCls}
+                maxLength={40}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="supp-frequency" className="text-sm font-medium">
                 Frequency
               </label>
-              <input
+              <Input
                 id="supp-frequency"
                 name="frequency"
                 placeholder="e.g. daily"
-                className={inputCls}
+                maxLength={40}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="supp-start" className="text-sm font-medium">
                 Start date
               </label>
-              <input
+              <Input
                 id="supp-start"
                 name="startDate"
                 type="date"
                 defaultValue={toDateInputValue(new Date())}
-                className={inputCls}
+                required
               />
             </div>
             <div className="space-y-1.5">
@@ -130,37 +135,32 @@ export default async function SupplementsPage() {
                   — optional
                 </span>
               </label>
-              <input
-                id="supp-end"
-                name="endDate"
-                type="date"
-                className={inputCls}
-              />
+              <Input id="supp-end" name="endDate" type="date" />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="supp-status" className="text-sm font-medium">
                 Status
               </label>
-              <select
-                id="supp-status"
-                name="status"
-                defaultValue="active"
-                className={inputCls}
-              >
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="stopped">Stopped</option>
-              </select>
+              <Select name="status" defaultValue="active">
+                <SelectTrigger id="supp-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="stopped">Stopped</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label htmlFor="supp-notes" className="text-sm font-medium">
                 Notes
               </label>
-              <input
+              <Input
                 id="supp-notes"
                 name="notes"
                 placeholder="optional"
-                className={inputCls}
+                maxLength={280}
               />
             </div>
             <div className="flex items-end sm:col-span-2 lg:col-span-3">
@@ -189,7 +189,7 @@ export default async function SupplementsPage() {
                   Active &mdash; <span className="num">{active.length}</span>
                 </Eyebrow>
               </div>
-              <div className="card-surface divide-y divide-[#F4F1FA] rounded-2xl dark:divide-white/5">
+              <div className="card-surface divide-border divide-y rounded-2xl">
                 {active.map((s) => (
                   <SupplementRow
                     key={s.id}
@@ -208,7 +208,7 @@ export default async function SupplementsPage() {
                   <span className="num">{inactive.length}</span>
                 </Eyebrow>
               </div>
-              <div className="card-surface divide-y divide-[#F4F1FA] rounded-2xl dark:divide-white/5">
+              <div className="card-surface divide-border divide-y rounded-2xl">
                 {inactive.map((s) => (
                   <SupplementRow
                     key={s.id}
