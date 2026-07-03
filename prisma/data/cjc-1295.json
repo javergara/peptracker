@@ -81,6 +81,7 @@
   "route": "SUBQ",
   "frequency": "Without DAC (Mod GRF 1-29): daily, often 1-3x/day (e.g. bedtime, post-workout). With DAC: roughly once or twice weekly.",
   "halfLife": "Without DAC (Mod GRF 1-29): ~30 minutes. With DAC: ~6-8 days due to covalent albumin binding.",
+  "halfLifeHours": 168,
   "cycleLength": "Commonly studied/used in 8-12 week cycles; longer GH-axis use is sometimes cycled with breaks to monitor IGF-1.",
   "reconstitution": {
     "vialMg": 2,

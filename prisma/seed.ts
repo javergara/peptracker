@@ -46,6 +46,7 @@ type RawPeptide = {
   route: string;
   frequency: string;
   halfLife: string;
+  halfLifeHours?: number;
   cycleLength: string;
   reconstitution: Record<string, unknown>;
   storage: string;
@@ -197,6 +198,7 @@ async function main() {
       route: p.route,
       frequency: p.frequency,
       halfLife: p.halfLife,
+      halfLifeHours: p.halfLifeHours ?? null,
       cycleLength: p.cycleLength,
       reconstitution: (p.reconstitution ?? {}) as object,
       storage: p.storage,

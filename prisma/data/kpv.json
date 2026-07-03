@@ -59,6 +59,7 @@
   "route": "SUBQ",
   "frequency": "daily",
   "halfLife": "Short (minutes) in plasma; rapidly transported/metabolized",
+  "halfLifeHours": 0.25,
   "cycleLength": "Commonly used in 4-8 week cycles, or as-needed for acute flares; no formal human protocol established",
   "reconstitution": {
     "vialMg": 10,

@@ -85,6 +85,7 @@
   "route": "SUBQ",
   "frequency": "Once daily, commonly in the evening to loosely mimic the nocturnal GH pulse; some pediatric regimens divide or vary timing per product labeling.",
   "halfLife": "Injected drug: terminal half-life ~20 minutes after IV, but ~2-4 hours after subcutaneous injection due to slow depot absorption. Biological effects last far longer because GH raises IGF-1, which has a half-life on the order of ~12-15 hours and sustains downstream anabolic signaling.",
+  "halfLifeHours": 3,
   "cycleLength": "In approved deficiency therapy it is taken continuously (often indefinitely) with periodic IGF-1 and glucose monitoring and dose titration. Non-medical users sometimes run multi-month blocks, but there is no validated 'cycle' - benefits regress off-drug and IGF-1/glucose should be monitored throughout.",
   "reconstitution": {
     "vialMg": 5,

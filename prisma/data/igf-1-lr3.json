@@ -66,6 +66,7 @@
   "route": "SUBQ",
   "frequency": "Once daily when used in research contexts; some protocols dose only on training/active days",
   "halfLife": "Approximately 20-30 hours in vivo, roughly 20-30x longer than free native IGF-1 (which is cleared in minutes when unbound)",
+  "halfLifeHours": 25,
   "cycleLength": "Short cycles are typically described in the research-chemical community (around 4 weeks), reflecting concern over IGF-1R desensitization and growth-related risks; no clinically validated cycle exists",
   "reconstitution": {
     "vialMg": 1,

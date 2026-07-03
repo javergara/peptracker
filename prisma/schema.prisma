@@ -59,8 +59,28 @@ model User {
   pushSubscriptions PushSubscription[]
   supplements       Supplement[]
   labReminders      LabReminder[]
+  checkIns          CheckIn[]
 
   @@index([accountId])
+}
+
+// Daily wellbeing check-in: one row per profile per day. Ratings is a
+// Record<markerKey, 1-5> — marker keys live in src/types/checkin.ts (Json,
+// SQLite-origin style) so new markers never need a migration.
+model CheckIn {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime // normalized to local midnight at entry
+  ratings     Json // Record<string, number 1-5>
+  sideEffects Json? // string[]
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
 }
 
 // Web Push subscription for PWA dose reminders. One row per browser/device push
@@ -93,6 +113,7 @@ model Peptide {
   route             String // SUBQ | IM | NASAL | TOPICAL | ORAL
   frequency         String
   halfLife          String
+  halfLifeHours     Float? // numeric elimination half-life (hours) — drives the PK/active-levels chart
   cycleLength       String
   reconstitution    Json // { vialMg, bacWaterMl, notes }
   storage           String
@@ -168,6 +189,7 @@ model Cycle {
   endDate        DateTime?
   status         String    @default("planned") // planned | active | paused | completed
   scheduleConfig Json? // { days, timesPerDay, dosePerAdmin, unit, ... }
+  washoutDays    Int? // planned rest period after the cycle ends before re-running the compound
   notes          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -215,6 +237,7 @@ model Vial {
   reconstitutedAt      DateTime?
   expiresAt            DateTime?
   status               String    @default("sealed") // sealed | active | empty | expired
+  price                Float? // what this vial cost (user's currency) — drives cost-per-dose
   notes                String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
@@ -238,6 +261,7 @@ model StockItem {
   dose      Float? // planned dose per administration (in doseUnit)
   doseUnit  String   @default("mcg") // mcg | mg
   frequency String   @default("daily") // Frequency (see src/lib/schedule.ts)
+  price     Float? // price per vial (user's currency) — drives cost estimation
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

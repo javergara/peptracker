@@ -59,6 +59,7 @@
   "route": "NASAL",
   "frequency": "1-3x daily",
   "halfLife": "Plasma 2-5 minutes; downstream BDNF/NGF effects persist 12-24 hours",
+  "halfLifeHours": 0.06,
   "cycleLength": "Often used in 2-4 week cycles with breaks; some use daily during cognitive or recovery demands",
   "reconstitution": {
     "vialMg": 10,

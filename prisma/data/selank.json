@@ -59,6 +59,7 @@
   "route": "NASAL",
   "frequency": "1-3x daily",
   "halfLife": "Plasma 2-3 minutes; behavioral/biochemical effects last hours to days via active metabolites",
+  "halfLifeHours": 0.04,
   "cycleLength": "Often 2-3 week courses (mirroring Russian GAD protocols), or as-needed; can be used daily during anxious periods",
   "reconstitution": {
     "vialMg": 10,

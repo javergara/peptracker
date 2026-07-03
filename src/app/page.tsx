@@ -12,6 +12,7 @@ import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { QuickLogButton } from "@/components/dashboard/quick-log-button";
+import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
 import { Button } from "@/components/ui/button";
 import {
   getActiveCycles,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/schedule";
 import { formatDate } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
+import { activeLevelSeries, type PkDose } from "@/lib/pk";
 import { suggestNextSite } from "@/lib/sites";
 import { cn } from "@/lib/utils";
 
@@ -110,6 +112,41 @@ export default async function DashboardPage() {
 
   // Whether streak justifies the "on track" chip
   const showStreakChip = adherence.streak > 0;
+
+  // Active levels (estimated PK) — combine doses logged against ACTIVE
+  // cycles, grouped by peptide, for peptides with a configured half-life.
+  // Reuses the 30-day rangeLogs already loaded (no extra query): the full
+  // 30-day history feeds the decay math for continuity, while the chart only
+  // displays the last 7 days.
+  const activeCycleIds = new Set(activeCycles.map((c) => c.id));
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const activeLevelsFrom = sevenDaysAgo.getTime();
+  const activeLevelsTo = now.getTime();
+  const pkGroups = new Map<
+    string,
+    { name: string; halfLifeHours: number; doses: PkDose[] }
+  >();
+  for (const log of rangeLogs) {
+    if (!log.cycleId || !activeCycleIds.has(log.cycleId)) continue;
+    const hl = log.peptide.halfLifeHours;
+    if (!hl || hl <= 0) continue;
+    const group = pkGroups.get(log.peptideId) ?? {
+      name: log.peptide.name,
+      halfLifeHours: hl,
+      doses: [],
+    };
+    group.doses.push({ t: log.takenAt.getTime(), amount: log.amount });
+    pkGroups.set(log.peptideId, group);
+  }
+  const activeLevelSeriesData = Array.from(pkGroups.values()).map((g) => ({
+    peptideName: g.name,
+    points: activeLevelSeries(
+      g.doses,
+      g.halfLifeHours,
+      activeLevelsFrom,
+      activeLevelsTo,
+    ),
+  }));
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -289,6 +326,18 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Active levels — combined estimated PK curve for active cycles */}
+      {activeLevelSeriesData.length > 0 ? (
+        <div className="card-surface mb-[18px] rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-4">Active levels · last 7 days</Eyebrow>
+          <ActiveLevelsChart
+            series={activeLevelSeriesData}
+            from={activeLevelsFrom}
+            to={activeLevelsTo}
+          />
+        </div>
+      ) : null}
 
       {/* Row 3 — Today's doses + Active cycles */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-2">

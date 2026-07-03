@@ -61,6 +61,7 @@
   "route": "SUBQ",
   "frequency": "daily (often split 1-2x daily)",
   "halfLife": "Short; metabolized in the liver with a half-life under ~30 minutes, cleared by the kidneys",
+  "halfLifeHours": 0.5,
   "cycleLength": "Typically 4-8 weeks per cycle, often run alongside the injury-recovery period",
   "reconstitution": {
     "vialMg": 5,

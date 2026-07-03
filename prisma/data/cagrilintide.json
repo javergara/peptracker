@@ -72,6 +72,7 @@
   "route": "SUBQ",
   "frequency": "once weekly",
   "halfLife": "~7-9 days (supports once-weekly dosing via albumin binding)",
+  "halfLifeHours": 192,
   "cycleLength": "Continuous long-term use in trials (26-68 weeks); no defined off-cycle. Steady state reached after several weeks of titration. Weight regain is common after discontinuation.",
   "reconstitution": {
     "vialMg": 5,

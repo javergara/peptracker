@@ -55,6 +55,7 @@
   "route": "SUBQ",
   "frequency": "2-3x weekly during loading, then once weekly maintenance",
   "halfLife": "Not formally published in humans; dosing every 3-4 days implies tissue-relevant levels persist several days per injection",
+  "halfLifeHours": 2,
   "cycleLength": "Typically an 8-week protocol: ~4-week loading phase followed by ~4-week maintenance phase",
   "reconstitution": {
     "vialMg": 10,

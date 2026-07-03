@@ -70,6 +70,7 @@
   "route": "TOPICAL",
   "frequency": "daily",
   "halfLife": "Short elimination half-life ~1.5-2 hours (systemic)",
+  "halfLifeHours": 1.75,
   "cycleLength": "Topical: continuous, no cycling. Injectable: typically 4-8 weeks on, often a 30-day active cycle with optional breaks.",
   "reconstitution": {
     "vialMg": 50,

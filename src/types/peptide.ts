@@ -158,6 +158,13 @@ export const peptideDataSchema = z.object({
   route: z.enum(ROUTES),
   frequency: z.string(),
   halfLife: z.string(),
+  /**
+   * Numeric elimination half-life in HOURS (midpoint when sources give a
+   * range) — drives the estimated active-levels (PK) chart. Optional: peptides
+   * without a citable value simply don't chart. Cite the source in
+   * `references`.
+   */
+  halfLifeHours: z.number().positive().optional(),
   cycleLength: z.string(),
   reconstitution: reconstitutionSchema,
   storage: z.string(),

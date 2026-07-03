@@ -50,6 +50,7 @@
   "route": "SUBQ",
   "frequency": "1-3x weekly (intermittent)",
   "halfLife": "Short, ~1-4 hours in circulation (rodent ~1-2 h); downstream AMPK/biogenesis effects persist much longer.",
+  "halfLifeHours": 2.5,
   "cycleLength": "Typical research/community cycles ~4-12 weeks, often with intermittent (e.g., 5-on/2-off or 3x weekly) dosing and breaks between cycles. No validated protocol exists.",
   "reconstitution": {
     "vialMg": 10,

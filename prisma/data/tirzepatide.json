@@ -115,6 +115,7 @@
   "route": "SUBQ",
   "frequency": "once weekly",
   "halfLife": "~5 days (~120 hours)",
+  "halfLifeHours": 120,
   "cycleLength": "Continuous long-term use in trials (52-72 weeks); no defined off-cycle. Steady state reached after ~4 weeks. Weight regain is common after discontinuation.",
   "reconstitution": {
     "vialMg": 10,

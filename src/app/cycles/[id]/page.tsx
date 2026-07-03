@@ -6,10 +6,12 @@ import { PageHeader } from "@/components/common/page-header";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { InkPanel } from "@/components/common/ink-panel";
 import { EmptyState } from "@/components/common/empty-state";
+import { Disclaimer } from "@/components/disclaimer";
 import { CycleActions } from "@/components/cycles/cycle-actions";
 import { CycleLogFields } from "@/components/cycles/cycle-log-fields";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
+import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
 import { Button } from "@/components/ui/button";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { logDose } from "@/lib/actions/doses";
@@ -21,6 +23,7 @@ import {
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
 import { doseDefaultsByPeptide } from "@/lib/cycles";
 import { formatDate } from "@/lib/dates";
+import { activeLevelSeries, type PkDose } from "@/lib/pk";
 import { suggestNextSite } from "@/lib/sites";
 
 const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -62,6 +65,47 @@ export default async function CycleDetailPage({
   const lastSite = cycle.doseLogs.find((d) => d.site)?.site ?? null;
   const suggestedSite = suggestNextSite(lastSite);
 
+  // Active-levels (estimated PK) — group this cycle's doses by peptide, keep
+  // only peptides with a configured half-life. Uses ALL of the cycle's
+  // already-loaded doseLogs (not just the display window) so a dose taken
+  // just before the window still contributes its decaying tail correctly.
+  const now = new Date();
+  const windowEnd = cycle.endDate && cycle.endDate < now ? cycle.endDate : now;
+  const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+  const windowStartDate = new Date(
+    Math.max(cycle.startDate.getTime(), windowEnd.getTime() - FOURTEEN_DAYS_MS),
+  );
+  const activeLevelsFrom = windowStartDate.getTime();
+  const activeLevelsTo = windowEnd.getTime();
+
+  const pkGroups = new Map<
+    string,
+    { name: string; halfLifeHours: number; doses: PkDose[] }
+  >();
+  for (const d of cycle.doseLogs) {
+    const hl = d.peptide.halfLifeHours;
+    if (!hl || hl <= 0) continue;
+    const group = pkGroups.get(d.peptideId) ?? {
+      name: d.peptide.name,
+      halfLifeHours: hl,
+      doses: [],
+    };
+    group.doses.push({ t: d.takenAt.getTime(), amount: d.amount });
+    pkGroups.set(d.peptideId, group);
+  }
+  const activeLevelSeriesData = Array.from(pkGroups.values()).map((g) => ({
+    peptideName: g.name,
+    points: activeLevelSeries(
+      g.doses,
+      g.halfLifeHours,
+      activeLevelsFrom,
+      activeLevelsTo,
+    ),
+  }));
+  const hasConfiguredHalfLife = peptideOptions.some(
+    (p) => p.halfLifeHours != null && p.halfLifeHours > 0,
+  );
+
   const vialsForForm = activeVials.map((v) => ({
     id: v.id,
     label: v.label,
@@ -99,6 +143,7 @@ export default async function CycleDetailPage({
           </div>
         }
       />
+      <Disclaimer className="mb-6" />
 
       {/* Ink hero — dominant metric for this cycle */}
       <InkPanel variant="hero" className="mb-6 p-6">
@@ -153,6 +198,23 @@ export default async function CycleDetailPage({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <CycleActions id={cycle.id} status={cycle.status} />
       </div>
+
+      {hasConfiguredHalfLife ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-4">Active levels · est.</Eyebrow>
+          <ActiveLevelsChart
+            series={activeLevelSeriesData}
+            from={activeLevelsFrom}
+            to={activeLevelsTo}
+          />
+        </section>
+      ) : peptideOptions.length > 0 ? (
+        <p className="text-muted-foreground mb-6 text-xs">
+          Add a half-life to{" "}
+          {peptideOptions.length > 1 ? "a peptide" : "this peptide"} to chart
+          its estimated active levels.
+        </p>
+      ) : null}
 
       {cycle.notes ? (
         <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">

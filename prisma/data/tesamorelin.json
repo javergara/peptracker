@@ -54,6 +54,7 @@
   "route": "SUBQ",
   "frequency": "daily",
   "halfLife": "~18-38 minutes (18.6 min single dose; ~37.8 min with multiple dosing)",
+  "halfLifeHours": 0.5,
   "cycleLength": "Continuous daily use; benefits reverse on discontinuation, so ongoing administration is required to maintain VAT reduction. IGF-1 monitored throughout.",
   "reconstitution": {
     "vialMg": 10,

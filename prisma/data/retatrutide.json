@@ -104,6 +104,7 @@
   "route": "SUBQ",
   "frequency": "once weekly",
   "halfLife": "~6 days (~144 hours)",
+  "halfLifeHours": 144,
   "cycleLength": "Continuous long-term use in trials (48-68 weeks); no defined off-cycle. Full washout ~30 days after stopping.",
   "reconstitution": {
     "vialMg": 10,
