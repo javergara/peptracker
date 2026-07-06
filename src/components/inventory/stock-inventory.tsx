@@ -290,7 +290,11 @@ export function StockInventory({
             <label htmlFor="s-freq" className="text-sm font-medium">
               Frequency
             </label>
-            <Select name="frequency" defaultValue="daily">
+            <Select
+              name="frequency"
+              defaultValue="daily"
+              items={FREQUENCY_LABELS}
+            >
               <SelectTrigger id="s-freq">
                 <SelectValue />
               </SelectTrigger>

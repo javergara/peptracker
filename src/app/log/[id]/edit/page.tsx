@@ -74,7 +74,12 @@ export default async function EditDosePage({
               <label htmlFor="ed-peptide" className="text-sm font-medium">
                 Peptide <span className="text-destructive">*</span>
               </label>
-              <Select name="peptideId" defaultValue={dose.peptideId} required>
+              <Select
+                name="peptideId"
+                defaultValue={dose.peptideId}
+                required
+                items={Object.fromEntries(peptides.map((p) => [p.id, p.name]))}
+              >
                 <SelectTrigger id="ed-peptide">
                   <SelectValue />
                 </SelectTrigger>
@@ -91,7 +96,14 @@ export default async function EditDosePage({
               <label htmlFor="ed-cycle" className="text-sm font-medium">
                 Cycle (optional)
               </label>
-              <Select name="cycleId" defaultValue={dose.cycleId ?? ""}>
+              <Select
+                name="cycleId"
+                defaultValue={dose.cycleId ?? ""}
+                items={{
+                  "": "— None —",
+                  ...Object.fromEntries(cycles.map((c) => [c.id, c.name])),
+                }}
+              >
                 <SelectTrigger id="ed-cycle">
                   <SelectValue placeholder="— None —" />
                 </SelectTrigger>
@@ -138,7 +150,11 @@ export default async function EditDosePage({
               <label htmlFor="ed-route" className="text-sm font-medium">
                 Route
               </label>
-              <Select name="route" defaultValue={dose.route ?? ""}>
+              <Select
+                name="route"
+                defaultValue={dose.route ?? ""}
+                items={{ "": "— Select —", ...ROUTE_LABELS }}
+              >
                 <SelectTrigger id="ed-route">
                   <SelectValue placeholder="— Select —" />
                 </SelectTrigger>

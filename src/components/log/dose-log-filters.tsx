@@ -40,7 +40,13 @@ export function DoseLogFilters({
       </label>
       <Select value={selectedPeptideId ?? "all"} onValueChange={onChange}>
         <SelectTrigger id="log-peptide-filter" size="sm" className="w-[200px]">
-          <SelectValue />
+          <SelectValue>
+            {(value) =>
+              !value || value === "all"
+                ? "All peptides"
+                : (peptides.find((p) => p.id === value)?.name ?? "All peptides")
+            }
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All peptides</SelectItem>

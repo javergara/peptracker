@@ -53,7 +53,14 @@ export function CycleLogFields({
           onValueChange={(v) => onPeptideChange(v ?? "")}
         >
           <SelectTrigger id="cd-peptide">
-            <SelectValue />
+            {/* base-ui Select.Value renders the raw value (an id) unless given a
+                formatter — map it back to the peptide name. */}
+            <SelectValue>
+              {(value) =>
+                peptideOptions.find((p) => p.id === value)?.name ??
+                "Select peptide"
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {peptideOptions.map((p) => (

@@ -39,6 +39,17 @@ function categoryLabel(cat: string): string {
   return map[cat] ?? cat;
 }
 
+// Value→label maps so the base-ui Select trigger shows the label, not the value.
+const CATEGORY_ITEMS: Record<string, string> = {
+  "": "— None —",
+  ...Object.fromEntries(CATEGORIES.map((c) => [c, categoryLabel(c)])),
+};
+const STATUS_ITEMS: Record<string, string> = {
+  active: "Active",
+  paused: "Paused",
+  stopped: "Stopped",
+};
+
 function CategoryBadge({ category }: { category: string | null }) {
   if (!category) return null;
   const colorMap: Record<string, string> = {
@@ -267,7 +278,11 @@ export function SupplementRow({
               >
                 Category
               </label>
-              <Select name="category" defaultValue={s.category ?? ""}>
+              <Select
+                name="category"
+                defaultValue={s.category ?? ""}
+                items={CATEGORY_ITEMS}
+              >
                 <SelectTrigger id={`category-${s.id}`}>
                   <SelectValue placeholder="— None —" />
                 </SelectTrigger>
@@ -375,7 +390,11 @@ export function SupplementRow({
               <label htmlFor={`status-${s.id}`} className="text-sm font-medium">
                 Status
               </label>
-              <Select name="status" defaultValue={s.status}>
+              <Select
+                name="status"
+                defaultValue={s.status}
+                items={STATUS_ITEMS}
+              >
                 <SelectTrigger id={`status-${s.id}`}>
                   <SelectValue />
                 </SelectTrigger>

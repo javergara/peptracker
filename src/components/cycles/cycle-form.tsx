@@ -21,6 +21,23 @@ import { cn } from "@/lib/utils";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// Value→label maps so the base-ui Select trigger shows the label, not the raw
+// value (e.g. "eod" → "Every other day").
+const FREQ_LABELS: Record<string, string> = {
+  daily: "Daily",
+  eod: "Every other day",
+  "twice-weekly": "Twice weekly",
+  weekly: "Weekly",
+  custom: "Custom days",
+};
+const ITEM_FREQ_LABELS: Record<string, string> = {
+  inherit: "Inherit cycle",
+  ...FREQ_LABELS,
+};
+const CYCLE_STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  CYCLE_STATUSES.map((s) => [s, s[0].toUpperCase() + s.slice(1)]),
+);
+
 /** A stack option with its peptides + suggested per-peptide doses. */
 export interface StackOption {
   id: string;
@@ -296,7 +313,11 @@ export function CycleForm({
             <label htmlFor="status" className="text-sm font-medium">
               Status
             </label>
-            <Select name="status" defaultValue={defaults.status ?? "active"}>
+            <Select
+              name="status"
+              defaultValue={defaults.status ?? "active"}
+              items={CYCLE_STATUS_LABELS}
+            >
               <SelectTrigger id="status">
                 <SelectValue />
               </SelectTrigger>
@@ -317,6 +338,7 @@ export function CycleForm({
               name="frequency"
               value={frequency}
               onValueChange={(v) => setFrequency(v ?? "daily")}
+              items={FREQ_LABELS}
             >
               <SelectTrigger id="frequency">
                 <SelectValue />
@@ -526,6 +548,7 @@ export function CycleForm({
                                 frequency: v ?? "inherit",
                               })
                             }
+                            items={ITEM_FREQ_LABELS}
                           >
                             <SelectTrigger id={`itemFreq-${it.peptideId}`}>
                               <SelectValue />

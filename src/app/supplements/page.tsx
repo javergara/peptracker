@@ -85,7 +85,19 @@ export default async function SupplementsPage() {
               <label htmlFor="supp-category" className="text-sm font-medium">
                 Category
               </label>
-              <Select name="category" defaultValue="">
+              <Select
+                name="category"
+                defaultValue=""
+                items={{
+                  "": "— None —",
+                  vitamin: "Vitamin",
+                  mineral: "Mineral",
+                  omega: "Omega",
+                  amino: "Amino Acid",
+                  herbal: "Herbal",
+                  other: "Other",
+                }}
+              >
                 <SelectTrigger id="supp-category">
                   <SelectValue placeholder="— None —" />
                 </SelectTrigger>
@@ -179,7 +191,15 @@ export default async function SupplementsPage() {
               <label htmlFor="supp-status" className="text-sm font-medium">
                 Status
               </label>
-              <Select name="status" defaultValue="active">
+              <Select
+                name="status"
+                defaultValue="active"
+                items={{
+                  active: "Active",
+                  paused: "Paused",
+                  stopped: "Stopped",
+                }}
+              >
                 <SelectTrigger id="supp-status">
                   <SelectValue />
                 </SelectTrigger>

@@ -479,7 +479,13 @@ export function DoseCalendar({
             <input type="hidden" name="takenAt" value={selectedTakenAt} />
             <Select name="peptideId" required>
               <SelectTrigger className="px-2.5 py-1.5">
-                <SelectValue placeholder="— Select peptide —" />
+                <SelectValue>
+                  {(value) =>
+                    value
+                      ? (peptides.find((p) => p.id === value)?.name ?? value)
+                      : "— Select peptide —"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {peptides.map((p) => (

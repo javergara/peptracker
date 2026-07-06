@@ -527,7 +527,7 @@ export default async function MetricsPage({
               <label htmlFor="m-type" className="text-sm font-medium">
                 Type
               </label>
-              <Select name="type" defaultValue="weight">
+              <Select name="type" defaultValue="weight" items={TYPE_LABELS}>
                 <SelectTrigger id="m-type">
                   <SelectValue />
                 </SelectTrigger>

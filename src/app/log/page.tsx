@@ -117,7 +117,14 @@ export default async function LogPage({
               <label htmlFor="l-cycle" className="text-sm font-medium">
                 Cycle (optional)
               </label>
-              <Select name="cycleId" defaultValue="">
+              <Select
+                name="cycleId"
+                defaultValue=""
+                items={{
+                  "": "— None —",
+                  ...Object.fromEntries(cycles.map((c) => [c.id, c.name])),
+                }}
+              >
                 <SelectTrigger id="l-cycle">
                   <SelectValue placeholder="— None —" />
                 </SelectTrigger>
@@ -163,7 +170,11 @@ export default async function LogPage({
               <label htmlFor="l-route" className="text-sm font-medium">
                 Route
               </label>
-              <Select name="route" defaultValue="">
+              <Select
+                name="route"
+                defaultValue=""
+                items={{ "": "— Select —", ...ROUTE_LABELS }}
+              >
                 <SelectTrigger id="l-route">
                   <SelectValue placeholder="— Select —" />
                 </SelectTrigger>

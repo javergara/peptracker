@@ -88,7 +88,16 @@ export default async function SettingsPage() {
               <label htmlFor="set-sex" className="text-sm font-medium">
                 Sex
               </label>
-              <Select name="sex" defaultValue={user.sex ?? ""}>
+              <Select
+                name="sex"
+                defaultValue={user.sex ?? ""}
+                items={{
+                  "": "Prefer not to say",
+                  M: "Male",
+                  F: "Female",
+                  other: "Other",
+                }}
+              >
                 <SelectTrigger id="set-sex">
                   <SelectValue />
                 </SelectTrigger>

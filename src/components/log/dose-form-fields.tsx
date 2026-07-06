@@ -82,7 +82,21 @@ export function DoseFormFields({
       {vials.length > 0 && (
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Vial (optional)</label>
-          <Select name="vialId" defaultValue="">
+          <Select
+            name="vialId"
+            defaultValue=""
+            items={{
+              "": "— No vial —",
+              ...Object.fromEntries(
+                vials.map((v) => [
+                  v.id,
+                  `${v.peptide?.name ?? v.peptideName ?? "Unknown"}${
+                    v.label ? ` — ${v.label}` : ""
+                  } (${v.remainingMcg.toFixed(0)} mcg left)`,
+                ]),
+              ),
+            }}
+          >
             <SelectTrigger>
               <SelectValue placeholder="— No vial —" />
             </SelectTrigger>
