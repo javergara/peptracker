@@ -130,6 +130,47 @@ export async function getCycle(id: string) {
   });
 }
 
+/**
+ * All of the active profile's cycles shaped for the cycle timeline/Gantt
+ * (`buildCycleLanes` in `src/lib/cycle-timeline.ts`): peptide + stack-item
+ * peptides + `scheduleConfig` so single-peptide and stack cycles can both be
+ * fanned out into per-peptide lanes.
+ */
+export async function getCyclesForTimeline() {
+  const user = await getActiveUser();
+  return prisma.cycle.findMany({
+    where: { userId: user.id },
+    orderBy: { startDate: "asc" },
+    include: {
+      peptide: { select: { id: true, name: true } },
+      stack: {
+        select: {
+          items: { select: { peptide: { select: { id: true, name: true } } } },
+        },
+      },
+    },
+  });
+}
+
+/**
+ * All cycles across ALL profiles, shaped for the cycle timeline/Gantt (mirrors
+ * `getCyclesForTimeline` but without the active-profile scope) — powers the
+ * calendar's year view when the "All profiles" overlay is on.
+ */
+export async function getAllCyclesForTimeline() {
+  return prisma.cycle.findMany({
+    orderBy: { startDate: "asc" },
+    include: {
+      peptide: { select: { id: true, name: true } },
+      stack: {
+        select: {
+          items: { select: { peptide: { select: { id: true, name: true } } } },
+        },
+      },
+    },
+  });
+}
+
 /** A single logged dose owned by the active profile (for the edit form). */
 export async function getDoseLog(id: string) {
   const user = await getActiveUser();
@@ -144,7 +185,10 @@ export async function getActiveCycles() {
   return prisma.cycle.findMany({
     where: { status: "active", userId: user.id },
     orderBy: { startDate: "desc" },
-    include: { peptide: true, stack: true },
+    include: {
+      peptide: true,
+      stack: { include: { items: { include: { peptide: true } } } },
+    },
   });
 }
 

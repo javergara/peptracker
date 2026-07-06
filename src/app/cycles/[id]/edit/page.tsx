@@ -13,7 +13,7 @@ import {
   listStacks,
 } from "@/lib/queries";
 import type { ScheduleConfig } from "@/lib/schedule";
-import { doseDefaultsByPeptide, parseDoseAmount } from "@/lib/cycles";
+import { parseDoseAmount } from "@/lib/cycles";
 import { toDateInputValue } from "@/lib/dates";
 import { asDosage } from "@/types/peptide";
 
@@ -97,7 +97,23 @@ export default async function EditCyclePage({
             dosePerAdmin: cfg?.dosePerAdmin ?? undefined,
             unit: cfg?.unit ?? "mcg",
             washoutDays: cycle.washoutDays ?? undefined,
-            items: doseDefaultsByPeptide(cfg?.items),
+            // Per-peptide dose + optional schedule override (stack cycles
+            // only). `startDate`/`endDate` are stored as plain yyyy-MM-dd
+            // strings already, so no date parsing is needed here.
+            items: Object.fromEntries(
+              (cfg?.items ?? []).map((it) => [
+                it.peptideId,
+                {
+                  dose: it.dose,
+                  unit: it.unit,
+                  frequency: it.frequency,
+                  daysOfWeek: it.daysOfWeek,
+                  timesPerDay: it.timesPerDay,
+                  startDate: it.startDate,
+                  endDate: it.endDate,
+                },
+              ]),
+            ),
             titrationLabel: cfg?.titration?.label,
             notes: cycle.notes ?? undefined,
           }}

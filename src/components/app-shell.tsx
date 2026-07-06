@@ -150,6 +150,8 @@ function NavLinks({
             ⌘K
           </kbd>
         </button>
+        {/* Quick reconstitution calculator — kept at the very top for fast access. */}
+        <SidebarCalculator />
       </div>
       {NAV.map((group, gi) => (
         <div key={group.label ?? `g${gi}`} className="flex flex-col gap-1">
@@ -180,12 +182,6 @@ function NavLinks({
           })}
         </div>
       ))}
-      <div className="flex flex-col gap-1">
-        <p className="text-muted-foreground/70 px-3 pt-1 pb-0.5 text-[0.7rem] font-semibold tracking-wider uppercase">
-          Tools
-        </p>
-        <SidebarCalculator />
-      </div>
     </nav>
   );
 }

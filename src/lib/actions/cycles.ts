@@ -110,20 +110,78 @@ async function parseCycleForm(formData: FormData) {
   };
 }
 
-/** Collect per-peptide doses from `itemDose:<id>` / `itemUnit:<id>` fields. */
+/**
+ * Collect per-peptide config for a stack cycle. Beyond dose/unit
+ * (`itemDose:<id>` / `itemUnit:<id>`), each peptide may override the cycle's
+ * schedule via `itemFreq:<id>`, `itemDays:<id>` (repeated), `itemTimesPerDay:<id>`,
+ * `itemStart:<id>`, `itemEnd:<id>`. Only fields that actually differ (or are
+ * present) are stored, so the Json stays lean and untouched peptides just inherit
+ * the cycle-level schedule.
+ */
 function parseStackItems(formData: FormData) {
-  const items: { peptideId: string; dose?: number; unit?: string }[] = [];
+  type Item = {
+    peptideId: string;
+    dose?: number;
+    unit?: string;
+    frequency?: string;
+    daysOfWeek?: number[];
+    timesPerDay?: number;
+    startDate?: string;
+    endDate?: string;
+  };
+  const items: Item[] = [];
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith("itemDose:")) continue;
     const peptideId = key.slice("itemDose:".length);
     if (!peptideId) continue;
+
     const dose = Number(value);
     const unit = String(formData.get(`itemUnit:${peptideId}`) ?? "mcg");
-    items.push({
+
+    const item: Item = {
       peptideId,
       dose: Number.isFinite(dose) && dose > 0 ? dose : undefined,
       unit,
-    });
+    };
+
+    // Optional per-peptide schedule override. "inherit" / empty => not stored.
+    const freqRaw = String(formData.get(`itemFreq:${peptideId}`) ?? "").trim();
+    if (freqRaw && freqRaw !== "inherit") {
+      item.frequency = freqRaw;
+      const days = [
+        ...new Set(
+          formData.getAll(`itemDays:${peptideId}`).map((v) => Number(v)),
+        ),
+      ]
+        .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6)
+        .sort((a, b) => a - b);
+      if (freqRaw === "twice-weekly" || freqRaw === "custom") {
+        if (days.length === 0) {
+          throw new Error(
+            "Pick at least one day for each per-peptide custom frequency.",
+          );
+        }
+        item.daysOfWeek = days;
+      } else if (days.length > 0) {
+        item.daysOfWeek = days;
+      }
+    }
+
+    const tpdRaw = formData.get(`itemTimesPerDay:${peptideId}`);
+    if (tpdRaw != null && tpdRaw !== "") {
+      const tpd = Number(tpdRaw);
+      if (Number.isFinite(tpd) && tpd >= 1)
+        item.timesPerDay = Math.min(6, Math.round(tpd));
+    }
+
+    const startRaw = String(
+      formData.get(`itemStart:${peptideId}`) ?? "",
+    ).trim();
+    if (startRaw) item.startDate = startRaw;
+    const endRaw = String(formData.get(`itemEnd:${peptideId}`) ?? "").trim();
+    if (endRaw) item.endDate = endRaw;
+
+    items.push(item);
   }
   return items;
 }

@@ -6,6 +6,7 @@ import { Loader2, Syringe } from "lucide-react";
 
 import { logDose } from "@/lib/actions/doses";
 import { Button } from "@/components/ui/button";
+import { toDateTimeLocalValue } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,7 +43,9 @@ export function QuickLogButton({
         formData.set("amount", String(amount));
         formData.set("unit", unit);
         formData.set("site", site);
-        formData.set("takenAt", new Date().toISOString());
+        // Local wall-clock string (not UTC ISO) so the logged time matches the
+        // user's clock, consistent with the log form + calendar quick-log.
+        formData.set("takenAt", toDateTimeLocalValue(new Date()));
         await logDose(formData);
         toast.success(`Dose logged — ${amount} ${unit}`);
       } catch (err) {

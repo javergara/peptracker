@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
   ArrowLeft,
   Minus,
@@ -16,6 +17,8 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Disclaimer } from "@/components/disclaimer";
 import { CycleActions } from "@/components/cycles/cycle-actions";
 import { CycleLogFields } from "@/components/cycles/cycle-log-fields";
+import { CycleProgress } from "@/components/cycles/cycle-progress";
+import { DoseTimeline } from "@/components/cycles/dose-timeline";
 import { DoseFormFields } from "@/components/log/dose-form-fields";
 import { DoseRowActions } from "@/components/log/dose-row-actions";
 import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
@@ -43,7 +46,12 @@ import {
   listBiomarkers,
   listPeptides,
 } from "@/lib/queries";
-import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
+import {
+  cycleProgress,
+  resolveItemSchedule,
+  type Frequency,
+  type ScheduleConfig,
+} from "@/lib/schedule";
 import { doseDefaultsByPeptide } from "@/lib/cycles";
 import { doseForCycleDay, protocolLabel } from "@/lib/titration";
 import { addDays, formatDate } from "@/lib/dates";
@@ -81,6 +89,8 @@ const INTERACTION_TONE: Record<string, string> = {
 };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
+
+const FALLBACK_CONFIG: ScheduleConfig = { frequency: "daily" };
 
 /**
  * Whether an insight's direction is clinically/goal meaningful, and which way
@@ -203,6 +213,35 @@ export default async function CycleDetailPage({
     (p) => p.halfLifeHours != null && p.halfLifeHours > 0,
   );
 
+  // Selectable-peptide dose timeline — ALL peptides dosed on this cycle
+  // (whether or not they have a configured half-life; `DoseTimeline` falls
+  // back to raw dose dots when it's null), over the same display window.
+  const doseTimelineGroups = new Map<
+    string,
+    {
+      name: string;
+      halfLifeHours: number | null;
+      doses: { t: number; amount: number }[];
+    }
+  >();
+  for (const d of cycle.doseLogs) {
+    const group = doseTimelineGroups.get(d.peptideId) ?? {
+      name: d.peptide.name,
+      halfLifeHours: d.peptide.halfLifeHours ?? null,
+      doses: [],
+    };
+    group.doses.push({ t: d.takenAt.getTime(), amount: d.amount });
+    doseTimelineGroups.set(d.peptideId, group);
+  }
+  const doseTimelineSeries = Array.from(doseTimelineGroups.entries()).map(
+    ([peptideId, g]) => ({
+      peptideId,
+      peptideName: g.name,
+      doses: g.doses,
+      halfLifeHours: g.halfLifeHours,
+    }),
+  );
+
   const vialsForForm = activeVials.map((v) => ({
     id: v.id,
     label: v.label,
@@ -283,19 +322,32 @@ export default async function CycleDetailPage({
   // One cost input per dosed peptide (single-peptide cycles have one; stack
   // cycles have one per stack item), priced from the peptide's most recently
   // priced vial/stock. `prog.totalDays` is null for an open-ended cycle, so
-  // the projection falls back to a per-month estimate.
-  const peptideCostInputs: { peptideId: string; doseMcg: number | null }[] =
-    cycle.peptide
-      ? [
-          {
-            peptideId: cycle.peptide.id,
-            doseMcg: toMcg(cfg?.dosePerAdmin, cfg?.unit),
-          },
-        ]
-      : (cfg?.items ?? []).map((it) => ({
-          peptideId: it.peptideId,
-          doseMcg: toMcg(it.dose, it.unit),
-        }));
+  // the projection falls back to a per-month estimate. Stack cycles resolve
+  // EACH peptide's own frequency (per-item overrides fall back to the
+  // cycle-level frequency) instead of applying one cycle-level frequency to
+  // every peptide.
+  const peptideCostInputs: {
+    peptideId: string;
+    doseMcg: number | null;
+    frequency: Frequency;
+  }[] = cycle.peptide
+    ? [
+        {
+          peptideId: cycle.peptide.id,
+          doseMcg: toMcg(cfg?.dosePerAdmin, cfg?.unit),
+          frequency: cfg?.frequency ?? "daily",
+        },
+      ]
+    : (cfg?.items ?? []).map((it) => ({
+        peptideId: it.peptideId,
+        doseMcg: toMcg(it.dose, it.unit),
+        frequency: resolveItemSchedule(
+          cfg ?? FALLBACK_CONFIG,
+          it,
+          cycle.startDate,
+          cycle.endDate,
+        ).frequency,
+      }));
   const doseCountByPeptide = new Map<string, number>();
   for (const d of cycle.doseLogs) {
     doseCountByPeptide.set(
@@ -314,7 +366,7 @@ export default async function CycleDetailPage({
       {
         peptideId: input.peptideId,
         doseMcg: input.doseMcg,
-        frequency: cfg?.frequency ?? "daily",
+        frequency: input.frequency,
         supply: supplies[i],
         loggedDoseCount: doseCountByPeptide.get(input.peptideId) ?? 0,
       },
@@ -338,6 +390,29 @@ export default async function CycleDetailPage({
     prog.daysElapsed > 0 ? Math.ceil((prog.daysElapsed + 1) / 7) : 1;
   const totalWeeks =
     prog.totalDays != null ? Math.ceil(prog.totalDays / 7) : null;
+
+  // Per-peptide schedule summary — only for stack cycles where an item has
+  // its own frequency/daysOfWeek/timesPerDay override (otherwise it's
+  // identical to the cycle-level line below, so skip the redundant row).
+  const stackScheduleOverrides = (cycle.stack?.items ?? [])
+    .map((item) => {
+      const itemCfg = cfg?.items?.find(
+        (it) => it.peptideId === item.peptide.id,
+      );
+      if (
+        !itemCfg ||
+        (!itemCfg.frequency && !itemCfg.daysOfWeek && !itemCfg.timesPerDay)
+      )
+        return null;
+      const resolved = resolveItemSchedule(
+        cfg ?? FALLBACK_CONFIG,
+        itemCfg,
+        cycle.startDate,
+        cycle.endDate,
+      );
+      return { peptideName: item.peptide.name, resolved };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -401,7 +476,24 @@ export default async function CycleDetailPage({
             aria-valuemax={100}
           />
         </div>
-        {cfg ? (
+        {stackScheduleOverrides.length > 0 ? (
+          <div className="mt-3 space-y-1">
+            {stackScheduleOverrides.map((o) => (
+              <p key={o.peptideName} className="text-ink-muted text-[13px]">
+                <span className="text-ink-foreground font-medium">
+                  {o.peptideName}
+                </span>{" "}
+                · {o.resolved.frequency}
+                {o.resolved.daysOfWeek?.length
+                  ? ` (${o.resolved.daysOfWeek.map((d) => DAY_ABBR[d] ?? d).join(", ")})`
+                  : ""}
+                {(o.resolved.timesPerDay ?? 1) > 1
+                  ? ` · ${o.resolved.timesPerDay}×/day`
+                  : ""}
+              </p>
+            ))}
+          </div>
+        ) : cfg ? (
           <p className="text-ink-muted mt-3 text-[13px]">
             {cfg.frequency}
             {cfg.daysOfWeek?.length
@@ -418,6 +510,27 @@ export default async function CycleDetailPage({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <CycleActions id={cycle.id} status={cycle.status} />
       </div>
+
+      <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <CycleProgress
+          cycle={{
+            startDate: cycle.startDate,
+            endDate: cycle.endDate,
+            status: cycle.status,
+            scheduleConfig: cfg,
+            peptide: cycle.peptide ? { name: cycle.peptide.name } : null,
+            stack: cycle.stack
+              ? {
+                  name: cycle.stack.name,
+                  items: cycle.stack.items.map((it) => ({
+                    peptide: { id: it.peptide.id, name: it.peptide.name },
+                  })),
+                }
+              : null,
+          }}
+          now={now}
+        />
+      </section>
 
       {/* Titration schedule — single-peptide cycles with a chosen protocol. */}
       {titrationProtocol && cfg?.titration ? (
@@ -519,6 +632,24 @@ export default async function CycleDetailPage({
           {peptideOptions.length > 1 ? "a peptide" : "this peptide"} to chart
           its estimated active levels.
         </p>
+      ) : null}
+
+      {doseTimelineSeries.length > 0 ? (
+        <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-4">Dose timeline</Eyebrow>
+          <Suspense
+            fallback={
+              <div className="bg-muted/40 h-[280px] animate-pulse rounded-lg" />
+            }
+          >
+            <DoseTimeline
+              series={doseTimelineSeries}
+              from={activeLevelsFrom}
+              to={activeLevelsTo}
+              now={now.getTime()}
+            />
+          </Suspense>
+        </section>
       ) : null}
 
       {cycle.notes ? (

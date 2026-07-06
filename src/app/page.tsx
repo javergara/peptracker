@@ -15,6 +15,7 @@ import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { QuickLogButton } from "@/components/dashboard/quick-log-button";
+import { CycleProgress } from "@/components/cycles/cycle-progress";
 import { ActiveLevelsChart } from "@/components/metrics/active-levels-chart";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +32,6 @@ import {
 } from "@/lib/queries";
 import { computeAdherence, computeOverdue } from "@/lib/adherence";
 import {
-  cycleProgress,
   getTodaysDoses,
   type CycleLike,
   type ScheduleConfig,
@@ -94,6 +94,23 @@ export default async function DashboardPage() {
 
   const todays = getTodaysDoses(cycleLikes, now);
   const todaysDue = todays.reduce((sum, t) => sum + t.times, 0);
+  // A stack cycle fans out to one `todays` entry per due peptide. For display we
+  // group back to one row per cycle, tracking which peptides are actually due
+  // today (a stack peptide on its own frequency may not be) so the row only
+  // offers quick-log for those.
+  const dueByCycle = new Map<
+    string,
+    { cycle: (typeof todays)[number]["cycle"]; duePeptideIds: Set<string> }
+  >();
+  for (const t of todays) {
+    const entry = dueByCycle.get(t.cycle.id) ?? {
+      cycle: t.cycle,
+      duePeptideIds: new Set<string>(),
+    };
+    if (t.peptideId) entry.duePeptideIds.add(t.peptideId);
+    dueByCycle.set(t.cycle.id, entry);
+  }
+  const todaysCycles = [...dueByCycle.values()];
   const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
   const overdue = computeOverdue(cycleLikes, rangeLogs, now);
 
@@ -142,12 +159,11 @@ export default async function DashboardPage() {
   // Whether streak justifies the "on track" chip
   const showStreakChip = adherence.streak > 0;
 
-  // Active levels (estimated PK) — combine doses logged against ACTIVE
-  // cycles, grouped by peptide, for peptides with a configured half-life.
-  // Reuses the 30-day rangeLogs already loaded (no extra query): the full
-  // 30-day history feeds the decay math for continuity, while the chart only
-  // displays the last 7 days.
-  const activeCycleIds = new Set(activeCycles.map((c) => c.id));
+  // Active levels (estimated PK) — group ALL recently-logged doses by peptide
+  // (whether or not they're tied to a cycle), for peptides with a configured
+  // half-life. Reuses the 30-day rangeLogs already loaded (no extra query): the
+  // full 30-day history feeds the decay math for continuity, while the chart
+  // only displays the last 7 days.
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const activeLevelsFrom = sevenDaysAgo.getTime();
   const activeLevelsTo = now.getTime();
@@ -156,7 +172,6 @@ export default async function DashboardPage() {
     { name: string; halfLifeHours: number; doses: PkDose[] }
   >();
   for (const log of rangeLogs) {
-    if (!log.cycleId || !activeCycleIds.has(log.cycleId)) continue;
     const hl = log.peptide.halfLifeHours;
     if (!hl || hl <= 0) continue;
     const group = pkGroups.get(log.peptideId) ?? {
@@ -212,9 +227,9 @@ export default async function DashboardPage() {
           </p>
 
           {/* Dose chips */}
-          {todays.length > 0 && (
+          {todaysCycles.length > 0 && (
             <div className="mb-5 flex flex-wrap gap-2.5">
-              {todays.slice(0, 3).map(({ cycle }) => (
+              {todaysCycles.slice(0, 3).map(({ cycle }) => (
                 <div
                   key={cycle.id}
                   className="flex items-center gap-2 rounded-[10px] border border-white/10 bg-white/7 px-3 py-[7px]"
@@ -383,7 +398,7 @@ export default async function DashboardPage() {
           <h2 className="font-display text-foreground mb-3.5 text-base font-semibold">
             Today&apos;s doses
           </h2>
-          {todays.length === 0 ? (
+          {todaysCycles.length === 0 ? (
             <EmptyState
               icon={<CheckCircle2 className="size-6" />}
               title="Nothing due today"
@@ -391,7 +406,7 @@ export default async function DashboardPage() {
             />
           ) : (
             <div className="divide-border flex flex-col divide-y">
-              {todays.map(({ cycle }) => {
+              {todaysCycles.map(({ cycle, duePeptideIds }) => {
                 // Check if there's a log today for this cycle
                 const todayStart = new Date(now);
                 todayStart.setHours(0, 0, 0, 0);
@@ -417,7 +432,9 @@ export default async function DashboardPage() {
                     : null;
                 const stackDoses = (config?.items ?? []).filter(
                   (it): it is typeof it & { dose: number } =>
-                    Boolean(it.peptideId) && Boolean(it.dose),
+                    Boolean(it.peptideId) &&
+                    Boolean(it.dose) &&
+                    duePeptideIds.has(it.peptideId),
                 );
 
                 return (
@@ -524,46 +541,38 @@ export default async function DashboardPage() {
               }
             />
           ) : (
-            <div className="flex flex-col gap-4">
-              {cycleLikes.map((c) => {
-                const prog = cycleProgress(c.startDate, c.endDate, now);
-                const pct = prog.percent ?? 0;
-                const weekNum =
-                  prog.daysElapsed > 0
-                    ? Math.ceil((prog.daysElapsed + 1) / 7)
-                    : 1;
-                const totalWeeks =
-                  prog.totalDays != null ? Math.ceil(prog.totalDays / 7) : null;
-                return (
-                  <div key={c.id}>
-                    <div className="mb-[7px] flex items-baseline justify-between">
-                      <Link
-                        href={`/cycles/${c.id}`}
-                        className="text-foreground text-[14px] font-medium hover:underline"
-                      >
-                        {c.name}
-                      </Link>
-                      <span className="num text-muted-foreground text-[12px]">
-                        {pct}%
-                        {totalWeeks != null
-                          ? ` · wk ${weekNum}/${totalWeeks}`
-                          : ""}
-                      </span>
-                    </div>
-                    {/* Gradient progress bar */}
-                    <div className="bg-accent h-2 overflow-hidden rounded-full">
-                      <div
-                        className="h-full rounded-full [background:var(--gradient-gauge)]"
-                        style={{ width: `${pct}%` }}
-                        role="progressbar"
-                        aria-valuenow={pct}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="divide-border flex flex-col divide-y">
+              {activeCycles.map((c) => (
+                <div key={c.id} className="py-4 first:pt-0 last:pb-0">
+                  <Link
+                    href={`/cycles/${c.id}`}
+                    className="text-foreground mb-2 block text-[14px] font-medium hover:underline"
+                  >
+                    {c.name}
+                  </Link>
+                  <CycleProgress
+                    cycle={{
+                      startDate: c.startDate,
+                      endDate: c.endDate,
+                      status: c.status,
+                      scheduleConfig: c.scheduleConfig as ScheduleConfig | null,
+                      peptide: c.peptide ? { name: c.peptide.name } : null,
+                      stack: c.stack
+                        ? {
+                            name: c.stack.name,
+                            items: c.stack.items.map((it) => ({
+                              peptide: {
+                                id: it.peptide.id,
+                                name: it.peptide.name,
+                              },
+                            })),
+                          }
+                        : null,
+                    }}
+                    now={now}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>

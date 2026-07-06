@@ -1,5 +1,10 @@
 import { isWithinRange } from "@/lib/dates";
-import { isDoseDay, type CycleLike } from "@/lib/schedule";
+import {
+  isDoseDay,
+  matchesFrequency,
+  resolveItemSchedule,
+  type CycleLike,
+} from "@/lib/schedule";
 
 /**
  * Adherence = how many scheduled doses were actually logged over a window.
@@ -31,9 +36,23 @@ function expectedForDay(cycles: CycleLike[], day: Date): number {
   let total = 0;
   for (const c of cycles) {
     if (c.status !== "active") continue;
-    if (!isWithinRange(day, c.startDate, c.endDate)) continue;
     const cfg = c.scheduleConfig;
     if (!cfg) continue;
+
+    // Stack cycle: each peptide runs on its own resolved schedule + sub-range.
+    if (cfg.items && cfg.items.length > 0) {
+      for (const item of cfg.items) {
+        const s = resolveItemSchedule(cfg, item, c.startDate, c.endDate);
+        if (!isWithinRange(day, s.start, s.end)) continue;
+        if (matchesFrequency(s.frequency, s.daysOfWeek, day, s.start)) {
+          total += s.timesPerDay;
+        }
+      }
+      continue;
+    }
+
+    // Single-peptide cycle.
+    if (!isWithinRange(day, c.startDate, c.endDate)) continue;
     if (isDoseDay(cfg, day, c.startDate)) {
       total += cfg.timesPerDay ?? 1;
     }

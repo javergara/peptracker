@@ -471,7 +471,7 @@ typical**, not authoritative (they vary by lab/assay).
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
   `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
-  `titration`. Keep pure math out of components so it stays testable.
+  `titration`, `cycle-timeline`. Keep pure math out of components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the
@@ -491,7 +491,26 @@ typical**, not authoritative (they vary by lab/assay).
   the dosing intent. **Single-peptide cycles** use `dosePerAdmin` + `unit`;
   **stack cycles dose each peptide differently**, so they use `items: [{
 peptideId, dose, unit }]` instead (a single dose is meaningless across a
-  multi-peptide stack). `dosePerAdmin`/`items` are **display + log-default only**
+  multi-peptide stack). **Per-peptide schedule (stack cycles):** each `items[]`
+  entry may also carry its own `frequency`/`daysOfWeek`/`timesPerDay`/`startDate`/
+  `endDate` (all optional — fall back to the cycle-level values + cycle envelope
+  via `resolveItemSchedule` in `schedule.ts`). So a stack can run each peptide on
+  its own cadence + sub-range. `getTodaysDoses` **fans out** to one entry per due
+  peptide (`{cycle, peptideId, times}`; peptideId=null for single-peptide cycles)
+  and `adherence.expectedForDay` sums per-item — every consumer (dashboard today's
+  doses, cron, cost loop) iterates the fan-out. Form UI = a per-peptide
+  "Customize schedule" disclosure in `cycle-form.tsx`; fields
+  `itemFreq/itemDays/itemTimesPerDay/itemStart/itemEnd:<peptideId>`. No migration
+  (lives in the Json).
+- **Cycle timelines.** `src/lib/cycle-timeline.ts` `buildCycleLanes(...)` → one
+  lane per peptide (stack cycles fan out; peptides with doses but no cycle get a
+  "loose" lane), consumed by `components/cycles/cycle-gantt.tsx` (YTD Gantt on
+  `/cycles` + calendar `?span=year`, active-profile with the calendar's
+  `?view=all` toggle), `cycle-progress.tsx` (elapsed/remaining/projected-end +
+  per-peptide sub-rows, on the dashboard "Active cycles" card + cycle detail), and
+  `dose-timeline.tsx` (client, selectable-peptide dose/active-level chart with
+  clearance projection, on cycle detail). The reconstitution **calculator lives at
+  the top of the sidebar** (above the nav groups). `dosePerAdmin`/`items` are **display + log-default only**
   — adherence/schedule math uses only `frequency` + `timesPerDay`; real amounts
   come from each `DoseLog.amount`. The `cycle-form.tsx` Dosing section is
   reactive (client): peptide source → one dose field; stack source → one dose

@@ -4,6 +4,7 @@ import {
   cycleProgress,
   getTodaysDoses,
   isDoseDay,
+  resolveItemSchedule,
   type CycleLike,
   type ScheduleConfig,
 } from "@/lib/schedule";
@@ -82,7 +83,7 @@ describe("getTodaysDoses", () => {
       scheduleConfig: { frequency: "daily", timesPerDay: 2 },
     });
     const result = getTodaysDoses([cycle], SUNDAY);
-    expect(result).toEqual([{ cycle, times: 2 }]);
+    expect(result).toEqual([{ cycle, peptideId: null, times: 2 }]);
   });
 
   it("defaults times to 1 when timesPerDay is absent", () => {
@@ -114,6 +115,96 @@ describe("getTodaysDoses", () => {
       startDate: new Date(2026, 5, 13), // day 1 from SUNDAY -> not a dose day
     });
     expect(getTodaysDoses([cycle], SUNDAY)).toEqual([]);
+  });
+
+  it("fans a stack cycle out to one entry per due peptide", () => {
+    // Peptide A: daily (due today). Peptide B: custom on Monday only (not today).
+    const cycle = makeCycle({
+      scheduleConfig: {
+        frequency: "daily",
+        items: [
+          { peptideId: "pa", timesPerDay: 2 },
+          { peptideId: "pb", frequency: "custom", daysOfWeek: [1] },
+        ],
+      },
+    });
+    const result = getTodaysDoses([cycle], SUNDAY);
+    expect(result).toEqual([{ cycle, peptideId: "pa", times: 2 }]);
+  });
+
+  it("respects a per-peptide start/end sub-range", () => {
+    const cycle = makeCycle({
+      startDate: new Date(2026, 5, 1),
+      endDate: new Date(2026, 6, 30),
+      scheduleConfig: {
+        frequency: "daily",
+        items: [
+          // Starts after SUNDAY -> not yet due.
+          { peptideId: "late", startDate: "2026-06-20" },
+          // Ends before SUNDAY -> already over.
+          { peptideId: "early", endDate: "2026-06-10" },
+          // Covers SUNDAY -> due.
+          { peptideId: "now", startDate: "2026-06-01", endDate: "2026-06-30" },
+        ],
+      },
+    });
+    const result = getTodaysDoses([cycle], SUNDAY);
+    expect(result.map((r) => r.peptideId)).toEqual(["now"]);
+  });
+});
+
+describe("resolveItemSchedule", () => {
+  const cycleStart = new Date(2026, 5, 1);
+  const cycleEnd = new Date(2026, 6, 1);
+
+  it("falls back to cycle-level values when the item omits them", () => {
+    const cfg: ScheduleConfig = {
+      frequency: "eod",
+      daysOfWeek: [1, 3],
+      timesPerDay: 2,
+    };
+    const r = resolveItemSchedule(
+      cfg,
+      { peptideId: "p" },
+      cycleStart,
+      cycleEnd,
+    );
+    expect(r).toEqual({
+      frequency: "eod",
+      daysOfWeek: [1, 3],
+      timesPerDay: 2,
+      start: cycleStart,
+      end: cycleEnd,
+    });
+  });
+
+  it("prefers per-item overrides", () => {
+    const cfg: ScheduleConfig = { frequency: "daily" };
+    const r = resolveItemSchedule(
+      cfg,
+      {
+        peptideId: "p",
+        frequency: "weekly",
+        daysOfWeek: [5],
+        timesPerDay: 3,
+        startDate: "2026-06-10",
+        endDate: "2026-06-20",
+      },
+      cycleStart,
+      cycleEnd,
+    );
+    expect(r.frequency).toBe("weekly");
+    expect(r.daysOfWeek).toEqual([5]);
+    expect(r.timesPerDay).toBe(3);
+    expect(r.start).toEqual(new Date("2026-06-10"));
+    expect(r.end).toEqual(new Date("2026-06-20"));
+  });
+
+  it("defaults timesPerDay to 1 when neither item nor cycle sets it", () => {
+    const cfg: ScheduleConfig = { frequency: "daily" };
+    const r = resolveItemSchedule(cfg, { peptideId: "p" }, cycleStart, null);
+    expect(r.timesPerDay).toBe(1);
+    expect(r.end).toBeNull();
   });
 });
 

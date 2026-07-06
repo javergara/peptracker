@@ -4,10 +4,17 @@ import { CalendarRange, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { EmptyState } from "@/components/common/empty-state";
+import { CycleGantt } from "@/components/cycles/cycle-gantt";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCurrentUser, listCycles } from "@/lib/queries";
+import {
+  getCurrentUser,
+  getCyclesForTimeline,
+  getDoseLogsInRange,
+  listCycles,
+} from "@/lib/queries";
 import { cycleProgress, type ScheduleConfig } from "@/lib/schedule";
+import { buildCycleLanes } from "@/lib/cycle-timeline";
 import { formatDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { CYCLE_STATUSES, type CycleStatus } from "@/types/peptide";
@@ -37,12 +44,27 @@ export default async function CyclesPage({
     ? (statusParam as CycleStatus)
     : "all";
 
-  const [user, cycles] = await Promise.all([
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+
+  const [user, cycles, timelineCycles, timelineDoseLogs] = await Promise.all([
     getCurrentUser(),
     listCycles(status === "all" ? undefined : status),
+    getCyclesForTimeline(),
+    getDoseLogsInRange(yearStart, now),
   ]);
   const accent = user.color ?? "#7C3AED";
-  const now = new Date();
+
+  const lanes = buildCycleLanes({
+    cycles: timelineCycles.map((c) => ({
+      ...c,
+      scheduleConfig: c.scheduleConfig as ScheduleConfig | null,
+    })),
+    doseLogs: timelineDoseLogs,
+    from: yearStart,
+    to: now,
+    now,
+  });
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -57,6 +79,17 @@ export default async function CyclesPage({
           </Button>
         }
       />
+
+      {/* Year-to-date timeline — every cycle + loose logged peptide, one row each */}
+      <section className="card-surface mb-6 rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
+        <Eyebrow className="mb-4">This year</Eyebrow>
+        <CycleGantt
+          lanes={lanes}
+          from={yearStart.getTime()}
+          to={now.getTime()}
+          now={now.getTime()}
+        />
+      </section>
 
       {/* Status filter tabs */}
       <div className="border-border mb-6 flex gap-1 overflow-x-auto border-b">

@@ -183,7 +183,12 @@ export function DoseCalendar({
     });
   }
 
-  const selectedTakenAt = `${year}-${pad(monthIndex + 1)}-${pad(selected)}T12:00`;
+  // Backfilling a past day defaults to local noon (so it can't drift across a
+  // date boundary); logging *today* stamps the real current local time.
+  const selectedIsToday = isThisMonth && selected === todayDate;
+  const selectedTakenAt = selectedIsToday
+    ? `${year}-${pad(monthIndex + 1)}-${pad(selected)}T${pad(today.getHours())}:${pad(today.getMinutes())}`
+    : `${year}-${pad(monthIndex + 1)}-${pad(selected)}T12:00`;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">

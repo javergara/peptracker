@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Eyebrow } from "@/components/common/eyebrow";
@@ -48,10 +49,79 @@ export interface CycleFormDefaults {
   /** Planned rest period after the cycle ends, in days (optional). */
   washoutDays?: number | string;
   notes?: string;
-  /** Edit-mode per-peptide dose prefill (peptideId → dose/unit). */
-  items?: Record<string, { dose?: number; unit?: string }>;
+  /**
+   * Edit-mode per-peptide prefill (peptideId → dose/unit + optional schedule
+   * override). The schedule fields are absent when the peptide inherits the
+   * cycle-level schedule.
+   */
+  items?: Record<
+    string,
+    {
+      dose?: number;
+      unit?: string;
+      frequency?: string;
+      daysOfWeek?: number[];
+      timesPerDay?: number;
+      startDate?: string; // yyyy-MM-dd
+      endDate?: string; // yyyy-MM-dd
+    }
+  >;
   /** Chosen titration protocol label, for single-peptide cycles (see `protocolLabel`). */
   titrationLabel?: string;
+}
+
+/** Local UI state for one stack peptide's optional schedule override. */
+interface ItemScheduleState {
+  /** Whether the "Customize schedule" disclosure is expanded. */
+  open: boolean;
+  /** "inherit" or a `Frequency` value. */
+  frequency: string;
+  days: number[];
+  /** Kept as a string so the input can be empty (= inherit). */
+  timesPerDay: string;
+  startDate: string;
+  endDate: string;
+}
+
+const DEFAULT_ITEM_SCHEDULE: ItemScheduleState = {
+  open: false,
+  frequency: "inherit",
+  days: [],
+  timesPerDay: "",
+  startDate: "",
+  endDate: "",
+};
+
+/** Whether a per-peptide schedule state differs from "inherit the cycle". */
+function hasScheduleOverride(s: ItemScheduleState): boolean {
+  return (
+    s.frequency !== "inherit" ||
+    s.days.length > 0 ||
+    s.timesPerDay !== "" ||
+    s.startDate !== "" ||
+    s.endDate !== ""
+  );
+}
+
+/** Build the initial per-peptide schedule state map from edit-mode defaults. */
+function initialItemSchedules(
+  items: CycleFormDefaults["items"],
+): Record<string, ItemScheduleState> {
+  const map: Record<string, ItemScheduleState> = {};
+  for (const [peptideId, it] of Object.entries(items ?? {})) {
+    const state: ItemScheduleState = {
+      open: false,
+      frequency: it.frequency ?? "inherit",
+      days: it.daysOfWeek ?? [],
+      timesPerDay: it.timesPerDay != null ? String(it.timesPerDay) : "",
+      startDate: it.startDate ?? "",
+      endDate: it.endDate ?? "",
+    };
+    // Open the disclosure by default so an existing override is visible.
+    state.open = hasScheduleOverride(state);
+    map[peptideId] = state;
+  }
+  return map;
 }
 
 /**
@@ -80,6 +150,9 @@ export function CycleForm({
   const [titrationLabel, setTitrationLabel] = React.useState(
     defaults.titrationLabel ?? "",
   );
+  const [itemSchedules, setItemSchedules] = React.useState<
+    Record<string, ItemScheduleState>
+  >(() => initialItemSchedules(defaults.items));
   const isStack = source.startsWith("stack:");
   const selectedStack = isStack
     ? stacks.find((s) => `stack:${s.id}` === source)
@@ -104,6 +177,39 @@ export function CycleForm({
         ? prev.filter((x) => x !== d)
         : [...prev, d].sort((a, b) => a - b),
     );
+
+  const getItemSchedule = (peptideId: string) =>
+    itemSchedules[peptideId] ?? DEFAULT_ITEM_SCHEDULE;
+
+  const updateItemSchedule = (
+    peptideId: string,
+    patch: Partial<ItemScheduleState>,
+  ) =>
+    setItemSchedules((prev) => ({
+      ...prev,
+      [peptideId]: { ...(prev[peptideId] ?? DEFAULT_ITEM_SCHEDULE), ...patch },
+    }));
+
+  const toggleItemDay = (peptideId: string, d: number) =>
+    setItemSchedules((prev) => {
+      const cur = prev[peptideId] ?? DEFAULT_ITEM_SCHEDULE;
+      const nextDays = cur.days.includes(d)
+        ? cur.days.filter((x) => x !== d)
+        : [...cur.days, d].sort((a, b) => a - b);
+      return { ...prev, [peptideId]: { ...cur, days: nextDays } };
+    });
+
+  // Any stack peptide whose own frequency override needs explicit days but
+  // has none picked yet — mirrors the cycle-level `needsDays` guard.
+  const itemsMissingDays = isStack
+    ? (selectedStack?.items ?? []).some((it) => {
+        const s = getItemSchedule(it.peptideId);
+        return (
+          (s.frequency === "twice-weekly" || s.frequency === "custom") &&
+          s.days.length === 0
+        );
+      })
+    : false;
 
   return (
     <ActionForm
@@ -322,51 +428,235 @@ export function CycleForm({
                 const pre = defaults.items?.[it.peptideId];
                 const dose = pre?.dose ?? it.dose;
                 const unit = pre?.unit ?? it.unit ?? "mcg";
+                const sched = getItemSchedule(it.peptideId);
+                const itemNeedsDays =
+                  sched.frequency === "twice-weekly" ||
+                  sched.frequency === "custom";
                 return (
                   <div
                     key={it.peptideId}
-                    className="grid items-end gap-3 sm:grid-cols-[1.4fr_1fr_0.8fr]"
+                    className="border-border/60 space-y-3 rounded-lg border p-3"
                   >
-                    <span className="text-foreground text-sm font-medium">
-                      {it.peptideName}
-                    </span>
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor={`itemDose-${it.peptideId}`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Dose
-                      </label>
-                      <Input
-                        id={`itemDose-${it.peptideId}`}
-                        name={`itemDose:${it.peptideId}`}
-                        type="number"
-                        step="any"
-                        min="0"
-                        inputMode="decimal"
-                        defaultValue={dose ?? ""}
-                        placeholder="e.g. 250"
-                      />
+                    <div className="grid items-end gap-3 sm:grid-cols-[1.4fr_1fr_0.8fr]">
+                      <span className="text-foreground text-sm font-medium">
+                        {it.peptideName}
+                      </span>
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor={`itemDose-${it.peptideId}`}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Dose
+                        </label>
+                        <Input
+                          id={`itemDose-${it.peptideId}`}
+                          name={`itemDose:${it.peptideId}`}
+                          type="number"
+                          step="any"
+                          min="0"
+                          inputMode="decimal"
+                          defaultValue={dose ?? ""}
+                          placeholder="e.g. 250"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label
+                          htmlFor={`itemUnit-${it.peptideId}`}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Unit
+                        </label>
+                        <Select
+                          name={`itemUnit:${it.peptideId}`}
+                          defaultValue={unit}
+                        >
+                          <SelectTrigger id={`itemUnit-${it.peptideId}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mcg">mcg</SelectItem>
+                            <SelectItem value="mg">mg</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor={`itemUnit-${it.peptideId}`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Unit
-                      </label>
-                      <Select
-                        name={`itemUnit:${it.peptideId}`}
-                        defaultValue={unit}
-                      >
-                        <SelectTrigger id={`itemUnit-${it.peptideId}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mcg">mcg</SelectItem>
-                          <SelectItem value="mg">mg</SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateItemSchedule(it.peptideId, { open: !sched.open })
+                      }
+                      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      aria-expanded={sched.open}
+                    >
+                      {sched.open ? (
+                        <ChevronDown className="size-3.5" />
+                      ) : (
+                        <ChevronRight className="size-3.5" />
+                      )}
+                      Customize schedule
+                      {!sched.open && hasScheduleOverride(sched) ? (
+                        <span className="text-primary">(custom)</span>
+                      ) : null}
+                    </button>
+
+                    <div
+                      className={cn(
+                        "bg-muted/40 space-y-3 rounded-md p-3",
+                        !sched.open && "hidden",
+                      )}
+                    >
+                      <p className="text-muted-foreground text-xs">
+                        Leave a field blank to inherit the cycle&apos;s schedule
+                        for this peptide.
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`itemFreq-${it.peptideId}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            Frequency
+                          </label>
+                          <Select
+                            name={`itemFreq:${it.peptideId}`}
+                            value={sched.frequency}
+                            onValueChange={(v) =>
+                              updateItemSchedule(it.peptideId, {
+                                frequency: v ?? "inherit",
+                              })
+                            }
+                          >
+                            <SelectTrigger id={`itemFreq-${it.peptideId}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inherit">
+                                Inherit cycle
+                              </SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="eod">
+                                Every other day
+                              </SelectItem>
+                              <SelectItem value="twice-weekly">
+                                Twice weekly
+                              </SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="custom">
+                                Custom days
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`itemTimesPerDay-${it.peptideId}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            Times per day
+                          </label>
+                          <Input
+                            id={`itemTimesPerDay-${it.peptideId}`}
+                            name={`itemTimesPerDay:${it.peptideId}`}
+                            type="number"
+                            min="1"
+                            max="6"
+                            step="1"
+                            inputMode="numeric"
+                            value={sched.timesPerDay}
+                            onChange={(e) =>
+                              updateItemSchedule(it.peptideId, {
+                                timesPerDay: e.target.value,
+                              })
+                            }
+                            placeholder="Inherit"
+                          />
+                        </div>
+                      </div>
+
+                      {itemNeedsDays ? (
+                        <fieldset className="space-y-1.5">
+                          <legend className="text-muted-foreground text-xs font-medium">
+                            Days of the week{" "}
+                            <span className="text-destructive">*</span>
+                          </legend>
+                          <div className="flex flex-wrap gap-1.5">
+                            {DAY_LABELS.map((label, d) => {
+                              const selected = sched.days.includes(d);
+                              return (
+                                <label
+                                  key={d}
+                                  className={cn(
+                                    "has-[:focus-visible]:ring-ring cursor-pointer rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors select-none has-[:focus-visible]:ring-2",
+                                    selected
+                                      ? "bg-primary border-primary text-primary-foreground"
+                                      : "border-input text-muted-foreground hover:border-primary/40",
+                                  )}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    name={`itemDays:${it.peptideId}`}
+                                    value={d}
+                                    checked={selected}
+                                    onChange={() =>
+                                      toggleItemDay(it.peptideId, d)
+                                    }
+                                    className="sr-only"
+                                  />
+                                  {label}
+                                </label>
+                              );
+                            })}
+                          </div>
+                          {sched.days.length === 0 ? (
+                            <p className="text-destructive text-xs">
+                              Pick at least one day, or this peptide won&apos;t
+                              be scheduled.
+                            </p>
+                          ) : null}
+                        </fieldset>
+                      ) : null}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`itemStart-${it.peptideId}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            Start date
+                          </label>
+                          <Input
+                            id={`itemStart-${it.peptideId}`}
+                            name={`itemStart:${it.peptideId}`}
+                            type="date"
+                            value={sched.startDate}
+                            onChange={(e) =>
+                              updateItemSchedule(it.peptideId, {
+                                startDate: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`itemEnd-${it.peptideId}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            End date
+                          </label>
+                          <Input
+                            id={`itemEnd-${it.peptideId}`}
+                            name={`itemEnd:${it.peptideId}`}
+                            type="date"
+                            value={sched.endDate}
+                            onChange={(e) =>
+                              updateItemSchedule(it.peptideId, {
+                                endDate: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -471,7 +761,9 @@ export function CycleForm({
         </div>
       </div>
 
-      <SubmitButton disabled={needsDays && days.length === 0}>
+      <SubmitButton
+        disabled={(needsDays && days.length === 0) || itemsMissingDays}
+      >
         {submitLabel}
       </SubmitButton>
     </ActionForm>

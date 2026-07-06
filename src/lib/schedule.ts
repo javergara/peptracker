@@ -10,12 +10,34 @@ import { isWithinRange } from "@/lib/dates";
 
 export type Frequency = "daily" | "eod" | "twice-weekly" | "weekly" | "custom";
 
-/** Per-peptide dose for a stack-based cycle (each peptide doses differently). */
+/**
+ * Per-peptide config for a stack-based cycle. Each peptide can dose differently
+ * AND (optionally) run on its own frequency / days / times-per-day and its own
+ * start–end sub-range inside the cycle envelope. Every schedule field is
+ * optional and falls back to the cycle-level value when absent — so a stack
+ * where every peptide shares the cycle schedule needs only `dose`/`unit`.
+ */
 export interface CyclePeptideDose {
   peptideId: string;
   /** Amount per administration for this peptide (paired with `unit`). */
   dose?: number;
   unit?: string;
+  /** Per-peptide overrides (fall back to the cycle-level values). */
+  frequency?: Frequency;
+  daysOfWeek?: number[];
+  timesPerDay?: number;
+  /** ISO date (yyyy-MM-dd) sub-range within the cycle; falls back to cycle dates. */
+  startDate?: string;
+  endDate?: string;
+}
+
+/** The effective schedule for one peptide after applying cycle-level fallbacks. */
+export interface ResolvedItemSchedule {
+  frequency: Frequency;
+  daysOfWeek?: number[];
+  timesPerDay: number;
+  start: Date;
+  end: Date | null;
 }
 
 export interface ScheduleConfig {
@@ -52,6 +74,32 @@ export interface CycleLike {
   stack?: { name: string } | null;
 }
 
+/** Low-level dose-day test on an explicit frequency + days + anchor date. */
+export function matchesFrequency(
+  frequency: Frequency,
+  daysOfWeek: number[] | undefined,
+  date: Date,
+  anchor: Date,
+): boolean {
+  switch (frequency) {
+    case "daily":
+      return true;
+    case "eod": {
+      const diff = Math.abs(differenceInCalendarDays(date, anchor));
+      return diff % 2 === 0;
+    }
+    case "weekly": {
+      const targetDay = daysOfWeek?.[0] ?? anchor.getDay();
+      return date.getDay() === targetDay;
+    }
+    case "twice-weekly":
+    case "custom":
+      return (daysOfWeek ?? []).includes(date.getDay());
+    default:
+      return true;
+  }
+}
+
 /**
  * Whether `date` is a dose day given a schedule and the cycle's start date.
  *
@@ -66,48 +114,80 @@ export function isDoseDay(
   date: Date,
   startDate: Date,
 ): boolean {
-  switch (config.frequency) {
-    case "daily":
-      return true;
-    case "eod": {
-      const diff = Math.abs(differenceInCalendarDays(date, startDate));
-      return diff % 2 === 0;
-    }
-    case "weekly": {
-      const targetDay = config.daysOfWeek?.[0] ?? startDate.getDay();
-      return date.getDay() === targetDay;
-    }
-    case "twice-weekly":
-    case "custom":
-      return (config.daysOfWeek ?? []).includes(date.getDay());
-    default:
-      return true;
-  }
+  return matchesFrequency(config.frequency, config.daysOfWeek, date, startDate);
+}
+
+/** Parse an ISO date string into a Date, or null when absent/invalid. */
+function parseISO(value: string | undefined): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 /**
- * Across a set of cycles, return the active ones that have a dose scheduled for
- * `date` (defaults to now), along with how many administrations each requires.
- *
- * A cycle is included only when it is status "active", `date` falls within
- * `[startDate, endDate]`, it has a `scheduleConfig`, and `isDoseDay` is true.
+ * The effective schedule for one stack-cycle peptide: each field falls back to
+ * the cycle-level value (and the cycle's own start/end) when the item omits it.
+ */
+export function resolveItemSchedule(
+  config: ScheduleConfig,
+  item: CyclePeptideDose,
+  cycleStart: Date,
+  cycleEnd: Date | null,
+): ResolvedItemSchedule {
+  return {
+    frequency: item.frequency ?? config.frequency,
+    daysOfWeek: item.daysOfWeek ?? config.daysOfWeek,
+    timesPerDay: item.timesPerDay ?? config.timesPerDay ?? 1,
+    start: parseISO(item.startDate) ?? cycleStart,
+    end: parseISO(item.endDate) ?? cycleEnd,
+  };
+}
+
+/** A due-today entry: `peptideId` is set for stack items, null for single. */
+export interface TodaysDose {
+  cycle: CycleLike;
+  peptideId: string | null;
+  times: number;
+}
+
+/**
+ * Across a set of cycles, return the doses scheduled for `date` (defaults to
+ * now). A cycle is only considered when it is status "active" and has a
+ * `scheduleConfig`. For a STACK cycle each peptide is evaluated on its own
+ * resolved schedule + own date sub-range and fanned out to one entry per due
+ * peptide; a single-peptide cycle yields at most one entry (peptideId = null).
  */
 export function getTodaysDoses(
   cycles: CycleLike[],
   date: Date = new Date(),
-): { cycle: CycleLike; times: number }[] {
-  const result: { cycle: CycleLike; times: number }[] = [];
+): TodaysDose[] {
+  const result: TodaysDose[] = [];
 
   for (const cycle of cycles) {
     if (cycle.status !== "active") continue;
-    if (!cycle.scheduleConfig) continue;
-    if (!isWithinRange(date, cycle.startDate, cycle.endDate)) continue;
-    if (!isDoseDay(cycle.scheduleConfig, date, cycle.startDate)) continue;
+    const cfg = cycle.scheduleConfig;
+    if (!cfg) continue;
 
-    result.push({
-      cycle,
-      times: cycle.scheduleConfig.timesPerDay ?? 1,
-    });
+    if (cfg.items && cfg.items.length > 0) {
+      for (const item of cfg.items) {
+        const s = resolveItemSchedule(
+          cfg,
+          item,
+          cycle.startDate,
+          cycle.endDate,
+        );
+        if (!isWithinRange(date, s.start, s.end)) continue;
+        if (!matchesFrequency(s.frequency, s.daysOfWeek, date, s.start))
+          continue;
+        result.push({ cycle, peptideId: item.peptideId, times: s.timesPerDay });
+      }
+      continue;
+    }
+
+    // Single-peptide cycle: one cycle-level schedule.
+    if (!isWithinRange(date, cycle.startDate, cycle.endDate)) continue;
+    if (!isDoseDay(cfg, date, cycle.startDate)) continue;
+    result.push({ cycle, peptideId: null, times: cfg.timesPerDay ?? 1 });
   }
 
   return result;

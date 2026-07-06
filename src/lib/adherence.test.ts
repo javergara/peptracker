@@ -58,4 +58,27 @@ describe("computeAdherence", () => {
     expect(a.percent).toBeNull();
     expect(a.expected).toBe(0);
   });
+
+  it("sums a stack cycle's per-peptide expectations", () => {
+    // One stack cycle: peptide A daily, peptide B every other day.
+    const cycle: CycleLike = {
+      id: "s1",
+      name: "Stack",
+      startDate: new Date(2026, 5, 18), // 6 days ago
+      endDate: null,
+      status: "active",
+      scheduleConfig: {
+        frequency: "daily",
+        items: [
+          { peptideId: "a" }, // inherits daily
+          { peptideId: "b", frequency: "eod" },
+        ],
+      },
+      peptide: null,
+      stack: { name: "Stack" },
+    };
+    // Over 7 days: A due 7 times, B (eod from day -6) due on even offsets → 4.
+    const a = computeAdherence([cycle], [], 7, now);
+    expect(a.expected).toBe(11);
+  });
 });
