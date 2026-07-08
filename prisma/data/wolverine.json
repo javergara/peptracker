@@ -1,0 +1,126 @@
+{
+  "slug": "wolverine",
+  "name": "Wolverine (BPC-157 / TB-500 Blend)",
+  "aliases": [
+    "Wolverine Blend",
+    "Wolverine Stack",
+    "BPC-157 + TB-500",
+    "BPC-157 / TB-500 Blend",
+    "Recovery Blend"
+  ],
+  "category": "HEALING_REPAIR",
+  "summary": "Wolverine is not a single molecule but a vendor pre-mixed research blend that combines two healing peptides, BPC-157 and TB-500 (a Thymosin Beta-4 fragment), usually in a 1:1 ratio in one vial. The name nods to the comic character's healing factor, and it is marketed for tissue repair, injury recovery, and joint/tendon support. This is educational information about two research compounds sold together, not medical advice; the blend itself has never been formally studied as a fixed combination.",
+  "mechanism": "The Wolverine blend works through the combined, complementary mechanisms of its two components rather than any unique blended pharmacology.\n\nBPC-157, a stable pentadecapeptide derived from a protein in gastric juice, acts largely at the local tissue level: it promotes angiogenesis (partly via VEGF upregulation and modulation of the nitric oxide system), drives tendon-fibroblast outgrowth and migration through the FAK-paxillin pathway, increases collagen formation, and reduces inflammatory cytokines. It effectively builds the repair infrastructure (new blood vessels, growth-factor signaling, extracellular matrix) at an injury site.\n\nTB-500 contains the active actin-binding domain of Thymosin Beta-4, a 43-amino-acid tissue-repair protein. By binding G-actin and regulating actin polymerization, it enhances cell migration, letting endothelial cells, immune cells, and progenitor cells move into damaged tissue; it also supports angiogenesis and dampens inflammation systemically. The stack rationale is that BPC-157 provides the localized regenerative scaffold while TB-500 mobilizes and migrates repair cells into position, so the two cover overlapping but distinct stages of the same healing process.",
+  "benefits": [
+    "Combines localized (BPC-157) and systemic (TB-500) tissue-repair pathways in one injection",
+    "Studied components accelerate healing of tendon, ligament, muscle, and skin injuries (animal models)",
+    "Both peptides promote angiogenesis and improved blood flow to damaged tissue",
+    "Anti-inflammatory effects that may reduce swelling and discomfort",
+    "Convenience of a single pre-mixed vial versus dosing two peptides separately",
+    "Popular in recovery/rehab contexts for joint, tendon, and soft-tissue support"
+  ],
+  "risks": [
+    "The blend itself has never been studied as a fixed combination; all evidence is extrapolated from separate BPC-157 and TB-500 (mostly rodent) research",
+    "Neither BPC-157 nor TB-500 is FDA-approved; no human clinical safety or efficacy data is established",
+    "Both components are banned by WADA and prohibited in professional/competitive sport",
+    "Fixed 1:1 ratios remove the ability to titrate each peptide independently, and vendor purity/ratio is unverified",
+    "Theoretical concern that combined pro-angiogenic activity could affect tumor growth; long-term human safety is unknown"
+  ],
+  "sideEffects": [
+    "Injection-site redness, irritation, or soreness",
+    "Temporary head rush, lightheadedness, or flushing after injection",
+    "Fatigue or lethargy, more commonly reported during the TB-500 loading period",
+    "Mild nausea or GI upset",
+    "Occasional headache or dizziness"
+  ],
+  "dosage": {
+    "low": "0.25",
+    "standard": "0.25-0.5",
+    "high": "0.5",
+    "unit": "mg",
+    "notes": "Common educational protocol for a 1:1 blend is ~0.25-0.5 mg of total blend per dose (i.e. roughly 125-250 mcg BPC-157 + 125-250 mcg TB-500 per injection). Many users dose daily during an initial loading period, then taper to several times per week. Because the two peptides have very different standalone schedules (BPC-157 daily; TB-500 loaded then weekly), a fixed blend is a compromise; some prefer dosing the peptides separately for finer control.",
+    "timing": "Often dosed once daily (or split) during a 2-4 week loading period, then reduced to 2-3x weekly for maintenance. Subcutaneous injection works systemically from any SubQ site (abdomen is convenient); some inject near the injury site aiming for a localized BPC-157 effect. Time of day is not critical.",
+    "maxDose": "Community protocols rarely exceed ~0.5-1 mg of total blend per day. Higher amounts are not better-supported, raise cost and side-effect risk, and all human dosing here is anecdotal and not clinically validated.",
+    "protocols": [
+      {
+        "label": "Standard blend (loading -> maintenance)",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 0.5,
+            "unit": "mg",
+            "note": "Loading: ~0.5 mg total blend daily (approx 250 mcg BPC-157 + 250 mcg TB-500) to build systemic TB-500 levels while maintaining daily BPC-157 exposure."
+          },
+          {
+            "weeks": "5-8",
+            "amount": 0.25,
+            "unit": "mg",
+            "note": "Maintenance: ~0.25 mg total blend 2-3x weekly; taper off once healing goals are met. Human protocols are anecdotal and not clinically validated."
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "daily during a 2-4 week loading phase, then 2-3x weekly maintenance",
+  "halfLife": "No half-life exists for the blend itself; the components differ. BPC-157 is cleared quickly (under ~30 minutes in serum) while TB-500's dosing every 3-4 days implies tissue-relevant levels persist for days.",
+  "halfLifeHours": 1,
+  "cycleLength": "Typically a 6-12 week course: a ~4-week loading phase followed by tapered maintenance, run alongside the injury-recovery window",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "A common blend vial holds 10 mg total (5 mg BPC-157 + 5 mg TB-500). 10 mg + 2 mL bacteriostatic water = 5 mg/mL total blend, so 0.5 mg blend = 0.1 mL (10 units on a U-100 insulin syringe) delivering ~250 mcg of each peptide. Vendor ratios/strengths vary (some sell 10 mg + 10 mg = 20 mg vials) so always confirm the label and recompute. Swirl gently, do not shake."
+  },
+  "storage": "Store lyophilized vials frozen or refrigerated. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. Protect from light.",
+  "contraindications": [
+    "Active or history of cancer (caution due to combined angiogenic activity)",
+    "Pregnancy and breastfeeding",
+    "Competitive athletes subject to anti-doping testing (both components are WADA-banned)",
+    "Known hypersensitivity to either peptide"
+  ],
+  "interactions": [
+    {
+      "with": "bpc-157",
+      "kind": "caution",
+      "note": "BPC-157 is already a component of this blend; do not stack additional standalone BPC-157 on top of the Wolverine blend without accounting for the combined dose to avoid double-dosing."
+    },
+    {
+      "with": "tb-500",
+      "kind": "caution",
+      "note": "TB-500 is already a component of this blend; adding standalone TB-500 would double the TB-500 dose. Dosing the two peptides separately instead of as a fixed blend allows independent titration."
+    },
+    {
+      "with": "ghk-cu",
+      "kind": "synergy",
+      "note": "Some vendors add GHK-Cu to recovery blends for its collagen-remodeling and skin/wound-healing effects; it targets complementary repair pathways to the BPC-157/TB-500 core."
+    }
+  ],
+  "references": [
+    {
+      "title": "Stable Gastric Pentadecapeptide BPC 157 and Wound Healing (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8275860/"
+    },
+    {
+      "title": "The promoting effect of pentadecapeptide BPC 157 on tendon healing (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21030672/"
+    },
+    {
+      "title": "Thymosin beta4: actin-sequestering protein moonlights to repair injured tissues (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16303881/"
+    },
+    {
+      "title": "Thymosin beta4 promotes dermal healing (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22348835/"
+    },
+    {
+      "title": "Wolverine Blend (BPC-157 + TB-500): The Recovery Peptide Stack (Moonshot)",
+      "url": "https://moonshotmp.com/learn/wolverine-blend/"
+    },
+    {
+      "title": "Wolverine Stack Dosage Guide: BPC-157 + TB-500 Dosing Protocol (PeptideDeck)",
+      "url": "https://www.peptidedeck.com/blog/wolverine-stack-dosage-guide"
+    }
+  ],
+  "tags": ["recovery-injury", "muscle-growth", "immune"],
+  "status": "research"
+}
