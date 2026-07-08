@@ -113,7 +113,7 @@ export async function updateDose(id: string, formData: FormData) {
   const user = await getActiveUser();
   const existing = await prisma.doseLog.findFirst({
     where: { id, userId: user.id },
-    select: { id: true, cycleId: true },
+    select: { id: true, cycleId: true, takenAt: true },
   });
   if (!existing) throw new Error("Dose not found.");
 
@@ -127,6 +127,7 @@ export async function updateDose(id: string, formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const moodRaw = formData.get("mood");
   const energyRaw = formData.get("energy");
+  const weightRaw = formData.get("weight");
   const sideEffects = formData
     .getAll("sideEffects")
     .map(String)
@@ -135,6 +136,8 @@ export async function updateDose(id: string, formData: FormData) {
   if (!peptideId || !amount) {
     throw new Error("Peptide and amount are required.");
   }
+
+  const takenAtDate = takenAt ? new Date(takenAt) : new Date();
 
   await prisma.doseLog.update({
     where: { id },
@@ -149,10 +152,44 @@ export async function updateDose(id: string, formData: FormData) {
       energy: energyRaw != null && energyRaw !== "" ? Number(energyRaw) : null,
       // Overwrite (empty array clears any previously stored side effects).
       sideEffects,
-      takenAt: takenAt ? new Date(takenAt) : new Date(),
+      takenAt: takenAtDate,
       notes: notes || null,
     },
   });
+
+  // Sync the bodyweight measurement recorded at this dose's time. Weight isn't
+  // FK-linked to the dose — it's a weight Measurement stamped at the dose's
+  // takenAt (see logDose) — so we locate it by the dose's OLD timestamp, then
+  // update / create / delete it to mirror the weight field.
+  const existingWeight = await prisma.measurement.findFirst({
+    where: { userId: user.id, type: "weight", recordedAt: existing.takenAt },
+    orderBy: { id: "desc" },
+  });
+  const weight = Number(weightRaw ?? 0);
+  const hasWeight = weightRaw != null && weightRaw !== "" && weight > 0;
+  if (hasWeight) {
+    if (existingWeight) {
+      await prisma.measurement.update({
+        where: { id: existingWeight.id },
+        data: { value: weight, recordedAt: takenAtDate },
+      });
+    } else {
+      await prisma.measurement.create({
+        data: {
+          userId: user.id,
+          type: "weight",
+          value: weight,
+          unit: user.weightUnit,
+          recordedAt: takenAtDate,
+        },
+      });
+    }
+    revalidatePath("/metrics");
+  } else if (existingWeight) {
+    // Weight was cleared — remove the linked measurement.
+    await prisma.measurement.delete({ where: { id: existingWeight.id } });
+    revalidatePath("/metrics");
+  }
 
   revalidatePath("/log");
   revalidatePath("/calendar");

@@ -16,7 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateDose } from "@/lib/actions/doses";
-import { getDoseLog, listCycles, listPeptides } from "@/lib/queries";
+import {
+  getDoseLog,
+  getDoseWeight,
+  getCurrentUser,
+  listCycles,
+  listPeptides,
+} from "@/lib/queries";
 import { toDateTimeLocalValue } from "@/lib/dates";
 import { asStringArray, ROUTES, ROUTE_LABELS } from "@/types/peptide";
 
@@ -29,14 +35,16 @@ export default async function EditDosePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [dose, peptides, cycles] = await Promise.all([
+  const [dose, peptides, cycles, user] = await Promise.all([
     getDoseLog(id),
     listPeptides(),
     listCycles(),
+    getCurrentUser(),
   ]);
   if (!dose) notFound();
 
   const sideEffects = asStringArray(dose.sideEffects);
+  const doseWeight = await getDoseWeight(dose.takenAt);
 
   async function action(formData: FormData) {
     "use server";
@@ -193,11 +201,13 @@ export default async function EditDosePage({
             </div>
 
             <DoseFormFields
+              weightUnit={user.weightUnit}
               defaults={{
                 site: dose.site,
                 mood: dose.mood,
                 energy: dose.energy,
                 sideEffects,
+                weight: doseWeight,
               }}
             />
 

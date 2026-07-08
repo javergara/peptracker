@@ -30,6 +30,8 @@ interface DoseFormFieldsProps {
     mood?: number | null;
     energy?: number | null;
     sideEffects?: string[];
+    /** Bodyweight recorded at this dose (weight Measurement at its takenAt). */
+    weight?: number | null;
   };
 }
 
@@ -70,10 +72,11 @@ export function DoseFormFields({
             min="0"
             inputMode="decimal"
             placeholder={`e.g. 82 ${weightUnit}`}
+            defaultValue={defaults?.weight != null ? defaults.weight : ""}
           />
           <p className="text-muted-foreground text-xs">
             Logged as a weight measurement at this dose&apos;s time — handy for
-            weekly GLP-1 check-ins.
+            weekly GLP-1 check-ins. Clear it to remove that measurement.
           </p>
         </div>
       ) : null}

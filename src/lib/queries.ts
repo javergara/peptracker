@@ -180,6 +180,21 @@ export async function getDoseLog(id: string) {
   });
 }
 
+/**
+ * The bodyweight recorded at a dose (if any). Weight isn't FK-linked to a dose
+ * — it's a weight Measurement stamped at the dose's takenAt (see logDose) — so
+ * we resolve it by matching that timestamp. Used to prefill the edit-dose form.
+ */
+export async function getDoseWeight(takenAt: Date): Promise<number | null> {
+  const user = await getActiveUser();
+  const m = await prisma.measurement.findFirst({
+    where: { userId: user.id, type: "weight", recordedAt: takenAt },
+    orderBy: { id: "desc" },
+    select: { value: true },
+  });
+  return m?.value ?? null;
+}
+
 export async function getActiveCycles() {
   const user = await getActiveUser();
   return prisma.cycle.findMany({
