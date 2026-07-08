@@ -10,6 +10,7 @@ import {
   MetricsTrends,
   type TrendSeries,
 } from "@/components/metrics/metrics-trends";
+import { MetricFocus } from "@/components/metrics/metric-focus";
 import {
   MetricsRangeControl,
   DEFAULT_RANGE,
@@ -430,13 +431,31 @@ export default async function MetricsPage({
         ))}
       </div>
 
-      {/* Trends card */}
+      {/* Single-metric focus — one series on a real, labeled Y axis */}
+      <Card className="card-surface">
+        <CardHeader>
+          <CardTitle className="font-display text-base font-semibold">
+            Metric over time
+          </CardTitle>
+          <CardDescription className="mt-0.5 text-[12.5px]">
+            Pick one metric to see how it&apos;s evolving on its own scale —
+            last {range}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense>
+            <MetricFocus series={trendSeries} />
+          </Suspense>
+        </CardContent>
+      </Card>
+
+      {/* Trends card — many series overlaid on a shared timeline */}
       <Card className="card-surface">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="font-display text-base font-semibold">
-                Trends — last {range}
+                Compare trends — last {range}
               </CardTitle>
               <CardDescription className="mt-0.5 text-[12.5px]">
                 Toggle any series. Lines share a timeline but keep their own
