@@ -17,6 +17,7 @@ export const PEPTIDE_CATEGORIES = [
   "COSMETIC",
   "NOOTROPIC_ANXIOLYTIC",
   "IMMUNE_ANTIINFLAMMATORY",
+  "DILUENT",
 ] as const;
 export type PeptideCategory = (typeof PEPTIDE_CATEGORIES)[number];
 
@@ -28,6 +29,7 @@ export const CATEGORY_LABELS: Record<PeptideCategory, string> = {
   COSMETIC: "Cosmetic & Skin",
   NOOTROPIC_ANXIOLYTIC: "Nootropic & Mood",
   IMMUNE_ANTIINFLAMMATORY: "Immune & Anti-inflammatory",
+  DILUENT: "Diluent & Supplies",
 };
 
 // ---------------------------------------------------------------------------

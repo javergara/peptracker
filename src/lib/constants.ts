@@ -31,6 +31,8 @@ export const CATEGORY_BADGE: Record<PeptideCategory, string> = {
     "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30",
   IMMUNE_ANTIINFLAMMATORY:
     "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
+  DILUENT:
+    "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };
 
 /** Tailwind class fragments for biomarker system (panel) badges. */

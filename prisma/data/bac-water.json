@@ -1,0 +1,68 @@
+{
+  "slug": "bac-water",
+  "name": "Bacteriostatic Water (BAC Water)",
+  "aliases": [
+    "BAC Water",
+    "Bac Water",
+    "Bacteriostatic Water for Injection",
+    "0.9% Benzyl Alcohol Water",
+    "BWFI"
+  ],
+  "category": "DILUENT",
+  "summary": "Bacteriostatic water is sterile water for injection containing 0.9% benzyl alcohol as a preservative. It is the diluent used to reconstitute lyophilized (freeze-dried) research peptides — it is not a peptide or a therapeutic compound itself. The benzyl alcohol inhibits bacterial growth, which is why a reconstituted vial can be drawn from repeatedly over several weeks (unlike plain sterile water, which is single-use). Tracked here as a supply so you can manage how much diluent you have on hand.",
+  "mechanism": "Contains 0.9% (9 mg/mL) benzyl alcohol, a bacteriostatic agent that inhibits the growth of common bacteria within a punctured multi-dose vial. This preservative action is what allows repeated withdrawals from a reconstituted peptide vial across a multi-week dosing window.",
+  "benefits": [
+    "Diluent for reconstituting lyophilized peptides (add to the powder to make an injectable solution)",
+    "Multi-dose: the benzyl alcohol preservative permits repeated withdrawals over ~28 days",
+    "Widely available in 10 mL and 30 mL multi-dose vials"
+  ],
+  "risks": [
+    "NOT for use in newborns/infants — benzyl alcohol is associated with fatal 'gasping syndrome' in neonates",
+    "Not intended for large-volume intravenous fluid replacement",
+    "Not for intrathecal or epidural use"
+  ],
+  "sideEffects": [
+    "Injection-site irritation",
+    "Rare hypersensitivity to benzyl alcohol"
+  ],
+  "dosage": {
+    "low": "1 mL",
+    "standard": "2 mL",
+    "high": "3 mL",
+    "unit": "mL",
+    "notes": "This is diluent VOLUME added per peptide vial during reconstitution — not a dose of anything. More water = lower concentration (easier to measure small doses); less water = higher concentration. Use the reconstitution calculator to pick a volume for your target dose."
+  },
+  "route": "SUBQ",
+  "frequency": "As needed for reconstitution",
+  "halfLife": "N/A — diluent, not administered on its own",
+  "cycleLength": "N/A",
+  "reconstitution": {
+    "vialMg": 0,
+    "bacWaterMl": 30,
+    "notes": "Not applicable — BAC water IS the reconstitution diluent. Common multi-dose vial sizes are 10 mL and 30 mL."
+  },
+  "storage": "Store at room temperature before opening. After the first puncture, refrigerate and discard after 28 days (the benzyl alcohol preservative loses reliability and contamination risk rises).",
+  "contraindications": [
+    "Neonates and infants (benzyl alcohol toxicity / gasping syndrome)",
+    "Large-volume IV fluid replacement",
+    "Intrathecal / epidural administration",
+    "Known benzyl alcohol hypersensitivity"
+  ],
+  "interactions": [],
+  "references": [
+    {
+      "title": "Drugs.com — Bacteriostatic Water for Injection (professional monograph)",
+      "url": "https://www.drugs.com/pro/bacteriostatic-water.html"
+    },
+    {
+      "title": "DailyMed (FDA) — Bacteriostatic Water for Injection labels",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=bacteriostatic+water+for+injection"
+    },
+    {
+      "title": "RxList — Bacteriostatic Water",
+      "url": "https://www.rxlist.com/bacteriostatic-water-drug.htm"
+    }
+  ],
+  "tags": [],
+  "status": "supply"
+}
