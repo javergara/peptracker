@@ -533,10 +533,25 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   user-scoped, not cached). The dashboard **`LowStockAlert`**
   (`src/components/dashboard/low-stock-alert.tsx`) warns when a peptide's combined
   total ≤ 1 (amber `warn` tokens); it renders nothing when everything's stocked.
+- **Diluents (BAC water) — measured in mL, not mcg/mg.** BAC water lives in the
+  peptide library under the **`DILUENT`** category (`isDiluent`,
+  `src/types/peptide.ts`; entry at `prisma/data/bac-water.json`) so it can be
+  tracked in inventory (Vial/StockItem are keyed by `peptideId`). The stock
+  `vialMcg` column holds **mL × 1000** for diluents, so
+  `formatVialSize(vialMcg, category)` (`src/lib/stock.ts`, tested) renders "mL"
+  for diluents and "mg" for peptides off the same value. The add-stock form
+  (`add-stock-form.tsx`, client — reacts to the selected peptide) relabels the
+  size field to mL and hides dose/frequency for a diluent; stock cards drop
+  dose/supply/cost and the **Activate** button (a diluent isn't reconstituted).
+  Diluent handling is **stock-tab only** (the Active-vials tab still assumes mg).
 - **Weight-at-dose:** the dose-log forms take an optional weight (via
-  `DoseFormFields` `weightUnit` prop, create-only); `logDose` writes it as a
-  `type:"weight"` Measurement at the dose time, so it flows into the Metrics
-  charts. Not shown on the edit form (avoids duplicate measurements).
+  `DoseFormFields` `weightUnit` prop); `logDose` writes it as a `type:"weight"`
+  Measurement at the dose time, so it flows into the Metrics charts. **Editable on
+  the edit form too:** weight has no FK to the dose — it's matched by timestamp
+  (`getDoseWeight(takenAt)` in `queries.ts` prefills it), and `updateDose` syncs
+  that Measurement: updates it (re-aligning `recordedAt` when the dose time
+  changes), creates it if newly entered, or deletes it if cleared — so there's
+  never a duplicate.
 - **Adherence/reminders:** `src/lib/adherence.ts` + dashboard `Due/Overdue` and
   streak widgets (`src/components/dashboard/`). Visual only (no push).
 - **Labs & biomarkers:** `/labs` (`src/lib/actions/labs.ts`) groups results by
@@ -560,6 +575,10 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   `src/components/metrics/`: `MetricsTrends` (the main view — ALL series in one
   chart, toggled from a legend; each series keeps its own hidden Y axis so
   differently-scaled series like weight vs mood overlay on a shared timeline),
+  **`MetricFocus`** (the _focused_ companion to MetricsTrends — ONE selected
+  series on a real, labeled Y axis so you can read how e.g. weight is actually
+  evolving in its own units; metric picker defaults to weight, URL-synced via
+  `?focus`, reuses `MetricChart`; both cards windowed by the `?range` control),
   `MetricChart` (single line; `mood` prop = emoji-face dots), `CorrelationChart`
   (dual-axis overlay), `ScatterCorrelation` (scatter + trend line), and
   `CorrelationExplorer` (pick any two series → Pearson r / R² / n via
