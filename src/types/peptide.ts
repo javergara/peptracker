@@ -32,6 +32,14 @@ export const CATEGORY_LABELS: Record<PeptideCategory, string> = {
   DILUENT: "Diluent & Supplies",
 };
 
+/**
+ * Diluents (BAC water) are supplies, not peptides: measured in **mL**, not
+ * mcg/mg, and never reconstituted/activated. Inventory treats them specially.
+ */
+export function isDiluent(category?: string | null): boolean {
+  return category === "DILUENT";
+}
+
 // ---------------------------------------------------------------------------
 // Routes of administration
 // ---------------------------------------------------------------------------

@@ -2,10 +2,23 @@ import { describe, expect, it } from "vitest";
 
 import {
   estimateStockSupply,
+  formatVialSize,
   frequencyDosesPerDay,
   isLowStock,
   toMcg,
 } from "@/lib/stock";
+
+describe("formatVialSize", () => {
+  it("shows peptide vials in mg", () => {
+    expect(formatVialSize(5000)).toBe("5 mg");
+    expect(formatVialSize(10000, "GLP_GIP")).toBe("10 mg");
+    expect(formatVialSize(500)).toBe("0.5 mg");
+  });
+  it("shows diluent vials in mL (same numeric column)", () => {
+    expect(formatVialSize(3000, "DILUENT")).toBe("3 mL");
+    expect(formatVialSize(10000, "DILUENT")).toBe("10 mL");
+  });
+});
 
 describe("frequencyDosesPerDay", () => {
   it("maps known cadences", () => {

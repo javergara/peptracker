@@ -1,10 +1,25 @@
 import type { Frequency } from "@/lib/schedule";
+import { isDiluent } from "@/types/peptide";
 
 /**
  * Stock (reserve) supply math — pure, no DB, no React. Estimates how long the
  * unopened vials you hold will last given a planned dose + frequency, and the
  * low-stock threshold used for the dashboard alert. Mirrors src/lib/cycles.ts.
  */
+
+/**
+ * Human label for a stock vial's size. Peptide vials are stored/shown in mg
+ * (vialMcg / 1000). Diluents (BAC water) are measured in **mL** — the same
+ * numeric column holds mL × 1000, so it divides identically but renders "mL".
+ */
+export function formatVialSize(
+  vialMcg: number,
+  category?: string | null,
+): string {
+  const n = vialMcg / 1000;
+  const num = Number.isInteger(n) ? n : n.toFixed(1);
+  return `${num} ${isDiluent(category) ? "mL" : "mg"}`;
+}
 
 /** Selectable frequencies for a stock item, with human labels. */
 export const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [

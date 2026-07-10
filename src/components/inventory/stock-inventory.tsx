@@ -1,30 +1,21 @@
-import { Boxes, Plus } from "lucide-react";
+import { Boxes } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { InkPanel } from "@/components/common/ink-panel";
-import { ActionForm, SubmitButton } from "@/components/common/action-form";
+import { AddStockForm } from "@/components/inventory/add-stock-form";
 import { ActivateStockForm } from "@/components/inventory/activate-stock-form";
 import { StockQuantityControls } from "@/components/inventory/stock-quantity-controls";
-import { SearchableSelect } from "@/components/common/searchable-select";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { addStock } from "@/lib/actions/stock";
 import type { StockLevel } from "@/lib/queries";
 import {
   FREQUENCY_LABELS,
-  FREQUENCY_OPTIONS,
   estimateStockSupply,
+  formatVialSize,
   isLowStock,
   toMcg,
 } from "@/lib/stock";
 import { costPerDose, costPerMonth, formatCost } from "@/lib/cost";
+import { isDiluent } from "@/types/peptide";
 import { cn } from "@/lib/utils";
 
 interface StockItemView {
@@ -36,13 +27,7 @@ interface StockItemView {
   doseUnit: string;
   frequency: string;
   price: number | null;
-  peptide: { name: string };
-}
-
-/** Format a vial size in mg (5000 mcg → "5 mg"). */
-function vialMgLabel(vialMcg: number) {
-  const mg = vialMcg / 1000;
-  return `${Number.isInteger(mg) ? mg : mg.toFixed(1)} mg`;
+  peptide: { name: string; category: string };
 }
 
 export function StockInventory({
@@ -52,7 +37,7 @@ export function StockInventory({
 }: {
   stockItems: StockItemView[];
   levels: StockLevel[];
-  peptides: { id: string; name: string }[];
+  peptides: { id: string; name: string; category: string }[];
 }) {
   const levelByPeptide = new Map(levels.map((l) => [l.peptideId, l]));
 
@@ -121,6 +106,7 @@ export function StockInventory({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stockItems.map((item) => {
+            const diluent = isDiluent(item.peptide.category);
             const doseMcg = toMcg(item.dose, item.doseUnit);
             const supply = estimateStockSupply({
               vialMcg: item.vialMcg,
@@ -134,7 +120,9 @@ export function StockInventory({
               item.dose != null
                 ? `${item.dose} ${item.doseUnit} · ${FREQUENCY_LABELS[item.frequency] ?? item.frequency}`
                 : null;
-            const perDoseCost = costPerDose(item.price, item.vialMcg, doseMcg);
+            const perDoseCost = diluent
+              ? null
+              : costPerDose(item.price, item.vialMcg, doseMcg);
             const perMonthCost = costPerMonth(perDoseCost, item.frequency);
 
             return (
@@ -151,7 +139,7 @@ export function StockInventory({
                       {item.peptide.name}
                     </p>
                     <p className="num text-muted-foreground text-[11.5px]">
-                      {vialMgLabel(item.vialMcg)} each
+                      {formatVialSize(item.vialMcg, item.peptide.category)} each
                     </p>
                   </div>
                   {low ? (
@@ -170,7 +158,9 @@ export function StockInventory({
                     </span>
                   </div>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    {doseLabel ? (
+                    {diluent ? (
+                      "Diluent — reconstitution supply"
+                    ) : doseLabel ? (
                       <>
                         {doseLabel}
                         {supply.days != null ? (
@@ -199,11 +189,14 @@ export function StockInventory({
                     id={item.id}
                     quantity={item.quantity}
                   />
-                  <ActivateStockForm
-                    stockId={item.id}
-                    disabled={item.quantity <= 0}
-                    doseLabel={doseLabel}
-                  />
+                  {/* Diluents aren't reconstituted/activated — no Activate. */}
+                  {!diluent ? (
+                    <ActivateStockForm
+                      stockId={item.id}
+                      disabled={item.quantity <= 0}
+                      doseLabel={doseLabel}
+                    />
+                  ) : null}
                 </div>
               </div>
             );
@@ -214,134 +207,7 @@ export function StockInventory({
       {/* Add to stock */}
       <section id="add-stock" className="card-surface rounded-[18px] p-6">
         <Eyebrow className="mb-4">Add to Stock</Eyebrow>
-        <ActionForm
-          action={addStock}
-          success="Added to stock"
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <div className="space-y-1.5">
-            <label htmlFor="s-peptide" className="text-sm font-medium">
-              Peptide <span className="text-destructive">*</span>
-            </label>
-            <SearchableSelect
-              id="s-peptide"
-              name="peptideId"
-              required
-              placeholder="— Select peptide —"
-              options={peptides.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-vialmg" className="text-sm font-medium">
-              Vial size (mg) <span className="text-destructive">*</span>
-            </label>
-            <Input
-              id="s-vialmg"
-              name="vialMg"
-              type="number"
-              step="any"
-              min="0.1"
-              inputMode="decimal"
-              required
-              placeholder="e.g. 5"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-qty" className="text-sm font-medium">
-              Quantity <span className="text-destructive">*</span>
-            </label>
-            <Input
-              id="s-qty"
-              name="quantity"
-              type="number"
-              step="1"
-              min="1"
-              inputMode="numeric"
-              defaultValue={1}
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-dose" className="text-sm font-medium">
-              Planned dose
-            </label>
-            <div className="flex gap-2">
-              <Input
-                id="s-dose"
-                name="dose"
-                type="number"
-                step="any"
-                min="0"
-                inputMode="decimal"
-                placeholder="e.g. 250"
-              />
-              <Select name="doseUnit" defaultValue="mcg">
-                <SelectTrigger aria-label="Dose unit">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mcg">mcg</SelectItem>
-                  <SelectItem value="mg">mg</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-freq" className="text-sm font-medium">
-              Frequency
-            </label>
-            <Select
-              name="frequency"
-              defaultValue="daily"
-              items={FREQUENCY_LABELS}
-            >
-              <SelectTrigger id="s-freq">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FREQUENCY_OPTIONS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-price" className="text-sm font-medium">
-              Price (per vial){" "}
-              <span className="text-muted-foreground font-normal">
-                — optional
-              </span>
-            </label>
-            <Input
-              id="s-price"
-              name="price"
-              type="number"
-              step="any"
-              min="0"
-              inputMode="decimal"
-              placeholder="e.g. 45.00"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="s-notes" className="text-sm font-medium">
-              Notes
-            </label>
-            <Input
-              id="s-notes"
-              name="notes"
-              placeholder="Optional notes"
-              maxLength={280}
-            />
-          </div>
-          <div className="flex items-end">
-            <SubmitButton>
-              <Plus className="size-4" />
-              Add to stock
-            </SubmitButton>
-          </div>
-        </ActionForm>
+        <AddStockForm peptides={peptides} />
       </section>
     </div>
   );
