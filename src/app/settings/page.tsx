@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateUserSettings } from "@/lib/actions/settings";
+import { changePasswordAction } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/queries";
 
 export const metadata = { title: "Settings" };
@@ -131,6 +132,62 @@ export default async function SettingsPage() {
             biomarker reference ranges. Optional.
           </p>
           <SubmitButton>Save settings</SubmitButton>
+        </ActionForm>
+      </div>
+
+      <div className="card-surface mb-6 rounded-2xl p-6">
+        <Eyebrow className="mb-4">Account security</Eyebrow>
+        <ActionForm
+          action={changePasswordAction}
+          success="Password updated"
+          resetOnSuccess
+          className="space-y-4"
+        >
+          <div className="space-y-1.5">
+            <label htmlFor="currentPassword" className="text-sm font-medium">
+              Current password
+            </label>
+            <Input
+              id="currentPassword"
+              name="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="newPassword" className="text-sm font-medium">
+                New password
+              </label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm new password
+              </label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            Use at least 8 characters. You&apos;ll stay signed in on this
+            device.
+          </p>
+          <SubmitButton>Update password</SubmitButton>
         </ActionForm>
       </div>
 
