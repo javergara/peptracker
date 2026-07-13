@@ -47,6 +47,36 @@ export function parseLocalDate(value: string | null | undefined): Date | null {
   return new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
 }
 
+/**
+ * A Date whose *local* Y/M/D equals what `instant` reads as in IANA `timezone`,
+ * anchored at noon (so downstream `getDay()`/day-bucketing can't slip across a
+ * boundary). Returns `instant` unchanged when no timezone is given or it's
+ * invalid. Lets server code (e.g. the reminder cron running in UTC) compute a
+ * user's *own* "today" instead of the server's. Pure.
+ */
+export function zonedToday(
+  instant: Date,
+  timezone: string | null | undefined,
+): Date {
+  if (!timezone) return instant;
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(instant);
+    const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+    const y = get("year");
+    const m = get("month");
+    const d = get("day");
+    if (!y || !m || !d) return instant;
+    return new Date(y, m - 1, d, 12, 0, 0, 0);
+  } catch {
+    return instant;
+  }
+}
+
 /** Local `yyyy-MM-dd` string for an `<input type="date">` default value. */
 export function toDateInputValue(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;

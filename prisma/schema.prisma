@@ -43,6 +43,7 @@ model User {
   color      String? // hex accent for the profile switcher / calendar
   sex        String? // M | F | other — used for sex-aware biomarker reference ranges
   birthYear  Int? // used to derive age for age-aware reference ranges
+  timezone   String? // IANA tz (e.g. "America/New_York") — reminders compute "today" in it
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

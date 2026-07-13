@@ -10,6 +10,7 @@ import {
 } from "@/lib/schedule";
 import { computeStockLevels, isLowStock } from "@/lib/stock";
 import { vialExpiryStatus } from "@/lib/vials";
+import { zonedToday } from "@/lib/dates";
 
 /**
  * Daily reminder cron. Vercel invokes this on the schedule in `vercel.json` with
@@ -63,49 +64,58 @@ async function handler(req: Request) {
   const eightDaysAgo = new Date(now.getTime() - 8 * 86_400_000);
 
   for (const [userId, userSubs] of byUser) {
-    const [cycles, logs, dueRechecks, stock, vials] = await Promise.all([
-      prisma.cycle.findMany({
-        where: { userId, status: "active" },
-        include: { peptide: true, stack: true },
-      }),
-      prisma.doseLog.findMany({
-        where: { userId, takenAt: { gte: eightDaysAgo } },
-        // cycleId/peptideId are needed so adherence matches each dose to the
-        // administration it satisfies (not a raw day count).
-        select: { takenAt: true, cycleId: true, peptideId: true },
-      }),
-      // Lab rechecks that are due and not yet completed.
-      prisma.labReminder.findMany({
-        where: { userId, completedAt: null, dueAt: { lte: now } },
-        select: { id: true, label: true, lastNotifiedAt: true },
-      }),
-      prisma.stockItem.findMany({
-        where: { userId },
-        select: {
-          peptideId: true,
-          quantity: true,
-          vialMcg: true,
-          dose: true,
-          doseUnit: true,
-          frequency: true,
-          peptide: { select: { name: true } },
-        },
-      }),
-      prisma.vial.findMany({
-        where: { userId, status: { in: ["active", "sealed"] } },
-        select: {
-          peptideId: true,
-          status: true,
-          remainingMcg: true,
-          expiresAt: true,
-          peptide: { select: { name: true } },
-        },
-      }),
-    ]);
+    const [profile, cycles, logs, dueRechecks, stock, vials] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { timezone: true },
+        }),
+        prisma.cycle.findMany({
+          where: { userId, status: "active" },
+          include: { peptide: true, stack: true },
+        }),
+        prisma.doseLog.findMany({
+          where: { userId, takenAt: { gte: eightDaysAgo } },
+          // cycleId/peptideId are needed so adherence matches each dose to the
+          // administration it satisfies (not a raw day count).
+          select: { takenAt: true, cycleId: true, peptideId: true },
+        }),
+        // Lab rechecks that are due and not yet completed.
+        prisma.labReminder.findMany({
+          where: { userId, completedAt: null, dueAt: { lte: now } },
+          select: { id: true, label: true, lastNotifiedAt: true },
+        }),
+        prisma.stockItem.findMany({
+          where: { userId },
+          select: {
+            peptideId: true,
+            quantity: true,
+            vialMcg: true,
+            dose: true,
+            doseUnit: true,
+            frequency: true,
+            peptide: { select: { name: true } },
+          },
+        }),
+        prisma.vial.findMany({
+          where: { userId, status: { in: ["active", "sealed"] } },
+          select: {
+            peptideId: true,
+            status: true,
+            remainingMcg: true,
+            expiresAt: true,
+            peptide: { select: { name: true } },
+          },
+        }),
+      ]);
+
+    // Compute "today" in the user's own timezone (the cron runs in UTC), so a
+    // dose due on their calendar day isn't missed/duplicated near midnight.
+    const today = zonedToday(now, profile?.timezone ?? null);
 
     // Don't re-notify a recheck more than once per day.
     const freshRechecks = dueRechecks.filter(
-      (r) => !r.lastNotifiedAt || !sameDay(r.lastNotifiedAt, now),
+      (r) => !r.lastNotifiedAt || !sameDay(r.lastNotifiedAt, today),
     );
 
     const cycleLikes: CycleLike[] = cycles.map((c) => ({
@@ -119,13 +129,13 @@ async function handler(req: Request) {
       stack: c.stack ? { name: c.stack.name } : null,
     }));
 
-    const dueToday = getTodaysDoses(cycleLikes, now).reduce(
+    const dueToday = getTodaysDoses(cycleLikes, today).reduce(
       (sum, t) => sum + t.times,
       0,
     );
-    const loggedToday = logs.filter((l) => sameDay(l.takenAt, now)).length;
+    const loggedToday = logs.filter((l) => sameDay(l.takenAt, today)).length;
     const remainingToday = Math.max(0, dueToday - loggedToday);
-    const overdue = computeOverdue(cycleLikes, logs, now).reduce(
+    const overdue = computeOverdue(cycleLikes, logs, today).reduce(
       (sum, d) => sum + d.missed,
       0,
     );
