@@ -8,7 +8,7 @@ import {
   buildInterventionBands,
   type InterventionInput,
 } from "@/lib/interventions";
-import { estimateStockSupply, toMcg } from "@/lib/stock";
+import { computeStockLevels, type StockLevel } from "@/lib/stock";
 
 /**
  * The peptide library, preset stacks, biomarker catalog, and interaction edges
@@ -384,29 +384,13 @@ export async function listStockItems() {
   });
 }
 
-export interface StockLevel {
-  peptideId: string;
-  peptideName: string;
-  /** Unopened vials in the reserve. */
-  stockVials: number;
-  /** Active/sealed vials currently in tracking. */
-  activeVials: number;
-  /** Combined vials on hand — drives the vial-count low-stock fallback. */
-  total: number;
-  /**
-   * Estimated days of supply left at the peptide's planned dose + frequency,
-   * across stock reserve + remaining in active/sealed vials. `null` when no
-   * planned dose/cadence is set (e.g. diluents) — callers fall back to `total`.
-   */
-  daysOfSupply: number | null;
-}
+export type { StockLevel };
 
 /**
- * Per-peptide supply picture: Σ stock quantity + count of active/sealed vials,
- * plus an estimated **days of supply** from the total mcg on hand (stock vial
- * size × qty + remaining in active/sealed vials) against the planned
- * dose/frequency. Candidate peptides are those with a stock item OR any vial.
- * Powers the stock-card low badge and the dashboard low-stock alert.
+ * Per-peptide supply picture (see `computeStockLevels`): Σ stock quantity +
+ * count of active/sealed vials, plus an estimated **days of supply**. Candidate
+ * peptides are those with a stock item OR any vial. Powers the stock-card low
+ * badge and the dashboard low-stock alert.
  */
 export async function getStockLevels(): Promise<StockLevel[]> {
   const user = await getActiveUser();
@@ -434,74 +418,23 @@ export async function getStockLevels(): Promise<StockLevel[]> {
     }),
   ]);
 
-  interface Acc extends StockLevel {
-    mcgOnHand: number;
-    doseMcg: number | null;
-    frequency: string;
-  }
-  const levels = new Map<string, Acc>();
-  const ensure = (peptideId: string, peptideName: string) => {
-    let l = levels.get(peptideId);
-    if (!l) {
-      l = {
-        peptideId,
-        peptideName,
-        stockVials: 0,
-        activeVials: 0,
-        total: 0,
-        daysOfSupply: null,
-        mcgOnHand: 0,
-        doseMcg: null,
-        frequency: "daily",
-      };
-      levels.set(peptideId, l);
-    }
-    return l;
-  };
-
-  for (const s of stock) {
-    const l = ensure(s.peptideId, s.peptide.name);
-    l.stockVials += s.quantity;
-    l.mcgOnHand += s.vialMcg * s.quantity;
-    // Adopt the first stock item that carries a planned dose as the cadence.
-    if (l.doseMcg == null) {
-      const dm = toMcg(s.dose, s.doseUnit);
-      if (dm && dm > 0) {
-        l.doseMcg = dm;
-        l.frequency = s.frequency;
-      }
-    }
-  }
-  for (const v of vials) {
-    const l = ensure(v.peptideId, v.peptide.name);
-    if (v.status === "active" || v.status === "sealed") {
-      l.activeVials += 1;
-      l.mcgOnHand += v.remainingMcg;
-    }
-  }
-
-  for (const l of levels.values()) {
-    l.total = l.stockVials + l.activeVials;
-    l.daysOfSupply = estimateStockSupply({
-      vialMcg: l.mcgOnHand,
-      quantity: 1,
-      doseMcg: l.doseMcg,
-      frequency: l.frequency,
-    }).days;
-  }
-
-  return Array.from(levels.values())
-    .map(
-      (l): StockLevel => ({
-        peptideId: l.peptideId,
-        peptideName: l.peptideName,
-        stockVials: l.stockVials,
-        activeVials: l.activeVials,
-        total: l.total,
-        daysOfSupply: l.daysOfSupply,
-      }),
-    )
-    .sort((a, b) => a.peptideName.localeCompare(b.peptideName));
+  return computeStockLevels(
+    stock.map((s) => ({
+      peptideId: s.peptideId,
+      peptideName: s.peptide.name,
+      quantity: s.quantity,
+      vialMcg: s.vialMcg,
+      dose: s.dose,
+      doseUnit: s.doseUnit,
+      frequency: s.frequency,
+    })),
+    vials.map((v) => ({
+      peptideId: v.peptideId,
+      peptideName: v.peptide.name,
+      status: v.status,
+      remainingMcg: v.remainingMcg,
+    })),
+  );
 }
 
 /**

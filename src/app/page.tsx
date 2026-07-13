@@ -412,79 +412,9 @@ export default async function DashboardPage() {
       </div>
       <SupplementAdherence items={supplementAdherence} />
 
-      {/* Row 2 — Three stat tiles */}
-      <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">
-        {/* Active cycles */}
-        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
-          <div className="flex items-start justify-between">
-            <div>
-              <Eyebrow>ACTIVE CYCLES</Eyebrow>
-              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
-                {runningCycles.length}
-              </div>
-            </div>
-            <Sparkline points={cycleSparkline} />
-          </div>
-          <p className="text-muted-foreground mt-1.5 text-[12px]">
-            {runningCycles.filter((c) => !c.stackId).length} peptide
-            {runningCycles.filter((c) => !c.stackId).length !== 1
-              ? "s"
-              : ""} · {runningCycles.filter((c) => c.stackId).length} stack
-            {runningCycles.filter((c) => c.stackId).length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        {/* Doses this week */}
-        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
-          <div className="flex items-start justify-between">
-            <div>
-              <Eyebrow>DOSES THIS WEEK</Eyebrow>
-              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
-                {dosesPerDay.reduce((a, b) => a + b, 0)}
-              </div>
-            </div>
-            <MiniBars values={dosesPerDay} />
-          </div>
-          <p className="text-muted-foreground mt-1.5 text-[12px]">
-            last 7 days
-          </p>
-        </div>
-
-        {/* Library */}
-        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
-          <div className="flex items-start justify-between">
-            <div>
-              <Eyebrow>LIBRARY</Eyebrow>
-              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
-                {peptides.length}
-              </div>
-            </div>
-            <div className="bg-accent flex size-[34px] items-center justify-center rounded-[10px]">
-              <Book className="text-primary size-[17px]" />
-            </div>
-          </div>
-          <Link
-            href="/peptides"
-            className="text-primary mt-1.5 block text-[12px] font-medium hover:underline"
-          >
-            Browse peptides →
-          </Link>
-        </div>
-      </div>
-
-      {/* Active levels — combined estimated PK curve for active cycles */}
-      {activeLevelSeriesData.length > 0 ? (
-        <div className="card-surface mb-[18px] rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
-          <Eyebrow className="mb-4">Active levels · last 7 days</Eyebrow>
-          <ActiveLevelsChart
-            series={activeLevelSeriesData}
-            from={activeLevelsFrom}
-            to={activeLevelsTo}
-          />
-        </div>
-      ) : null}
-
-      {/* Row 3 — Today's doses + Active cycles */}
+      {/* Today's doses + Active cycles — promoted above the glanceable stat
+          tiles so the daily "what do I do" action is the first thing after the
+          alerts, not buried under vanity counts. */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-2">
         {/* Today's doses */}
         <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
@@ -658,6 +588,79 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Glanceable stats + estimated PK — secondary context, below the day's
+          action list. */}
+      <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+        {/* Active cycles */}
+        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <Eyebrow>ACTIVE CYCLES</Eyebrow>
+              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
+                {runningCycles.length}
+              </div>
+            </div>
+            <Sparkline points={cycleSparkline} />
+          </div>
+          <p className="text-muted-foreground mt-1.5 text-[12px]">
+            {runningCycles.filter((c) => !c.stackId).length} peptide
+            {runningCycles.filter((c) => !c.stackId).length !== 1
+              ? "s"
+              : ""} · {runningCycles.filter((c) => c.stackId).length} stack
+            {runningCycles.filter((c) => c.stackId).length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Doses this week */}
+        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <Eyebrow>DOSES THIS WEEK</Eyebrow>
+              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
+                {dosesPerDay.reduce((a, b) => a + b, 0)}
+              </div>
+            </div>
+            <MiniBars values={dosesPerDay} />
+          </div>
+          <p className="text-muted-foreground mt-1.5 text-[12px]">
+            last 7 days
+          </p>
+        </div>
+
+        {/* Library */}
+        <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <Eyebrow>LIBRARY</Eyebrow>
+              <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
+                {peptides.length}
+              </div>
+            </div>
+            <div className="bg-accent flex size-[34px] items-center justify-center rounded-[10px]">
+              <Book className="text-primary size-[17px]" />
+            </div>
+          </div>
+          <Link
+            href="/peptides"
+            className="text-primary mt-1.5 block text-[12px] font-medium hover:underline"
+          >
+            Browse peptides →
+          </Link>
+        </div>
+      </div>
+
+      {/* Active levels — combined estimated PK curve for active cycles */}
+      {activeLevelSeriesData.length > 0 ? (
+        <div className="card-surface mb-[18px] rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+          <Eyebrow className="mb-4">Active levels · last 7 days</Eyebrow>
+          <ActiveLevelsChart
+            series={activeLevelSeriesData}
+            from={activeLevelsFrom}
+            to={activeLevelsTo}
+          />
+        </div>
+      ) : null}
 
       {/* Row 4 — Recent doses table */}
       <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">

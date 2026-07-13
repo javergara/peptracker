@@ -9,6 +9,9 @@ import {
   AlertTriangle,
   Info,
   ChevronLeft,
+  CalendarPlus,
+  PackagePlus,
+  Layers,
 } from "lucide-react";
 
 import { getPeptideBySlug, getPeptideInteractions } from "@/lib/queries";
@@ -17,7 +20,9 @@ import {
   asDosage,
   asReconstitution,
   asReferences,
+  isDiluent,
 } from "@/types/peptide";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/common/page-header";
 import { Disclaimer } from "@/components/disclaimer";
 import { ReferenceList } from "@/components/common/reference-list";
@@ -107,6 +112,33 @@ export default async function PeptideDetailPage({
       />
 
       {tags.length > 0 && <GoalBadges tags={tags} />}
+
+      {/* Actions — turn the read-only KB page into a jumping-off point. A
+          diluent (BAC water) can only be stocked, not cycled/stacked. */}
+      <div className="flex flex-wrap gap-2">
+        {!isDiluent(peptide.category) && (
+          <Button render={<Link href={`/cycles/new?peptide=${peptide.id}`} />}>
+            <CalendarPlus className="size-4" />
+            Start a cycle
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          render={<Link href={`/inventory?tab=stock&peptide=${peptide.id}`} />}
+        >
+          <PackagePlus className="size-4" />
+          Add to inventory
+        </Button>
+        {!isDiluent(peptide.category) && (
+          <Button
+            variant="outline"
+            render={<Link href={`/stacks/new?peptide=${peptide.id}`} />}
+          >
+            <Layers className="size-4" />
+            Add to a stack
+          </Button>
+        )}
+      </div>
 
       <Disclaimer />
 

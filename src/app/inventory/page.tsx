@@ -168,6 +168,7 @@ export default async function InventoryPage({
           stockItems={stockItems}
           levels={levels}
           peptides={peptides}
+          initialPeptideId={peptideFilter}
         />
       ) : (
         <>

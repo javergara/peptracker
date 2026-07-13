@@ -28,8 +28,19 @@ interface PeptideOption {
  * (BAC water) are measured in **mL** and have no per-dose supply, so the size
  * field relabels to mL and the dose/frequency inputs drop away.
  */
-export function AddStockForm({ peptides }: { peptides: PeptideOption[] }) {
-  const [peptideId, setPeptideId] = React.useState<string | null>(null);
+export function AddStockForm({
+  peptides,
+  initialPeptideId,
+}: {
+  peptides: PeptideOption[];
+  /** Preselected peptide when deep-linked from the peptide detail page. */
+  initialPeptideId?: string;
+}) {
+  const [peptideId, setPeptideId] = React.useState<string | null>(
+    initialPeptideId && peptides.some((p) => p.id === initialPeptideId)
+      ? initialPeptideId
+      : null,
+  );
   const selected = peptides.find((p) => p.id === peptideId);
   const diluent = isDiluent(selected?.category);
 

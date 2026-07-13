@@ -9,7 +9,12 @@ import { getAllInteractionRows, listPeptides } from "@/lib/queries";
 
 export const metadata = { title: "Build a Stack" };
 
-export default async function NewStackPage() {
+export default async function NewStackPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ peptide?: string }>;
+}) {
+  const { peptide: initialPeptideId } = await searchParams;
   const [peptides, interactionRows] = await Promise.all([
     listPeptides(),
     getAllInteractionRows(),
@@ -35,7 +40,11 @@ export default async function NewStackPage() {
       />
       <Disclaimer className="mb-6" />
       <div className="card-surface rounded-[18px] p-6 [box-shadow:var(--shadow-card)]">
-        <StackBuilder peptides={options} interactionRows={interactionRows} />
+        <StackBuilder
+          peptides={options}
+          interactionRows={interactionRows}
+          initialPeptideId={initialPeptideId}
+        />
       </div>
     </div>
   );

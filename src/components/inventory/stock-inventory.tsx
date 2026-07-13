@@ -34,10 +34,13 @@ export function StockInventory({
   stockItems,
   levels,
   peptides,
+  initialPeptideId,
 }: {
   stockItems: StockItemView[];
   levels: StockLevel[];
   peptides: { id: string; name: string; category: string }[];
+  /** Preselect this peptide in the add form (deep-link from peptide detail). */
+  initialPeptideId?: string;
 }) {
   const levelByPeptide = new Map(levels.map((l) => [l.peptideId, l]));
 
@@ -207,7 +210,7 @@ export function StockInventory({
       {/* Add to stock */}
       <section id="add-stock" className="card-surface rounded-[18px] p-6">
         <Eyebrow className="mb-4">Add to Stock</Eyebrow>
-        <AddStockForm peptides={peptides} />
+        <AddStockForm peptides={peptides} initialPeptideId={initialPeptideId} />
       </section>
     </div>
   );

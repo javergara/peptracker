@@ -12,7 +12,12 @@ import { asDosage } from "@/types/peptide";
 
 export const metadata = { title: "New Cycle" };
 
-export default async function NewCyclePage() {
+export default async function NewCyclePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string; peptide?: string; stack?: string }>;
+}) {
+  const { source, peptide, stack } = await searchParams;
   const [user, peptidesRaw, stacksRaw] = await Promise.all([
     getCurrentUser(),
     listPeptides(),
@@ -34,6 +39,19 @@ export default async function NewCyclePage() {
       ...parseDoseAmount(i.dose),
     })),
   }));
+
+  // Prefill the "based on" source when deep-linked from a peptide/stack page.
+  // Accept an explicit `source` ("peptide:<id>"/"stack:<id>") or the shorthand
+  // `?peptide=<id>` / `?stack=<id>`, validated against the known options.
+  const requestedSource =
+    source ??
+    (peptide ? `peptide:${peptide}` : stack ? `stack:${stack}` : undefined);
+  const validSource =
+    requestedSource &&
+    (peptides.some((p) => `peptide:${p.id}` === requestedSource) ||
+      stacks.some((s) => `stack:${s.id}` === requestedSource))
+      ? requestedSource
+      : undefined;
 
   async function action(formData: FormData) {
     "use server";
@@ -61,6 +79,7 @@ export default async function NewCyclePage() {
           stacks={stacks}
           action={action}
           submitLabel="Create cycle"
+          defaults={validSource ? { source: validSource } : undefined}
         />
       </div>
     </div>
