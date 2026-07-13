@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  aggregateSpend,
   costOverDays,
   costPerDose,
   costPerMonth,
@@ -57,5 +58,40 @@ describe("formatCost", () => {
     expect(formatCost(3.5)).toBe("$3.50");
     expect(formatCost(null)).toBe("—");
     expect(formatCost(3.5, "€")).toBe("€3.50");
+  });
+});
+
+describe("aggregateSpend", () => {
+  it("totals and groups by peptide, highest first", () => {
+    const r = aggregateSpend([
+      { peptideId: "a", peptideName: "AAA", amount: 50 },
+      { peptideId: "b", peptideName: "BBB", amount: 120 },
+      { peptideId: "a", peptideName: "AAA", amount: 30 },
+    ]);
+    expect(r.total).toBe(200);
+    expect(r.pricedLines).toBe(3);
+    expect(r.byPeptide).toEqual([
+      { peptideId: "b", peptideName: "BBB", amount: 120 },
+      { peptideId: "a", peptideName: "AAA", amount: 80 },
+    ]);
+  });
+
+  it("ignores lines with no/invalid price", () => {
+    const r = aggregateSpend([
+      { peptideId: "a", peptideName: "AAA", amount: 0 },
+      { peptideId: "b", peptideName: "BBB", amount: NaN },
+      { peptideId: "c", peptideName: "CCC", amount: 40 },
+    ]);
+    expect(r.total).toBe(40);
+    expect(r.pricedLines).toBe(1);
+    expect(r.byPeptide).toHaveLength(1);
+  });
+
+  it("is empty for no priced lines", () => {
+    expect(aggregateSpend([])).toEqual({
+      total: 0,
+      byPeptide: [],
+      pricedLines: 0,
+    });
   });
 });

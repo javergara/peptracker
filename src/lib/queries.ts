@@ -372,6 +372,55 @@ export async function listActiveVials() {
   });
 }
 
+/**
+ * Priced inventory lines for spend analytics — each active/stock vial that has
+ * a `price`, reduced to `{ peptideId, peptideName, amount }` (vial = its price;
+ * stock = price × quantity). Feeds `aggregateSpend`. User-scoped.
+ */
+export async function getSpendItems(): Promise<
+  { peptideId: string; peptideName: string; amount: number }[]
+> {
+  const user = await getActiveUser();
+  const [vials, stock] = await Promise.all([
+    prisma.vial.findMany({
+      where: { userId: user.id, price: { not: null } },
+      select: {
+        peptideId: true,
+        price: true,
+        peptide: { select: { name: true } },
+      },
+    }),
+    prisma.stockItem.findMany({
+      where: { userId: user.id, price: { not: null } },
+      select: {
+        peptideId: true,
+        price: true,
+        quantity: true,
+        peptide: { select: { name: true } },
+      },
+    }),
+  ]);
+  const items: { peptideId: string; peptideName: string; amount: number }[] =
+    [];
+  for (const v of vials) {
+    if (v.price != null)
+      items.push({
+        peptideId: v.peptideId,
+        peptideName: v.peptide.name,
+        amount: v.price,
+      });
+  }
+  for (const s of stock) {
+    if (s.price != null)
+      items.push({
+        peptideId: s.peptideId,
+        peptideName: s.peptide.name,
+        amount: s.price * s.quantity,
+      });
+  }
+  return items;
+}
+
 // --- Stock reserve ---------------------------------------------------------
 
 /** The active profile's stock (unopened vials in reserve), by peptide name. */

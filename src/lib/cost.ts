@@ -51,3 +51,45 @@ export function formatCost(value: number | null, symbol = "$"): string {
   if (value == null) return "—";
   return `${symbol}${value.toFixed(2)}`;
 }
+
+/** One priced inventory line — `amount` is the total money for that line. */
+export interface SpendItem {
+  peptideId: string;
+  peptideName: string;
+  amount: number;
+}
+
+export interface SpendSummary {
+  /** Total money invested across all priced lines. */
+  total: number;
+  /** Per-peptide totals, highest spend first. */
+  byPeptide: { peptideId: string; peptideName: string; amount: number }[];
+  /** How many lines carried a usable price (drives an "add prices" hint). */
+  pricedLines: number;
+}
+
+/**
+ * Aggregate what's been spent across priced inventory lines (active vials +
+ * stock reserve). Lines with no/invalid price are ignored. Pure — the caller
+ * turns each vial/stock row into a `{ amount }` (vial = its price; stock =
+ * price × quantity) before passing them in.
+ */
+export function aggregateSpend(items: SpendItem[]): SpendSummary {
+  const priced = items.filter((i) => Number.isFinite(i.amount) && i.amount > 0);
+  const byId = new Map<string, { peptideName: string; amount: number }>();
+  let total = 0;
+  for (const i of priced) {
+    total += i.amount;
+    const cur = byId.get(i.peptideId);
+    if (cur) cur.amount += i.amount;
+    else
+      byId.set(i.peptideId, { peptideName: i.peptideName, amount: i.amount });
+  }
+  const byPeptide = Array.from(byId.entries())
+    .map(([peptideId, v]) => ({ peptideId, ...v }))
+    .sort(
+      (a, b) =>
+        b.amount - a.amount || a.peptideName.localeCompare(b.peptideName),
+    );
+  return { total, byPeptide, pricedLines: priced.length };
+}

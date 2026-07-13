@@ -18,13 +18,14 @@ import {
   getCurrentUser,
   listStockItems,
   getStockLevels,
+  getSpendItems,
 } from "@/lib/queries";
 import {
   vialConcentration,
   vialFillPercent,
   vialGaugeStatus,
 } from "@/lib/vials";
-import { costPerDose, formatCost } from "@/lib/cost";
+import { aggregateSpend, costPerDose, formatCost } from "@/lib/cost";
 import { toMcg } from "@/lib/stock";
 import { asDosage } from "@/types/peptide";
 import { VIAL_STATUS_STYLE } from "@/lib/constants";
@@ -60,13 +61,18 @@ export default async function InventoryPage({
   const { tab, peptide: peptideFilter } = await searchParams;
   const mode: InventoryMode = tab === "stock" ? "stock" : "active";
 
-  const [peptides, user, vials, stockItems, levels] = await Promise.all([
-    listPeptides(),
-    getCurrentUser(),
-    mode === "active" ? listVials() : Promise.resolve([]),
-    mode === "stock" ? listStockItems() : Promise.resolve([]),
-    mode === "stock" ? getStockLevels() : Promise.resolve([]),
-  ]);
+  const [peptides, user, vials, stockItems, levels, spendItems] =
+    await Promise.all([
+      listPeptides(),
+      getCurrentUser(),
+      mode === "active" ? listVials() : Promise.resolve([]),
+      mode === "stock" ? listStockItems() : Promise.resolve([]),
+      mode === "stock" ? getStockLevels() : Promise.resolve([]),
+      getSpendItems(),
+    ]);
+
+  // Total invested across all priced vials + stock (both tabs), highest first.
+  const spend = aggregateSpend(spendItems);
 
   // Peptide filter pills — derived from the peptides that actually have
   // vials on this tab (no extra query, `vials` is already fetched).
@@ -162,6 +168,25 @@ export default async function InventoryPage({
           </Link>
         ))}
       </div>
+
+      {/* Spend summary — total invested across priced vials + stock, top spends. */}
+      {spend.pricedLines > 0 ? (
+        <div className="card-surface flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[18px] p-[16px_20px] [box-shadow:var(--shadow-card)]">
+          <div>
+            <Eyebrow>Total invested</Eyebrow>
+            <div className="num text-foreground mt-0.5 text-[22px] font-semibold">
+              {formatCost(spend.total)}
+            </div>
+          </div>
+          <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            {spend.byPeptide.slice(0, 4).map((p) => (
+              <span key={p.peptideId} className="num">
+                {p.peptideName} {formatCost(p.amount)}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {mode === "stock" ? (
         <StockInventory
