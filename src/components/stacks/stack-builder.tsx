@@ -50,13 +50,26 @@ interface Props {
   interactionRows: InteractionRow[];
   /** Present in edit mode — prefills the form and switches the submit to updateStack. */
   stack?: InitialStack;
+  /** Preselect this peptide (deep-link from the peptide detail page). */
+  initialPeptideId?: string;
 }
 
-export function StackBuilder({ peptides, interactionRows, stack }: Props) {
+export function StackBuilder({
+  peptides,
+  interactionRows,
+  stack,
+  initialPeptideId,
+}: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    () => new Set(stack?.items.map((i) => i.peptideId) ?? []),
+    () =>
+      new Set(
+        stack?.items.map((i) => i.peptideId) ??
+          (initialPeptideId && peptides.some((p) => p.id === initialPeptideId)
+            ? [initialPeptideId]
+            : []),
+      ),
   );
   const [name, setName] = useState(stack?.name ?? "");
   const [goal, setGoal] = useState<GoalTag | "">(

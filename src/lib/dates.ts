@@ -33,6 +33,20 @@ export function daysBetween(a: Date, b: Date): number {
   return differenceInCalendarDays(b, a);
 }
 
+/**
+ * Parse a `yyyy-MM-dd` (`<input type="date">`) value into a **local midnight**
+ * Date. Using `new Date("2026-07-13")` instead parses as **UTC** midnight, which
+ * shifts the calendar day for any user behind UTC — the source of day-off-by-one
+ * bugs in schedule/range math. Returns `null` for missing/malformed input so
+ * callers decide the fallback (today, null end date, …).
+ */
+export function parseLocalDate(value: string | null | undefined): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? "");
+  if (!match) return null;
+  const [, y, m, d] = match;
+  return new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
+}
+
 /** Local `yyyy-MM-dd` string for an `<input type="date">` default value. */
 export function toDateInputValue(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;

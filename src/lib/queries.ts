@@ -8,6 +8,7 @@ import {
   buildInterventionBands,
   type InterventionInput,
 } from "@/lib/interventions";
+import { computeStockLevels, type StockLevel } from "@/lib/stock";
 
 /**
  * The peptide library, preset stacks, biomarker catalog, and interaction edges
@@ -383,60 +384,56 @@ export async function listStockItems() {
   });
 }
 
-export interface StockLevel {
-  peptideId: string;
-  peptideName: string;
-  /** Unopened vials in the reserve. */
-  stockVials: number;
-  /** Active/sealed vials currently in tracking. */
-  activeVials: number;
-  /** Combined vials on hand — drives the low-stock alert. */
-  total: number;
-}
+export type { StockLevel };
 
 /**
- * Combined vials-on-hand per peptide: Σ stock quantity + count of active/sealed
- * vials. Candidate peptides are those with a stock item OR any vial (any status).
- * Powers the stock-card low badge and the dashboard low-stock alert.
+ * Per-peptide supply picture (see `computeStockLevels`): Σ stock quantity +
+ * count of active/sealed vials, plus an estimated **days of supply**. Candidate
+ * peptides are those with a stock item OR any vial. Powers the stock-card low
+ * badge and the dashboard low-stock alert.
  */
 export async function getStockLevels(): Promise<StockLevel[]> {
   const user = await getActiveUser();
   const [stock, vials] = await Promise.all([
     prisma.stockItem.findMany({
       where: { userId: user.id },
-      include: { peptide: { select: { name: true } } },
+      select: {
+        peptideId: true,
+        quantity: true,
+        vialMcg: true,
+        dose: true,
+        doseUnit: true,
+        frequency: true,
+        peptide: { select: { name: true } },
+      },
     }),
     prisma.vial.findMany({
       where: { userId: user.id },
       select: {
         peptideId: true,
         status: true,
+        remainingMcg: true,
         peptide: { select: { name: true } },
       },
     }),
   ]);
 
-  const levels = new Map<string, StockLevel>();
-  const ensure = (peptideId: string, peptideName: string) => {
-    let l = levels.get(peptideId);
-    if (!l) {
-      l = { peptideId, peptideName, stockVials: 0, activeVials: 0, total: 0 };
-      levels.set(peptideId, l);
-    }
-    return l;
-  };
-
-  for (const s of stock) {
-    ensure(s.peptideId, s.peptide.name).stockVials += s.quantity;
-  }
-  for (const v of vials) {
-    const l = ensure(v.peptideId, v.peptide.name);
-    if (v.status === "active" || v.status === "sealed") l.activeVials += 1;
-  }
-  for (const l of levels.values()) l.total = l.stockVials + l.activeVials;
-
-  return Array.from(levels.values()).sort((a, b) =>
-    a.peptideName.localeCompare(b.peptideName),
+  return computeStockLevels(
+    stock.map((s) => ({
+      peptideId: s.peptideId,
+      peptideName: s.peptide.name,
+      quantity: s.quantity,
+      vialMcg: s.vialMcg,
+      dose: s.dose,
+      doseUnit: s.doseUnit,
+      frequency: s.frequency,
+    })),
+    vials.map((v) => ({
+      peptideId: v.peptideId,
+      peptideName: v.peptide.name,
+      status: v.status,
+      remainingMcg: v.remainingMcg,
+    })),
   );
 }
 

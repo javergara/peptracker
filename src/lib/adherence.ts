@@ -15,6 +15,10 @@ import {
 
 export interface AdherenceLog {
   takenAt: Date;
+  /** Cycle the dose was logged against; ad-hoc doses (null) satisfy nothing. */
+  cycleId?: string | null;
+  /** Peptide dosed — used to match the right item of a stack cycle. */
+  peptideId?: string | null;
 }
 
 export interface Adherence {
@@ -32,8 +36,20 @@ function sameDay(a: Date, b: Date): boolean {
   return startOfDay(a).getTime() === startOfDay(b).getTime();
 }
 
-function expectedForDay(cycles: CycleLike[], day: Date): number {
-  let total = 0;
+/**
+ * One expected administration on a given day: a specific cycle (and peptide, for
+ * stack cycles) that should be dosed, with how many times. The `key` is what a
+ * logged dose is matched against.
+ */
+interface DayAdmin {
+  /** `${cycleId}::${peptideId}` for stack items; `${cycleId}::*` for single. */
+  key: string;
+  expected: number;
+}
+
+/** The expected administrations for `day` across all active cycles. */
+function expectedAdminsForDay(cycles: CycleLike[], day: Date): DayAdmin[] {
+  const admins: DayAdmin[] = [];
   for (const c of cycles) {
     if (c.status !== "active") continue;
     const cfg = c.scheduleConfig;
@@ -44,20 +60,53 @@ function expectedForDay(cycles: CycleLike[], day: Date): number {
       for (const item of cfg.items) {
         const s = resolveItemSchedule(cfg, item, c.startDate, c.endDate);
         if (!isWithinRange(day, s.start, s.end)) continue;
-        if (matchesFrequency(s.frequency, s.daysOfWeek, day, s.start)) {
-          total += s.timesPerDay;
-        }
+        if (!matchesFrequency(s.frequency, s.daysOfWeek, day, s.start))
+          continue;
+        admins.push({
+          key: `${c.id}::${item.peptideId}`,
+          expected: s.timesPerDay,
+        });
       }
       continue;
     }
 
     // Single-peptide cycle.
     if (!isWithinRange(day, c.startDate, c.endDate)) continue;
-    if (isDoseDay(cfg, day, c.startDate)) {
-      total += cfg.timesPerDay ?? 1;
-    }
+    if (!isDoseDay(cfg, day, c.startDate)) continue;
+    admins.push({ key: `${c.id}::*`, expected: cfg.timesPerDay ?? 1 });
   }
-  return total;
+  return admins;
+}
+
+/**
+ * Doses on `day` that actually satisfy a scheduled administration — each dose is
+ * matched to the specific cycle (and peptide, for stacks) it belongs to and
+ * counted at most `expected` times. So an ad-hoc dose (no cycleId), a
+ * wrong-peptide dose, or a third dose on a twice-a-day peptide can't paper over
+ * a *different* peptide's miss, and double-logging can't push a day over 100%.
+ */
+function loggedForDay(
+  admins: DayAdmin[],
+  logs: AdherenceLog[],
+  day: Date,
+): number {
+  if (admins.length === 0) return 0;
+  const byKey = new Set(admins.map((a) => a.key));
+  const counts = new Map<string, number>();
+  for (const l of logs) {
+    if (!l.cycleId || !sameDay(l.takenAt, day)) continue;
+    // Prefer the peptide-specific (stack) admin; fall back to the cycle-wide
+    // single-peptide admin.
+    const stackKey = `${l.cycleId}::${l.peptideId}`;
+    const key = byKey.has(stackKey) ? stackKey : `${l.cycleId}::*`;
+    if (!byKey.has(key)) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  let logged = 0;
+  for (const a of admins) {
+    logged += Math.min(counts.get(a.key) ?? 0, a.expected);
+  }
+  return logged;
 }
 
 export function computeAdherence(
@@ -71,8 +120,9 @@ export function computeAdherence(
 
   for (let i = 0; i < windowDays; i++) {
     const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-    expected += expectedForDay(cycles, day);
-    logged += doseLogs.filter((d) => sameDay(d.takenAt, day)).length;
+    const admins = expectedAdminsForDay(cycles, day);
+    expected += admins.reduce((s, a) => s + a.expected, 0);
+    logged += loggedForDay(admins, doseLogs, day);
   }
 
   const percent =
@@ -84,8 +134,9 @@ export function computeAdherence(
   let streak = 0;
   for (let i = 0; i < windowDays + 1; i++) {
     const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-    const exp = expectedForDay(cycles, day);
-    const log = doseLogs.filter((d) => sameDay(d.takenAt, day)).length;
+    const admins = expectedAdminsForDay(cycles, day);
+    const exp = admins.reduce((s, a) => s + a.expected, 0);
+    const log = loggedForDay(admins, doseLogs, day);
     const met = exp === 0 || log >= exp;
     if (!met) {
       if (i === 0) continue; // today not finished yet
@@ -118,9 +169,10 @@ export function computeOverdue(
     const day = startOfDay(
       new Date(now.getFullYear(), now.getMonth(), now.getDate() - i),
     );
-    const expected = expectedForDay(cycles, day);
+    const admins = expectedAdminsForDay(cycles, day);
+    const expected = admins.reduce((s, a) => s + a.expected, 0);
     if (expected === 0) continue;
-    const logged = logs.filter((l) => sameDay(l.takenAt, day)).length;
+    const logged = loggedForDay(admins, logs, day);
     const missed = expected - logged;
     if (missed > 0) result.push({ date: day, missed });
   }

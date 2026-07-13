@@ -13,6 +13,8 @@ import {
   YAxis,
 } from "recharts";
 
+import { comparePhases, effectSizeLabel } from "@/lib/cycle-comparison";
+
 /**
  * A biomarker's trend with intervention bands (cycles + supplements) shaded
  * behind it and an optional reference-range band — the "exams correlated to
@@ -54,6 +56,22 @@ export function MarkerTimelineChart({
   color?: string;
 }) {
   if (points.length === 0) return null;
+
+  // On-cycle vs off-cycle comparison (cycle bands only; supplements excluded).
+  const cycleWindows = bands
+    .filter((b) => b.kind === "cycle")
+    .map((b) => ({ start: b.start, end: b.end }));
+  const cmp = cycleWindows.length
+    ? comparePhases(
+        points.map((p) => ({ date: p.t, value: p.value })),
+        cycleWindows,
+      )
+    : null;
+  const showCmp =
+    cmp != null && cmp.onN > 0 && cmp.offN > 0 && cmp.delta != null;
+  const fmtVal = (v: number) =>
+    Math.abs(v) >= 100 ? Math.round(v).toString() : v.toFixed(1);
+  const effect = cmp ? effectSizeLabel(cmp.cohensD) : null;
 
   const ts = points.map((p) => p.t);
   let min = Math.min(...ts);
@@ -163,6 +181,35 @@ export function MarkerTimelineChart({
           />
         </LineChart>
       </ResponsiveContainer>
+
+      {/* On-cycle vs off-cycle summary — descriptive, not causal. */}
+      {showCmp && cmp ? (
+        <div className="border-border/60 mt-3 rounded-lg border bg-[var(--muted)]/30 px-3 py-2">
+          <div className="text-muted-foreground flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
+            <span className="eyebrow" style={{ fontSize: "10px" }}>
+              On cycle vs off
+            </span>
+            <span className="num">
+              on {fmtVal(cmp.onMean!)}
+              {unit ? ` ${unit}` : ""} ({cmp.onN})
+            </span>
+            <span className="num">
+              off {fmtVal(cmp.offMean!)}
+              {unit ? ` ${unit}` : ""} ({cmp.offN})
+            </span>
+            <span className="text-foreground num font-medium">
+              Δ {cmp.delta! > 0 ? "+" : ""}
+              {fmtVal(cmp.delta!)}
+              {cmp.percentChange != null
+                ? ` (${cmp.percentChange > 0 ? "+" : ""}${cmp.percentChange.toFixed(0)}%)`
+                : ""}
+            </span>
+            {effect && effect !== "negligible" ? (
+              <span className="capitalize">{effect} effect</span>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {/* Band legend (what the shaded regions mean). */}
       {bands.length > 0 ? (

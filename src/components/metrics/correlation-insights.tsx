@@ -52,6 +52,12 @@ function InsightCard({ insight }: { insight: Insight }) {
       <div className="text-muted-foreground num flex gap-4 text-xs">
         <span>r = {signedR}</span>
         <span>n = {insight.n}</span>
+        <span>
+          p{" "}
+          {insight.pValue < 0.001
+            ? "< 0.001"
+            : `= ${insight.pValue.toFixed(3)}`}
+        </span>
       </div>
     </div>
   );

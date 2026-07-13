@@ -34,15 +34,18 @@ export function StockInventory({
   stockItems,
   levels,
   peptides,
+  initialPeptideId,
 }: {
   stockItems: StockItemView[];
   levels: StockLevel[];
   peptides: { id: string; name: string; category: string }[];
+  /** Preselect this peptide in the add form (deep-link from peptide detail). */
+  initialPeptideId?: string;
 }) {
   const levelByPeptide = new Map(levels.map((l) => [l.peptideId, l]));
 
   const totalReserve = stockItems.reduce((s, i) => s + i.quantity, 0);
-  const lowCount = levels.filter((l) => isLowStock(l.total)).length;
+  const lowCount = levels.filter((l) => isLowStock(l)).length;
   const soonestDays = stockItems
     .map(
       (i) =>
@@ -115,7 +118,7 @@ export function StockInventory({
               frequency: item.frequency,
             });
             const level = levelByPeptide.get(item.peptideId);
-            const low = level ? isLowStock(level.total) : item.quantity <= 1;
+            const low = level ? isLowStock(level) : item.quantity <= 1;
             const doseLabel =
               item.dose != null
                 ? `${item.dose} ${item.doseUnit} · ${FREQUENCY_LABELS[item.frequency] ?? item.frequency}`
@@ -207,7 +210,7 @@ export function StockInventory({
       {/* Add to stock */}
       <section id="add-stock" className="card-surface rounded-[18px] p-6">
         <Eyebrow className="mb-4">Add to Stock</Eyebrow>
-        <AddStockForm peptides={peptides} />
+        <AddStockForm peptides={peptides} initialPeptideId={initialPeptideId} />
       </section>
     </div>
   );

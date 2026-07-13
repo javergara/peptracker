@@ -3,7 +3,12 @@
 import * as React from "react";
 import { AlertTriangle, GitCompareArrows } from "lucide-react";
 
-import { correlationStrength, linearRegression } from "@/lib/stats";
+import {
+  correlationStrength,
+  linearRegression,
+  pearsonPValue,
+} from "@/lib/stats";
+import { pairByNearestDate } from "@/lib/correlations";
 import { ScatterCorrelation } from "@/components/metrics/scatter-correlation";
 import { EmptyState } from "@/components/common/empty-state";
 import { Eyebrow } from "@/components/common/eyebrow";
@@ -19,23 +24,20 @@ export interface CorrSeries {
 
 const PAIR_WINDOW_MS = 14 * 86_400_000;
 
-/** Pair each Y point with the nearest X point within the time window. */
+/**
+ * Pair X and Y one-to-one by nearest date (shared with the insight-discovery
+ * engine so both agree). Each reading is used once — no reusing one X against
+ * many Y, which would inflate n and r.
+ */
 function pair(
   xs: { t: number; value: number }[],
   ys: { t: number; value: number }[],
 ) {
-  const out: { x: number; y: number }[] = [];
-  for (const y of ys) {
-    let best: { diff: number; value: number } | null = null;
-    for (const x of xs) {
-      const diff = Math.abs(x.t - y.t);
-      if (diff <= PAIR_WINDOW_MS && (!best || diff < best.diff)) {
-        best = { diff, value: x.value };
-      }
-    }
-    if (best) out.push({ x: best.value, y: y.value });
-  }
-  return out;
+  return pairByNearestDate(
+    xs.map((p) => ({ date: p.t, value: p.value })),
+    ys.map((p) => ({ date: p.t, value: p.value })),
+    PAIR_WINDOW_MS,
+  );
 }
 
 const selectCls =
@@ -82,6 +84,8 @@ export function CorrelationExplorer({
   const hasFit = points.length >= 2;
   const thin = points.length > 0 && points.length < 5;
   const strength = correlationStrength(reg.r);
+  const pValue = pearsonPValue(reg.r, reg.n);
+  const significant = reg.n >= 3 && pValue < 0.05;
 
   if (usable.length < 2) {
     return (
@@ -211,13 +215,19 @@ export function CorrelationExplorer({
                     className="eyebrow text-ink-caption"
                     style={{ fontSize: "10px" }}
                   >
-                    Strength
+                    p-value
                   </div>
-                  <div className="num text-ink-accent mt-0.5 text-xl font-semibold capitalize">
-                    {strength}
+                  <div className="num text-ink-foreground mt-0.5 text-xl font-semibold">
+                    {pValue < 0.001 ? "<0.001" : pValue.toFixed(3)}
                   </div>
                 </div>
               </div>
+
+              <p className="text-ink-caption mt-4 text-[11.5px] leading-snug">
+                {significant
+                  ? `Statistically significant (p < 0.05) — unlikely to be chance at n = ${reg.n}. Still correlational, not causal.`
+                  : `Not statistically significant (p ≥ 0.05) at n = ${reg.n} — treat as suggestive only; it could be chance.`}
+              </p>
             </InkPanel>
           </div>
 

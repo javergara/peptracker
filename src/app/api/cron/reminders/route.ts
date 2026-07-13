@@ -8,6 +8,8 @@ import {
   type CycleLike,
   type ScheduleConfig,
 } from "@/lib/schedule";
+import { computeStockLevels, isLowStock } from "@/lib/stock";
+import { vialExpiryStatus } from "@/lib/vials";
 
 /**
  * Daily reminder cron. Vercel invokes this on the schedule in `vercel.json` with
@@ -61,19 +63,43 @@ async function handler(req: Request) {
   const eightDaysAgo = new Date(now.getTime() - 8 * 86_400_000);
 
   for (const [userId, userSubs] of byUser) {
-    const [cycles, logs, dueRechecks] = await Promise.all([
+    const [cycles, logs, dueRechecks, stock, vials] = await Promise.all([
       prisma.cycle.findMany({
         where: { userId, status: "active" },
         include: { peptide: true, stack: true },
       }),
       prisma.doseLog.findMany({
         where: { userId, takenAt: { gte: eightDaysAgo } },
-        select: { takenAt: true },
+        // cycleId/peptideId are needed so adherence matches each dose to the
+        // administration it satisfies (not a raw day count).
+        select: { takenAt: true, cycleId: true, peptideId: true },
       }),
       // Lab rechecks that are due and not yet completed.
       prisma.labReminder.findMany({
         where: { userId, completedAt: null, dueAt: { lte: now } },
         select: { id: true, label: true, lastNotifiedAt: true },
+      }),
+      prisma.stockItem.findMany({
+        where: { userId },
+        select: {
+          peptideId: true,
+          quantity: true,
+          vialMcg: true,
+          dose: true,
+          doseUnit: true,
+          frequency: true,
+          peptide: { select: { name: true } },
+        },
+      }),
+      prisma.vial.findMany({
+        where: { userId, status: { in: ["active", "sealed"] } },
+        select: {
+          peptideId: true,
+          status: true,
+          remainingMcg: true,
+          expiresAt: true,
+          peptide: { select: { name: true } },
+        },
       }),
     ]);
 
@@ -104,7 +130,38 @@ async function handler(req: Request) {
       0,
     );
 
-    if (remainingToday === 0 && overdue === 0 && freshRechecks.length === 0) {
+    // Inventory nudges: vials expiring within 7 days (or already expired) and
+    // peptides running low on supply — both already computed elsewhere, folded
+    // into the same daily push (no second cron).
+    const expiringSoon = vials.filter((v) => {
+      const status = vialExpiryStatus(v.expiresAt, now);
+      return status === "soon" || status === "expired";
+    }).length;
+    const lowStock = computeStockLevels(
+      stock.map((s) => ({
+        peptideId: s.peptideId,
+        peptideName: s.peptide.name,
+        quantity: s.quantity,
+        vialMcg: s.vialMcg,
+        dose: s.dose,
+        doseUnit: s.doseUnit,
+        frequency: s.frequency,
+      })),
+      vials.map((v) => ({
+        peptideId: v.peptideId,
+        peptideName: v.peptide.name,
+        status: v.status,
+        remainingMcg: v.remainingMcg,
+      })),
+    ).filter((l) => isLowStock(l)).length;
+
+    if (
+      remainingToday === 0 &&
+      overdue === 0 &&
+      freshRechecks.length === 0 &&
+      expiringSoon === 0 &&
+      lowStock === 0
+    ) {
       continue;
     }
 
@@ -120,12 +177,26 @@ async function handler(req: Request) {
         `${freshRechecks.length} lab recheck${freshRechecks.length === 1 ? "" : "s"} due`,
       );
     }
+    if (expiringSoon > 0) {
+      parts.push(
+        `${expiringSoon} vial${expiringSoon === 1 ? "" : "s"} expiring`,
+      );
+    }
+    if (lowStock > 0) {
+      parts.push(
+        `${lowStock} peptide${lowStock === 1 ? "" : "s"} low on stock`,
+      );
+    }
 
     const hasDoses = remainingToday > 0 || overdue > 0;
+    const inventoryOnly =
+      !hasDoses &&
+      freshRechecks.length === 0 &&
+      (expiringSoon > 0 || lowStock > 0);
     const payload: PushPayload = {
       title: "Peptra reminder",
       body: parts.join(" · "),
-      url: hasDoses ? "/log" : "/labs",
+      url: hasDoses ? "/log" : inventoryOnly ? "/inventory" : "/labs",
       tag: "peptra-reminder",
     };
 

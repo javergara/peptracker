@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/queries";
 import { protocolLabel } from "@/lib/titration";
+import { parseLocalDate } from "@/lib/dates";
 import { asDosage } from "@/types/peptide";
 
 export type CycleStatusValue = "planned" | "active" | "paused" | "completed";
@@ -99,8 +100,10 @@ async function parseCycleForm(formData: FormData) {
 
   return {
     name,
-    startDate: new Date(startDate),
-    endDate: endDate ? new Date(endDate) : null,
+    // Parse form dates as LOCAL midnight (not UTC) so weekday anchoring and
+    // range membership line up with the user's calendar, not the server's TZ.
+    startDate: parseLocalDate(startDate) ?? new Date(),
+    endDate: parseLocalDate(endDate),
     status,
     peptideId: kind === "peptide" ? id : null,
     stackId: kind === "stack" ? id : null,

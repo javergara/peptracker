@@ -13,6 +13,7 @@ import { SupplementAdherence } from "@/components/dashboard/supplement-adherence
 import { ReadinessTile } from "@/components/dashboard/readiness-tile";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { MissedDosesAlert } from "@/components/dashboard/missed-doses-alert";
+import { EndedCyclesPrompt } from "@/components/dashboard/ended-cycles-prompt";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { QuickLogButton } from "@/components/dashboard/quick-log-button";
 import { CycleProgress } from "@/components/cycles/cycle-progress";
@@ -40,6 +41,11 @@ import { formatDate } from "@/lib/dates";
 import { moodFace } from "@/lib/mood";
 import { activeLevelSeries, type PkDose } from "@/lib/pk";
 import { computeReadiness, deriveReadinessInputs } from "@/lib/readiness";
+import {
+  effectiveSingleDose,
+  isCycleEnded,
+  washoutDaysLeft,
+} from "@/lib/cycles";
 import { asCheckInRatings } from "@/types/checkin";
 import { suggestNextSite } from "@/lib/sites";
 import { cn } from "@/lib/utils";
@@ -92,25 +98,23 @@ export default async function DashboardPage() {
     stack: c.stack ? { name: c.stack.name } : null,
   }));
 
+  // An "active" cycle whose end date has passed still counts toward adherence
+  // *history* (cycleLikes keeps it), but shouldn't inflate the live ACTIVE stat
+  // or the active-cycles card — surface those as a completion prompt instead.
+  const runningCycles = activeCycles.filter(
+    (c) => !isCycleEnded(c.endDate, now),
+  );
+  const endedCycles = activeCycles
+    .filter((c) => isCycleEnded(c.endDate, now))
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      endDate: (c.endDate as Date).toISOString(),
+      washoutLeft: washoutDaysLeft(c.endDate, c.washoutDays, now),
+    }));
+
   const todays = getTodaysDoses(cycleLikes, now);
   const todaysDue = todays.reduce((sum, t) => sum + t.times, 0);
-  // A stack cycle fans out to one `todays` entry per due peptide. For display we
-  // group back to one row per cycle, tracking which peptides are actually due
-  // today (a stack peptide on its own frequency may not be) so the row only
-  // offers quick-log for those.
-  const dueByCycle = new Map<
-    string,
-    { cycle: (typeof todays)[number]["cycle"]; duePeptideIds: Set<string> }
-  >();
-  for (const t of todays) {
-    const entry = dueByCycle.get(t.cycle.id) ?? {
-      cycle: t.cycle,
-      duePeptideIds: new Set<string>(),
-    };
-    if (t.peptideId) entry.duePeptideIds.add(t.peptideId);
-    dueByCycle.set(t.cycle.id, entry);
-  }
-  const todaysCycles = [...dueByCycle.values()];
   const adherence = computeAdherence(cycleLikes, rangeLogs, 30, now);
   const overdue = computeOverdue(cycleLikes, rangeLogs, now);
 
@@ -128,10 +132,96 @@ export default async function DashboardPage() {
       }
     : null;
 
-  // Raw active cycles (with scalar peptideId/stackId) for quick-log defaults —
-  // cycleLikes drops those in favor of just the peptide/stack display name.
-  const activeCycleById = new Map(activeCycles.map((c) => [c.id, c]));
   const peptideNameById = new Map(peptides.map((p) => [p.id, p.name]));
+
+  // Effective single-peptide dose per cycle for today — resolves titration
+  // cycles (whose dosePerAdmin is intentionally blank) to the current week's
+  // ramped dose, matching the cycle-detail page. Drives the dashboard dose chip
+  // and one-tap quick-log so titration cycles aren't left un-loggable.
+  const singleDoseByCycle = new Map<
+    string,
+    { peptideId: string; amount: number; unit: string }
+  >();
+  for (const c of activeCycles) {
+    if (!c.peptideId) continue; // stack cycles dose per-peptide via items
+    const dose = effectiveSingleDose(
+      c.scheduleConfig as ScheduleConfig | null,
+      c.peptide?.dosage,
+      c.startDate,
+      now,
+    );
+    if (dose) singleDoseByCycle.set(c.id, { peptideId: c.peptideId, ...dose });
+  }
+
+  // Today's doses, tracked per PEPTIDE/administration (not per cycle) so a
+  // multi-dose day or a stack shows "1 of 2 logged" and keeps quick-log live for
+  // whatever's still outstanding — logging one peptide no longer hides the rest.
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  // Count today's logged doses per cycle+peptide.
+  const loggedTodayByKey = new Map<string, number>();
+  for (const log of rangeLogs) {
+    if (!log.cycleId || log.takenAt < todayStart) continue;
+    const key = `${log.cycleId}::${log.peptideId}`;
+    loggedTodayByKey.set(key, (loggedTodayByKey.get(key) ?? 0) + 1);
+  }
+
+  interface DueAdmin {
+    peptideId: string;
+    peptideName: string;
+    expected: number;
+    logged: number;
+    amount?: number;
+    unit: string;
+  }
+  interface TodayRow {
+    cycleId: string;
+    cycleName: string;
+    title: string;
+    admins: DueAdmin[];
+  }
+  const rawById = new Map(activeCycles.map((c) => [c.id, c]));
+  const rowsByCycle = new Map<string, TodayRow>();
+  for (const t of todays) {
+    const raw = rawById.get(t.cycle.id);
+    if (!raw) continue;
+    let row = rowsByCycle.get(t.cycle.id);
+    if (!row) {
+      row = {
+        cycleId: t.cycle.id,
+        cycleName: raw.name,
+        title: raw.peptide?.name ?? raw.stack?.name ?? raw.name,
+        admins: [],
+      };
+      rowsByCycle.set(t.cycle.id, row);
+    }
+    if (t.peptideId) {
+      // Stack item: dose comes from the per-peptide scheduleConfig.items entry.
+      const item = (raw.scheduleConfig as ScheduleConfig | null)?.items?.find(
+        (i) => i.peptideId === t.peptideId,
+      );
+      row.admins.push({
+        peptideId: t.peptideId,
+        peptideName: peptideNameById.get(t.peptideId) ?? "dose",
+        expected: t.times,
+        logged: loggedTodayByKey.get(`${t.cycle.id}::${t.peptideId}`) ?? 0,
+        amount: item?.dose,
+        unit: item?.unit ?? "mcg",
+      });
+    } else if (raw.peptideId) {
+      // Single-peptide cycle: dose from the resolved single dose (flat/titration).
+      const single = singleDoseByCycle.get(t.cycle.id);
+      row.admins.push({
+        peptideId: raw.peptideId,
+        peptideName: raw.peptide?.name ?? "dose",
+        expected: t.times,
+        logged: loggedTodayByKey.get(`${t.cycle.id}::${raw.peptideId}`) ?? 0,
+        amount: single?.amount,
+        unit: single?.unit ?? "mcg",
+      });
+    }
+  }
+  const todaysRows = [...rowsByCycle.values()];
 
   // Suggested next injection site — same rotation logic as /log, seeded from
   // the most recently logged dose that recorded a site.
@@ -227,29 +317,31 @@ export default async function DashboardPage() {
           </p>
 
           {/* Dose chips */}
-          {todaysCycles.length > 0 && (
+          {todaysRows.length > 0 && (
             <div className="mb-5 flex flex-wrap gap-2.5">
-              {todaysCycles.slice(0, 3).map(({ cycle }) => (
-                <div
-                  key={cycle.id}
-                  className="flex items-center gap-2 rounded-[10px] border border-white/10 bg-white/7 px-3 py-[7px]"
-                >
-                  <span
-                    className="size-[7px] shrink-0 rounded-full"
-                    style={{ background: accent }}
-                    aria-hidden
-                  />
-                  <span className="text-ink-foreground text-[13px] font-medium">
-                    {cycle.peptide?.name ?? cycle.stack?.name ?? cycle.name}
-                  </span>
-                  {cycle.scheduleConfig?.dosePerAdmin ? (
-                    <span className="num text-ink-muted text-xs">
-                      {cycle.scheduleConfig.dosePerAdmin}{" "}
-                      {cycle.scheduleConfig.unit ?? "mcg"}
+              {todaysRows.slice(0, 3).map((row) => {
+                const dose = singleDoseByCycle.get(row.cycleId);
+                return (
+                  <div
+                    key={row.cycleId}
+                    className="flex items-center gap-2 rounded-[10px] border border-white/10 bg-white/7 px-3 py-[7px]"
+                  >
+                    <span
+                      className="size-[7px] shrink-0 rounded-full"
+                      style={{ background: accent }}
+                      aria-hidden
+                    />
+                    <span className="text-ink-foreground text-[13px] font-medium">
+                      {row.title}
                     </span>
-                  ) : null}
-                </div>
-              ))}
+                    {dose ? (
+                      <span className="num text-ink-muted text-xs">
+                        {dose.amount} {dose.unit}
+                      </span>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -308,6 +400,7 @@ export default async function DashboardPage() {
 
       {/* Alerts — each renders only when there's something to act on */}
       {onboarding ? <OnboardingChecklist status={onboarding} /> : null}
+      <EndedCyclesPrompt cycles={endedCycles} />
       <MissedDosesAlert overdue={overdue} />
       <LowStockAlert levels={stockLevels} />
 
@@ -319,7 +412,185 @@ export default async function DashboardPage() {
       </div>
       <SupplementAdherence items={supplementAdherence} />
 
-      {/* Row 2 — Three stat tiles */}
+      {/* Today's doses + Active cycles — promoted above the glanceable stat
+          tiles so the daily "what do I do" action is the first thing after the
+          alerts, not buried under vanity counts. */}
+      <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-2">
+        {/* Today's doses */}
+        <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+          <h2 className="font-display text-foreground mb-3.5 text-base font-semibold">
+            Today&apos;s doses
+          </h2>
+          {todaysRows.length === 0 ? (
+            <EmptyState
+              icon={<CheckCircle2 className="size-6" />}
+              title="Nothing due today"
+              description="Active cycles with a dose scheduled for today will appear here."
+            />
+          ) : (
+            <div className="divide-border flex flex-col divide-y">
+              {todaysRows.map((row) => {
+                // Track logged-vs-expected per administration so a multi-dose day
+                // or a stack keeps quick-log live for whatever's still due.
+                const totalExpected = row.admins.reduce(
+                  (s, a) => s + a.expected,
+                  0,
+                );
+                const totalLogged = row.admins.reduce(
+                  (s, a) => s + Math.min(a.logged, a.expected),
+                  0,
+                );
+                const allDone = totalLogged >= totalExpected;
+                // A single-peptide cycle has one admin whose name is the title —
+                // no need to repeat it on the button.
+                const isSingle =
+                  row.admins.length === 1 &&
+                  row.admins[0].peptideName === row.title;
+
+                return (
+                  <div key={row.cycleId} className="py-[11px]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-[11px]">
+                        <span
+                          className="size-[9px] shrink-0 rounded-full"
+                          style={{ background: accent }}
+                          aria-hidden
+                        />
+                        <div>
+                          <Link
+                            href={`/cycles/${row.cycleId}`}
+                            className="text-foreground text-[14px] font-medium hover:underline"
+                          >
+                            {row.title}
+                          </Link>
+                          <p className="text-muted-foreground text-[12px]">
+                            {row.cycleName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {allDone ? (
+                          <div className="text-ok inline-flex items-center gap-1.5 text-[12px] font-medium">
+                            <Check className="size-[13px]" strokeWidth={2} />
+                            {totalExpected > 1
+                              ? `${totalLogged}/${totalExpected} logged`
+                              : "Logged"}
+                          </div>
+                        ) : (
+                          <span className="num text-muted-foreground text-[12px]">
+                            {totalLogged}/{totalExpected} logged
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* One quick-log control per still-outstanding administration.
+                        A button persists until that peptide's expected count for
+                        the day is met (tapping it logs one dose at a time). */}
+                    {!allDone ? (
+                      <div className="mt-2 flex flex-wrap gap-1.5 pl-[20px]">
+                        {row.admins.map((a) => {
+                          const remaining = a.expected - a.logged;
+                          if (remaining <= 0) return null;
+                          const suffix =
+                            a.expected > 1 ? ` (${remaining} left)` : "";
+                          // No configured amount → can't one-tap; link to cycle.
+                          if (a.amount == null) {
+                            return (
+                              <Link
+                                key={a.peptideId}
+                                href={`/cycles/${row.cycleId}`}
+                                className="text-primary text-[12px] font-medium hover:underline"
+                              >
+                                Log {isSingle ? "" : `${a.peptideName} `}→
+                              </Link>
+                            );
+                          }
+                          return (
+                            <QuickLogButton
+                              key={a.peptideId}
+                              cycleId={row.cycleId}
+                              peptideId={a.peptideId}
+                              amount={a.amount}
+                              unit={a.unit}
+                              site={suggestedSite}
+                              guard={a.expected === 1}
+                              label={
+                                isSingle
+                                  ? undefined
+                                  : `${a.peptideName}${suffix}`
+                              }
+                              className={
+                                isSingle ? undefined : "h-6 px-2 text-[11px]"
+                              }
+                            />
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Active cycles */}
+        <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
+          <h2 className="font-display text-foreground mb-4 text-base font-semibold">
+            Active cycles
+          </h2>
+          {runningCycles.length === 0 ? (
+            <EmptyState
+              icon={<CheckCircle2 className="size-6" />}
+              title="No active cycles"
+              description="Start a cycle from a peptide or stack to track it here."
+              action={
+                <Button size="sm" render={<Link href="/cycles/new" />}>
+                  New cycle
+                </Button>
+              }
+            />
+          ) : (
+            <div className="divide-border flex flex-col divide-y">
+              {runningCycles.map((c) => (
+                <div key={c.id} className="py-4 first:pt-0 last:pb-0">
+                  <Link
+                    href={`/cycles/${c.id}`}
+                    className="text-foreground mb-2 block text-[14px] font-medium hover:underline"
+                  >
+                    {c.name}
+                  </Link>
+                  <CycleProgress
+                    cycle={{
+                      startDate: c.startDate,
+                      endDate: c.endDate,
+                      status: c.status,
+                      scheduleConfig: c.scheduleConfig as ScheduleConfig | null,
+                      peptide: c.peptide ? { name: c.peptide.name } : null,
+                      stack: c.stack
+                        ? {
+                            name: c.stack.name,
+                            items: c.stack.items.map((it) => ({
+                              peptide: {
+                                id: it.peptide.id,
+                                name: it.peptide.name,
+                              },
+                            })),
+                          }
+                        : null,
+                    }}
+                    now={now}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Glanceable stats + estimated PK — secondary context, below the day's
+          action list. */}
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">
         {/* Active cycles */}
         <div className="card-surface rounded-[18px] p-[18px] [box-shadow:var(--shadow-card)]">
@@ -327,17 +598,17 @@ export default async function DashboardPage() {
             <div>
               <Eyebrow>ACTIVE CYCLES</Eyebrow>
               <div className="num text-foreground mt-1.5 text-[30px] leading-none font-semibold">
-                {activeCycles.length}
+                {runningCycles.length}
               </div>
             </div>
             <Sparkline points={cycleSparkline} />
           </div>
           <p className="text-muted-foreground mt-1.5 text-[12px]">
-            {activeCycles.filter((c) => !c.stackId).length} peptide
-            {activeCycles.filter((c) => !c.stackId).length !== 1
+            {runningCycles.filter((c) => !c.stackId).length} peptide
+            {runningCycles.filter((c) => !c.stackId).length !== 1
               ? "s"
-              : ""} · {activeCycles.filter((c) => c.stackId).length} stack
-            {activeCycles.filter((c) => c.stackId).length !== 1 ? "s" : ""}
+              : ""} · {runningCycles.filter((c) => c.stackId).length} stack
+            {runningCycles.filter((c) => c.stackId).length !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -390,193 +661,6 @@ export default async function DashboardPage() {
           />
         </div>
       ) : null}
-
-      {/* Row 3 — Today's doses + Active cycles */}
-      <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-2">
-        {/* Today's doses */}
-        <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
-          <h2 className="font-display text-foreground mb-3.5 text-base font-semibold">
-            Today&apos;s doses
-          </h2>
-          {todaysCycles.length === 0 ? (
-            <EmptyState
-              icon={<CheckCircle2 className="size-6" />}
-              title="Nothing due today"
-              description="Active cycles with a dose scheduled for today will appear here."
-            />
-          ) : (
-            <div className="divide-border flex flex-col divide-y">
-              {todaysCycles.map(({ cycle, duePeptideIds }) => {
-                // Check if there's a log today for this cycle
-                const todayStart = new Date(now);
-                todayStart.setHours(0, 0, 0, 0);
-                const logged = rangeLogs.find(
-                  (log) =>
-                    log.cycleId === cycle.id && log.takenAt >= todayStart,
-                );
-
-                // Resolve quick-log defaults. Single-peptide cycles dose via
-                // scheduleConfig.dosePerAdmin/unit; stack cycles dose each
-                // peptide differently via scheduleConfig.items. A cycle with
-                // neither configured can't be one-tap logged (no amount to
-                // guess), so it falls back to a plain link to the cycle page.
-                const raw = activeCycleById.get(cycle.id);
-                const config = cycle.scheduleConfig;
-                const singleDose =
-                  raw?.peptideId && config?.dosePerAdmin
-                    ? {
-                        peptideId: raw.peptideId,
-                        amount: config.dosePerAdmin,
-                        unit: config.unit ?? "mcg",
-                      }
-                    : null;
-                const stackDoses = (config?.items ?? []).filter(
-                  (it): it is typeof it & { dose: number } =>
-                    Boolean(it.peptideId) &&
-                    Boolean(it.dose) &&
-                    duePeptideIds.has(it.peptideId),
-                );
-
-                return (
-                  <div key={cycle.id} className="py-[11px]">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-[11px]">
-                        <span
-                          className="size-[9px] shrink-0 rounded-full"
-                          style={{ background: accent }}
-                          aria-hidden
-                        />
-                        <div>
-                          <Link
-                            href={`/cycles/${cycle.id}`}
-                            className="text-foreground text-[14px] font-medium hover:underline"
-                          >
-                            {cycle.peptide?.name ??
-                              cycle.stack?.name ??
-                              cycle.name}
-                          </Link>
-                          <p className="text-muted-foreground text-[12px]">
-                            {cycle.name}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        {logged ? (
-                          <div className="text-ok inline-flex items-center gap-1.5 text-[12px] font-medium">
-                            <Check className="size-[13px]" strokeWidth={2} />
-                            Logged{" "}
-                            <span className="num">
-                              {formatDate(logged.takenAt, "HH:mm")}
-                            </span>
-                          </div>
-                        ) : singleDose ? (
-                          <div className="flex items-center gap-2">
-                            <span className="num text-foreground text-[13px]">
-                              {singleDose.amount} {singleDose.unit}
-                            </span>
-                            <QuickLogButton
-                              cycleId={cycle.id}
-                              peptideId={singleDose.peptideId}
-                              amount={singleDose.amount}
-                              unit={singleDose.unit}
-                              site={suggestedSite}
-                            />
-                          </div>
-                        ) : stackDoses.length === 0 ? (
-                          <>
-                            <Link
-                              href={`/cycles/${cycle.id}`}
-                              className="text-primary text-[12px] font-medium hover:underline"
-                            >
-                              Log →
-                            </Link>
-                            <div className="text-muted-foreground text-[11px]">
-                              pending
-                            </div>
-                          </>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {/* Stack cycles dose each peptide differently — one small
-                        quick-log button per configured peptide, wrapped below
-                        the row instead of squeezed inline. */}
-                    {!logged && stackDoses.length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-1.5 pl-[20px]">
-                        {stackDoses.map((it) => (
-                          <QuickLogButton
-                            key={it.peptideId}
-                            cycleId={cycle.id}
-                            peptideId={it.peptideId}
-                            amount={it.dose}
-                            unit={it.unit ?? "mcg"}
-                            site={suggestedSite}
-                            label={peptideNameById.get(it.peptideId) ?? "dose"}
-                            className="h-6 px-2 text-[11px]"
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Active cycles */}
-        <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">
-          <h2 className="font-display text-foreground mb-4 text-base font-semibold">
-            Active cycles
-          </h2>
-          {cycleLikes.length === 0 ? (
-            <EmptyState
-              icon={<CheckCircle2 className="size-6" />}
-              title="No active cycles"
-              description="Start a cycle from a peptide or stack to track it here."
-              action={
-                <Button size="sm" render={<Link href="/cycles/new" />}>
-                  New cycle
-                </Button>
-              }
-            />
-          ) : (
-            <div className="divide-border flex flex-col divide-y">
-              {activeCycles.map((c) => (
-                <div key={c.id} className="py-4 first:pt-0 last:pb-0">
-                  <Link
-                    href={`/cycles/${c.id}`}
-                    className="text-foreground mb-2 block text-[14px] font-medium hover:underline"
-                  >
-                    {c.name}
-                  </Link>
-                  <CycleProgress
-                    cycle={{
-                      startDate: c.startDate,
-                      endDate: c.endDate,
-                      status: c.status,
-                      scheduleConfig: c.scheduleConfig as ScheduleConfig | null,
-                      peptide: c.peptide ? { name: c.peptide.name } : null,
-                      stack: c.stack
-                        ? {
-                            name: c.stack.name,
-                            items: c.stack.items.map((it) => ({
-                              peptide: {
-                                id: it.peptide.id,
-                                name: it.peptide.name,
-                              },
-                            })),
-                          }
-                        : null,
-                    }}
-                    now={now}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Row 4 — Recent doses table */}
       <div className="card-surface rounded-[18px] p-5 [box-shadow:var(--shadow-card)]">

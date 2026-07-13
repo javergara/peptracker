@@ -1,4 +1,6 @@
-import type { CyclePeptideDose } from "@/lib/schedule";
+import type { CyclePeptideDose, ScheduleConfig } from "@/lib/schedule";
+import { doseForCycleDay, protocolLabel } from "@/lib/titration";
+import { asDosage } from "@/types/peptide";
 
 /**
  * Parse a free-form stack-item dose string into a numeric amount + unit.
@@ -35,4 +37,78 @@ export function doseDefaultsByPeptide(
     if (it.peptideId) map[it.peptideId] = { dose: it.dose, unit: it.unit };
   }
   return map;
+}
+
+/**
+ * The effective single-peptide dose for a cycle on `date`. When the cycle is
+ * following a titration protocol (`scheduleConfig.titration`), the dose comes
+ * from the peptide's `dosage.protocols` schedule for the current week; otherwise
+ * it's the flat `dosePerAdmin`/`unit`. Returns null when nothing is configured
+ * (or the titration schedule hasn't started). Pure — lets the dashboard chip
+ * and quick-log resolve titration cycles the same way the detail page does,
+ * instead of reading the (blanked-for-titration) `dosePerAdmin`.
+ */
+export function effectiveSingleDose(
+  cfg:
+    | Pick<ScheduleConfig, "titration" | "dosePerAdmin" | "unit">
+    | null
+    | undefined,
+  peptideDosage: unknown,
+  startDate: Date,
+  date: Date,
+): { amount: number; unit: string } | null {
+  const label = cfg?.titration?.label;
+  if (label) {
+    const protocols = asDosage(peptideDosage)?.protocols ?? [];
+    const protocol = protocols.find((p, i) => protocolLabel(p, i) === label);
+    const today = protocol ? doseForCycleDay(protocol, startDate, date) : null;
+    if (today) return { amount: today.amount, unit: today.unit };
+    // Titration configured but not yet started / no matching step: fall through
+    // to any flat dose, else null.
+  }
+  if (cfg?.dosePerAdmin) {
+    return { amount: cfg.dosePerAdmin, unit: cfg.unit ?? "mcg" };
+  }
+  return null;
+}
+
+/**
+ * Whether an `active` cycle's planned window has elapsed — it has an `endDate`
+ * and today's day-start is past it. Open-ended cycles (no `endDate`) never end
+ * this way. Pure. An active cycle past its end date otherwise lingers forever:
+ * it inflates the dashboard's ACTIVE count and clutters the active-cycles card
+ * while producing zero due doses. Consumers use this to split running from
+ * ended cycles and prompt the user to complete (or extend) the ended ones.
+ */
+export function isCycleEnded(
+  endDate: Date | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  if (!endDate) return false;
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+  return startOfToday.getTime() > endDate.getTime();
+}
+
+/**
+ * Whole days of washout remaining after a cycle's end: `endDate + washoutDays`
+ * minus today (clamped at 0). Returns null when there's no end date or no
+ * planned washout. Pure — drives the ended-cycle prompt's rest countdown.
+ */
+export function washoutDaysLeft(
+  endDate: Date | null | undefined,
+  washoutDays: number | null | undefined,
+  now: Date = new Date(),
+): number | null {
+  if (!endDate || !washoutDays || washoutDays <= 0) return null;
+  const washoutEnd = endDate.getTime() + washoutDays * 24 * 60 * 60 * 1000;
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
+  return Math.max(0, Math.ceil((washoutEnd - startOfToday) / 86_400_000));
 }

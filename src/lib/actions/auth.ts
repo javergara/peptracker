@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { signIn, signOut } from "@/auth";
+import { requireAccountId } from "@/lib/active-user";
 
 const PROFILE_COLOR = "#7C3AED";
 
@@ -77,4 +78,42 @@ export async function signupAction(
 
 export async function logoutAction() {
   await signOut({ redirectTo: "/login" });
+}
+
+/**
+ * Change the signed-in account's password. Requires the current password
+ * (defense-in-depth against a hijacked session) and an 8+ char new one. Throws
+ * on failure so the ActionForm surfaces the message as a toast.
+ */
+export async function changePasswordAction(formData: FormData) {
+  const accountId = await requireAccountId();
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  const newPassword = String(formData.get("newPassword") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (newPassword.length < 8) {
+    throw new Error("New password must be at least 8 characters.");
+  }
+  if (newPassword !== confirmPassword) {
+    throw new Error("New password and confirmation don't match.");
+  }
+
+  const account = await prisma.account.findUnique({
+    where: { id: accountId },
+    select: { passwordHash: true },
+  });
+  if (!account) throw new Error("Account not found.");
+
+  const ok = await bcrypt.compare(currentPassword, account.passwordHash);
+  if (!ok) throw new Error("Current password is incorrect.");
+
+  if (await bcrypt.compare(newPassword, account.passwordHash)) {
+    throw new Error("New password must be different from the current one.");
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { passwordHash },
+  });
 }
