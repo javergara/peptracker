@@ -185,15 +185,22 @@ export function CycleForm({
     setSourceRaw(v);
     setTitrationLabel("");
   };
-  // These frequencies only fire on explicitly picked weekdays.
-  const needsDays = frequency === "twice-weekly" || frequency === "custom";
+  // These frequencies only fire on explicitly picked weekdays. `weekly` anchors
+  // to a single chosen day (else it silently falls back to the start date's
+  // weekday); twice-weekly/custom allow several.
+  const needsDays =
+    frequency === "weekly" ||
+    frequency === "twice-weekly" ||
+    frequency === "custom";
 
   const toggleDay = (d: number) =>
-    setDays((prev) =>
-      prev.includes(d)
+    setDays((prev) => {
+      // Weekly = exactly one day: selecting replaces the current choice.
+      if (frequency === "weekly") return prev.includes(d) ? [] : [d];
+      return prev.includes(d)
         ? prev.filter((x) => x !== d)
-        : [...prev, d].sort((a, b) => a - b),
-    );
+        : [...prev, d].sort((a, b) => a - b);
+    });
 
   const getItemSchedule = (peptideId: string) =>
     itemSchedules[peptideId] ?? DEFAULT_ITEM_SCHEDULE;
@@ -210,9 +217,14 @@ export function CycleForm({
   const toggleItemDay = (peptideId: string, d: number) =>
     setItemSchedules((prev) => {
       const cur = prev[peptideId] ?? DEFAULT_ITEM_SCHEDULE;
-      const nextDays = cur.days.includes(d)
-        ? cur.days.filter((x) => x !== d)
-        : [...cur.days, d].sort((a, b) => a - b);
+      const nextDays =
+        cur.frequency === "weekly"
+          ? cur.days.includes(d)
+            ? []
+            : [d]
+          : cur.days.includes(d)
+            ? cur.days.filter((x) => x !== d)
+            : [...cur.days, d].sort((a, b) => a - b);
       return { ...prev, [peptideId]: { ...cur, days: nextDays } };
     });
 
@@ -222,7 +234,9 @@ export function CycleForm({
     ? (selectedStack?.items ?? []).some((it) => {
         const s = getItemSchedule(it.peptideId);
         return (
-          (s.frequency === "twice-weekly" || s.frequency === "custom") &&
+          (s.frequency === "weekly" ||
+            s.frequency === "twice-weekly" ||
+            s.frequency === "custom") &&
           s.days.length === 0
         );
       })
@@ -357,7 +371,8 @@ export function CycleForm({
         {needsDays ? (
           <fieldset className="space-y-1.5">
             <legend className="text-sm font-medium">
-              Days of the week <span className="text-destructive">*</span>
+              {frequency === "weekly" ? "Day of the week" : "Days of the week"}{" "}
+              <span className="text-destructive">*</span>
             </legend>
             <div className="flex flex-wrap gap-1.5">
               {DAY_LABELS.map((label, d) => {
@@ -394,10 +409,14 @@ export function CycleForm({
               )}
             >
               {days.length === 0
-                ? "Pick at least one day — the cycle won't schedule doses without it."
-                : frequency === "twice-weekly" && days.length !== 2
-                  ? "Twice weekly usually means two days."
-                  : "Doses are scheduled on these days."}
+                ? frequency === "weekly"
+                  ? "Pick the day — the cycle won't schedule a weekly dose without it."
+                  : "Pick at least one day — the cycle won't schedule doses without it."
+                : frequency === "weekly"
+                  ? "The weekly dose is scheduled on this day."
+                  : frequency === "twice-weekly" && days.length !== 2
+                    ? "Twice weekly usually means two days."
+                    : "Doses are scheduled on these days."}
             </p>
           </fieldset>
         ) : null}
@@ -452,6 +471,7 @@ export function CycleForm({
                 const unit = pre?.unit ?? it.unit ?? "mcg";
                 const sched = getItemSchedule(it.peptideId);
                 const itemNeedsDays =
+                  sched.frequency === "weekly" ||
                   sched.frequency === "twice-weekly" ||
                   sched.frequency === "custom";
                 return (

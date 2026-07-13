@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
+import { applyVialDraw, creditVialDraw, doseDrawMcg } from "@/lib/vials";
+import { DUPLICATE_DOSE_ERROR, DUPLICATE_WINDOW_HOURS } from "@/lib/dose-guard";
 import { asStringArray } from "@/types/peptide";
 
 /** Snapshot of a deleted dose, enough to re-create it (for undo). */
@@ -47,6 +49,29 @@ export async function logDose(formData: FormData) {
 
   const takenAtDate = takenAt ? new Date(takenAt) : new Date();
 
+  // Duplicate guard for one-tap loggers: if this peptide was already logged
+  // within a few hours of the new time, ask the caller to confirm rather than
+  // silently recording a second (possibly accidental) dose.
+  const guardDuplicate =
+    String(formData.get("guardDuplicate") ?? "") === "true";
+  const confirmDuplicate =
+    String(formData.get("confirmDuplicate") ?? "") === "true";
+  if (guardDuplicate && !confirmDuplicate) {
+    const windowMs = DUPLICATE_WINDOW_HOURS * 60 * 60 * 1000;
+    const recent = await prisma.doseLog.findFirst({
+      where: {
+        userId: user.id,
+        peptideId,
+        takenAt: {
+          gte: new Date(takenAtDate.getTime() - windowMs),
+          lte: new Date(takenAtDate.getTime() + windowMs),
+        },
+      },
+      select: { id: true },
+    });
+    if (recent) throw new Error(DUPLICATE_DOSE_ERROR);
+  }
+
   await prisma.doseLog.create({
     data: {
       userId: user.id,
@@ -85,14 +110,9 @@ export async function logDose(formData: FormData) {
   if (vialId) {
     const vial = await prisma.vial.findUnique({ where: { id: vialId } });
     if (vial) {
-      const usedMcg = unit === "mg" ? amount * 1000 : amount;
-      const remaining = Math.max(0, vial.remainingMcg - usedMcg);
       await prisma.vial.update({
         where: { id: vialId },
-        data: {
-          remainingMcg: remaining,
-          status: remaining <= 0 ? "empty" : "active",
-        },
+        data: applyVialDraw(vial, doseDrawMcg(amount, unit)),
       });
       revalidatePath("/inventory");
     }
@@ -208,6 +228,20 @@ export async function deleteDose(id: string): Promise<RestorableDose> {
   if (!dose) throw new Error("Dose not found.");
 
   await prisma.doseLog.delete({ where: { id } });
+
+  // Credit the drawn amount back to the source vial so inventory stays truthful
+  // when a logged dose is removed (mirrors the decrement in logDose).
+  if (dose.vialId) {
+    const vial = await prisma.vial.findUnique({ where: { id: dose.vialId } });
+    if (vial) {
+      await prisma.vial.update({
+        where: { id: dose.vialId },
+        data: creditVialDraw(vial, doseDrawMcg(dose.amount, dose.unit)),
+      });
+      revalidatePath("/inventory");
+    }
+  }
+
   revalidatePath("/log");
   revalidatePath("/calendar");
   revalidatePath("/");
@@ -230,7 +264,10 @@ export async function deleteDose(id: string): Promise<RestorableDose> {
   };
 }
 
-/** Re-create a dose deleted via deleteDose (undo). Does not touch vial balance. */
+/**
+ * Re-create a dose deleted via deleteDose (undo). Re-decrements the source vial
+ * so the balance restored by deleteDose is symmetrically drawn back down.
+ */
 export async function restoreDose(data: RestorableDose) {
   const user = await getActiveUser();
   await prisma.doseLog.create({
@@ -250,6 +287,18 @@ export async function restoreDose(data: RestorableDose) {
       notes: data.notes,
     },
   });
+
+  if (data.vialId) {
+    const vial = await prisma.vial.findUnique({ where: { id: data.vialId } });
+    if (vial) {
+      await prisma.vial.update({
+        where: { id: data.vialId },
+        data: applyVialDraw(vial, doseDrawMcg(data.amount, data.unit)),
+      });
+      revalidatePath("/inventory");
+    }
+  }
+
   revalidatePath("/log");
   revalidatePath("/calendar");
   revalidatePath("/");

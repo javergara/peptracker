@@ -94,9 +94,18 @@ describe("estimateStockSupply", () => {
 });
 
 describe("isLowStock", () => {
-  it("flags one vial or fewer", () => {
-    expect(isLowStock(0)).toBe(true);
-    expect(isLowStock(1)).toBe(true);
-    expect(isLowStock(2)).toBe(false);
+  it("falls back to one vial or fewer when supply is unknown", () => {
+    expect(isLowStock({ total: 0 })).toBe(true);
+    expect(isLowStock({ total: 1 })).toBe(true);
+    expect(isLowStock({ total: 2 })).toBe(false);
+    expect(isLowStock({ total: 2, daysOfSupply: null })).toBe(false);
+  });
+  it("prefers days-of-supply when known", () => {
+    // Plenty of vials, but only a few days left → low.
+    expect(isLowStock({ total: 5, daysOfSupply: 10 })).toBe(true);
+    // One vial, but weeks of supply → not low.
+    expect(isLowStock({ total: 1, daysOfSupply: 40 })).toBe(false);
+    expect(isLowStock({ total: 3, daysOfSupply: 14 })).toBe(false);
+    expect(isLowStock({ total: 3, daysOfSupply: 13 })).toBe(true);
   });
 });

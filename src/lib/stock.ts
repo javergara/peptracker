@@ -98,7 +98,19 @@ export function toMcg(
   return unit === "mg" ? dose * 1000 : dose;
 }
 
-/** Low-stock threshold for the dashboard alert: one vial or fewer on hand. */
-export function isLowStock(totalVials: number): boolean {
-  return totalVials <= 1;
+/** Reorder when fewer than this many days of supply remain. */
+export const LOW_STOCK_DAYS = 14;
+
+/**
+ * Low-stock threshold for the dashboard alert. Prefers a **days-of-supply**
+ * signal (reorder under {@link LOW_STOCK_DAYS} days) so a daily-dosed peptide
+ * and a weekly one aren't treated identically; falls back to a vial count of ≤1
+ * when no planned dose/cadence is known (e.g. diluents).
+ */
+export function isLowStock(level: {
+  total: number;
+  daysOfSupply?: number | null;
+}): boolean {
+  if (level.daysOfSupply != null) return level.daysOfSupply < LOW_STOCK_DAYS;
+  return level.total <= 1;
 }

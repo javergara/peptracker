@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { addDays, daysBetween, formatDate, isWithinRange } from "@/lib/dates";
+import {
+  addDays,
+  daysBetween,
+  formatDate,
+  isWithinRange,
+  parseLocalDate,
+} from "@/lib/dates";
 
 describe("dates", () => {
   describe("formatDate", () => {
@@ -72,6 +78,25 @@ describe("dates", () => {
     it("treats null end as open-ended", () => {
       expect(isWithinRange(new Date(2030, 0, 1), start, null)).toBe(true);
       expect(isWithinRange(new Date(2025, 0, 1), start, null)).toBe(false);
+    });
+  });
+
+  describe("parseLocalDate", () => {
+    it("parses yyyy-MM-dd to local midnight (not UTC)", () => {
+      const d = parseLocalDate("2026-07-13");
+      expect(d).toEqual(new Date(2026, 6, 13, 0, 0, 0, 0));
+      // Local Y/M/D must match the input regardless of the runner's TZ.
+      expect(d?.getFullYear()).toBe(2026);
+      expect(d?.getMonth()).toBe(6);
+      expect(d?.getDate()).toBe(13);
+      expect(d?.getHours()).toBe(0);
+    });
+    it("returns null for missing/malformed input", () => {
+      expect(parseLocalDate("")).toBeNull();
+      expect(parseLocalDate(null)).toBeNull();
+      expect(parseLocalDate(undefined)).toBeNull();
+      expect(parseLocalDate("2026/07/13")).toBeNull();
+      expect(parseLocalDate("13-07-2026")).toBeNull();
     });
   });
 });

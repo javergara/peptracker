@@ -68,7 +68,9 @@ async function handler(req: Request) {
       }),
       prisma.doseLog.findMany({
         where: { userId, takenAt: { gte: eightDaysAgo } },
-        select: { takenAt: true },
+        // cycleId/peptideId are needed so adherence matches each dose to the
+        // administration it satisfies (not a raw day count).
+        select: { takenAt: true, cycleId: true, peptideId: true },
       }),
       // Lab rechecks that are due and not yet completed.
       prisma.labReminder.findMany({

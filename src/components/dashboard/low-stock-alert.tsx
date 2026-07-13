@@ -5,13 +5,18 @@ import type { StockLevel } from "@/lib/queries";
 import { isLowStock } from "@/lib/stock";
 
 /**
- * Dashboard low-stock warning: peptides with one combined vial (stock + active)
- * or fewer on hand. Renders nothing when everything is well-stocked.
+ * Dashboard low-stock warning: peptides running low on supply — under ~2 weeks
+ * of doses left where a planned dose/cadence is known, else ≤1 vial on hand.
+ * Renders nothing when everything is well-stocked.
  */
 export function LowStockAlert({ levels }: { levels: StockLevel[] }) {
   const low = levels
-    .filter((l) => isLowStock(l.total))
-    .sort((a, b) => a.total - b.total);
+    .filter((l) => isLowStock(l))
+    .sort(
+      (a, b) =>
+        (a.daysOfSupply ?? Infinity) - (b.daysOfSupply ?? Infinity) ||
+        a.total - b.total,
+    );
   if (low.length === 0) return null;
 
   return (
@@ -30,8 +35,11 @@ export function LowStockAlert({ levels }: { levels: StockLevel[] }) {
           >
             <span className="text-foreground font-medium">{l.peptideName}</span>
             <span className="text-muted-foreground num text-xs">
-              {l.total} vial{l.total === 1 ? "" : "s"} total ({l.stockVials}{" "}
-              stock + {l.activeVials} in use)
+              {l.daysOfSupply != null
+                ? `~${l.daysOfSupply} day${l.daysOfSupply === 1 ? "" : "s"} left · `
+                : ""}
+              {l.total} vial{l.total === 1 ? "" : "s"} ({l.stockVials} stock +{" "}
+              {l.activeVials} in use)
             </span>
           </li>
         ))}

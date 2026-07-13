@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
+import { parseLocalDate } from "@/lib/dates";
 import {
   CHECKIN_MARKER_KEYS,
   checkInRatingsSchema,
@@ -16,14 +17,11 @@ import {
  * `@@unique([userId, date])` day key). Falls back to today when missing/bad.
  */
 function parseCheckInDate(value: string): Date {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now;
-  }
-  const [, y, m, d] = match;
-  return new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
+  const parsed = parseLocalDate(value);
+  if (parsed) return parsed;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
 }
 
 /** Read `rating:<key>` fields (1-5, or absent to skip that marker). */
