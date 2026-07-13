@@ -55,10 +55,50 @@ describe("findStrongCorrelations", () => {
   });
 
   it("excludes pairs with too few paired points (n below minN)", () => {
-    // Only 3 points each — below the default minN of 5.
+    // Only 3 points each — below the default minN of 6.
     const a = series("a", "A", 3, (i) => i);
     const b = series("b", "B", 3, (i) => i * 2);
 
+    expect(findStrongCorrelations([a, b])).toHaveLength(0);
+  });
+
+  it("rejects a spurious small-sample correlation (not significant)", () => {
+    // A moderately-strong r over very few points is not statistically
+    // significant, so the significance gate drops it even though |r| ≥ 0.5.
+    const a: CorrelationSeries = {
+      key: "a",
+      label: "A",
+      points: [0, 1, 2, 3, 4, 5].map((i) => ({ date: t0 + i * DAY, value: i })),
+    };
+    const b: CorrelationSeries = {
+      key: "b",
+      label: "B",
+      // Noisy: r lands in the ~0.5 range but p ≥ 0.05 at n = 6.
+      points: [2, 0, 3, 1, 4, 2].map((v, i) => ({
+        date: t0 + i * DAY,
+        value: v,
+      })),
+    };
+    const insights = findStrongCorrelations([a, b], { threshold: 0.4 });
+    for (const ins of insights) expect(ins.pValue).toBeLessThan(0.05);
+  });
+
+  it("pairs one-to-one (does not reuse one point to inflate n)", () => {
+    // a has ONE point; b has 8 near it. One-to-one pairing yields a single
+    // pair (n=1), not 8 — so nothing significant can be manufactured.
+    const a: CorrelationSeries = {
+      key: "a",
+      label: "A",
+      points: [{ date: t0, value: 5 }],
+    };
+    const b: CorrelationSeries = {
+      key: "b",
+      label: "B",
+      points: Array.from({ length: 8 }, (_, i) => ({
+        date: t0 + i * DAY,
+        value: i,
+      })),
+    };
     expect(findStrongCorrelations([a, b])).toHaveLength(0);
   });
 
@@ -108,8 +148,8 @@ describe("findStrongCorrelations", () => {
 
   it("ranks by |r| x sqrt(n), favoring strong AND well-sampled pairs", () => {
     // Pair 1: perfect correlation but few points.
-    const small1 = series("s1", "Small1", 5, (i) => i);
-    const small2 = series("s2", "Small2", 5, (i) => i * 2);
+    const small1 = series("s1", "Small1", 6, (i) => i);
+    const small2 = series("s2", "Small2", 6, (i) => i * 2);
     // Pair 2: slightly noisy but many more points.
     const big1 = series("b1", "Big1", 30, (i) => i + (i % 3 === 0 ? 0.4 : 0));
     const big2 = series("b2", "Big2", 30, (i) => i * 2);
@@ -145,6 +185,8 @@ describe("describeInsight", () => {
       r: 0.62,
       rSquared: 0.38,
       n: 18,
+      pValue: 0.006,
+      coTrended: false,
       direction: "positive",
       strength: "strong",
     });
@@ -164,11 +206,30 @@ describe("describeInsight", () => {
       r: -0.58,
       rSquared: 0.34,
       n: 12,
+      pValue: 0.048,
+      coTrended: false,
       direction: "inverse",
       strength: "moderate",
     });
     expect(sentence).toBe(
       "Higher Weight tends to go with lower Energy (r = −0.58, n = 12).",
     );
+  });
+
+  it("adds a shared-trend caveat when both series co-trend", () => {
+    const sentence = describeInsight({
+      aKey: "m:weight",
+      aLabel: "Weight",
+      bKey: "l:igf",
+      bLabel: "IGF-1",
+      r: -0.8,
+      rSquared: 0.64,
+      n: 10,
+      pValue: 0.005,
+      coTrended: true,
+      direction: "inverse",
+      strength: "strong",
+    });
+    expect(sentence).toContain("shared trend");
   });
 });
