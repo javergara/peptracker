@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/common/page-header";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { DataControls } from "@/components/settings/data-controls";
+import { DangerZone } from "@/components/settings/danger-zone";
 import { ProfilesCard } from "@/components/profiles/profiles-card";
 import { ReminderSettings } from "@/components/pwa/reminder-settings";
 import { Disclaimer } from "@/components/disclaimer";
@@ -194,6 +195,10 @@ export default async function SettingsPage() {
       <div className="card-surface mb-6 rounded-2xl p-6">
         <Eyebrow className="mb-4">Data</Eyebrow>
         <DataControls />
+      </div>
+
+      <div className="mb-6">
+        <DangerZone />
       </div>
 
       <Disclaimer />

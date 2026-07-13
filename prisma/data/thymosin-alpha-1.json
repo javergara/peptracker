@@ -1,0 +1,121 @@
+{
+  "slug": "thymosin-alpha-1",
+  "name": "Thymosin Alpha-1 (Tα1)",
+  "aliases": ["Thymalfasin", "Zadaxin", "TA1", "Ta1", "Thymosin α1"],
+  "category": "IMMUNE_ANTIINFLAMMATORY",
+  "summary": "Thymosin Alpha-1 is a synthetic 28-amino-acid peptide identical to a naturally occurring fragment of prothymosin alpha produced by the thymus. Marketed as thymalfasin (Zadaxin) in more than 30 countries, it is an immune-modulator studied for chronic hepatitis B and C, sepsis, cancer immunotherapy support, and vaccine response.",
+  "mechanism": "Thymosin Alpha-1 restores and modulates immune homeostasis rather than acting as a simple stimulant. It promotes the maturation, differentiation, and proliferation of T lymphocytes in the thymus, tending to raise CD4+ T-cell counts and normalize the CD4+/CD8+ ratio, and it enhances natural killer (NK) cell activity.\n\nAt the molecular level Tα1 signals through Toll-like receptors (notably TLR2, TLR3/4, and TLR9), activating downstream IRF3, NF-κB, p38 MAPK, and MyD88 pathways. This drives dendritic-cell maturation and antigen presentation, bridging innate and adaptive immunity and increasing production of Th1 cytokines such as IL-2, IFN-γ, and IL-12 while dampening pro-inflammatory overactivation.\n\nBecause each dose triggers sustained dendritic-cell and T-cell activation, the immunological effects persist for roughly 72–96 hours even though the peptide itself is cleared within a day — the rationale for the twice-weekly clinical dosing schedule. In septic patients Tα1 has been shown to restore monocyte HLA-DR expression, a marker of reversed immunoparalysis.",
+  "benefits": [
+    "Immune modulation: increases CD4+ T cells and normalizes the CD4+/CD8+ ratio",
+    "Approved (as thymalfasin/Zadaxin) in 30+ countries for chronic hepatitis B and C, often with interferon",
+    "Reduced 28-day mortality trend and restored monocyte HLA-DR in the ETASS severe-sepsis trial",
+    "Enhances dendritic-cell maturation, NK-cell activity, and antigen presentation",
+    "Studied as an adjunct to improve vaccine responses in immunocompromised or elderly patients",
+    "Investigated as supportive immunotherapy in cancer and in COVID-19",
+    "Generally well tolerated with a favorable safety profile in clinical trials"
+  ],
+  "risks": [
+    "Not FDA-approved in the United States (approved abroad as thymalfasin/Zadaxin); U.S. use is off-label/research only and it was placed on the FDA 503A/503B bulk restriction review",
+    "Human dosing outside the labeled hepatitis indication (sepsis, cancer, longevity) is investigational and not standardized",
+    "Should be avoided or used only under specialist supervision in organ-transplant recipients or others on intentional immunosuppression, as immune activation could promote rejection",
+    "Theoretical caution in autoimmune disease due to immune stimulation",
+    "May be prohibited by some sporting/anti-doping frameworks as an immunomodulator; verify current WADA status before competition"
+  ],
+  "sideEffects": [
+    "Injection-site reactions: redness, discomfort, or transient erythema",
+    "Generally mild and infrequent; large trials reported no serious drug-related adverse events",
+    "Occasional transient fatigue, joint discomfort, or low-grade flu-like feeling",
+    "Rare hypersensitivity reactions"
+  ],
+  "dosage": {
+    "low": "1.6",
+    "standard": "1.6",
+    "high": "3.2",
+    "unit": "mg",
+    "notes": "The best-established clinical dose (thymalfasin/Zadaxin for chronic hepatitis B) is 1.6 mg (approximately 900 mcg/m2) subcutaneously twice weekly, injections spaced 3–4 days apart. Some sepsis/critical-care protocols used higher loading (e.g. 1.6 mg twice daily for several days, then once daily). Educational information only, not medical advice.",
+    "timing": "Twice weekly with roughly 3–4 days between injections. Because immune effects persist ~72–96 hours per dose, this schedule maintains modulation despite the ~2-hour plasma half-life. Timing relative to food is not critical.",
+    "maxDose": "The labeled hepatitis dose is 1.6 mg twice weekly for 6–12 months. Short-term critical-care regimens have used up to ~3.2 mg/day in divided doses; no higher chronic ceiling is established for non-hospital use.",
+    "protocols": [
+      {
+        "label": "Standard maintenance (hepatitis-derived)",
+        "steps": [
+          {
+            "weeks": "1-24",
+            "amount": 1.6,
+            "unit": "mg",
+            "note": "1.6 mg subcutaneously twice weekly (~3–4 days apart) for 6 months; the labeled thymalfasin course for chronic hepatitis B runs 6–12 months. Sustained virological benefit is often delayed until ~12 months post-treatment."
+          }
+        ]
+      },
+      {
+        "label": "Short immune-support course",
+        "steps": [
+          {
+            "weeks": "1-4",
+            "amount": 1.6,
+            "unit": "mg",
+            "note": "1.6 mg twice weekly for ~4 weeks as a general educational immune-support block; anecdotal and not a validated indication."
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "twice weekly (3–4 days apart); some acute protocols dose daily",
+  "halfLife": "Rapidly absorbed with peak serum levels at ~2 hours and clearance to baseline by ~24 hours; downstream immunological effects persist ~72–96 hours",
+  "halfLifeHours": 2,
+  "cycleLength": "6–12 months for the hepatitis indication; shorter 4–12 week educational immune-support blocks are also used",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "A 10 mg research vial + 2 mL bacteriostatic water = 5 mg/mL, so a 1.6 mg dose = 0.32 mL (32 units on a U-100 insulin syringe). The commercial Zadaxin presentation is a 1.6 mg lyophilized vial reconstituted with 1.0 mL sterile diluent and injected whole. Swirl gently; do not shake."
+  },
+  "storage": "Store lyophilized vials refrigerated at 2–8°C (frozen for long-term). After reconstitution, refrigerate at 2–8°C and use within ~2–4 weeks; protect from light and do not freeze the reconstituted solution.",
+  "contraindications": [
+    "Known hypersensitivity to thymosin alpha-1 or thymalfasin",
+    "Organ-transplant recipients and others on deliberate immunosuppression (risk of promoting rejection) unless supervised by a specialist",
+    "Active autoimmune disease (use only under specialist guidance due to immune stimulation)",
+    "Pregnancy and breastfeeding (safety not established)",
+    "Competitive athletes should verify current anti-doping status before use"
+  ],
+  "interactions": [
+    {
+      "with": "tb-500",
+      "kind": "caution",
+      "note": "Frequently confused with Thymosin Beta-4 (TB-500) because of the shared 'thymosin' name, but they are unrelated molecules with different actions — Tα1 is an immune modulator, TB-500 is a tissue-repair/actin-binding peptide. Do not substitute one for the other."
+    },
+    {
+      "with": "kpv",
+      "kind": "synergy",
+      "note": "Theoretically complementary immune modulation — Tα1 restores adaptive T-cell and dendritic-cell function while KPV calms excess inflammation. Combined use is not clinically validated; educational only."
+    }
+  ],
+  "references": [
+    {
+      "title": "Thymosin α1 and Its Role in Viral Infectious Diseases: The Mechanism and Clinical Application (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10144173/"
+    },
+    {
+      "title": "The efficacy of thymosin alpha 1 for severe sepsis (ETASS): a multicenter, single-blind, randomized and controlled trial (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4056079/"
+    },
+    {
+      "title": "Thymosin‐α1 for people with chronic hepatitis B (Cochrane review, PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8929401/"
+    },
+    {
+      "title": "Thymosin α1 Activates Complement Receptor-Mediated Phagocytosis in Human Monocyte-Derived Macrophages (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6741600/"
+    },
+    {
+      "title": "Thymosin alpha1 treatment of chronic hepatitis B: phase III multicentre, randomized, double-blind, placebo-controlled study (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10607256/"
+    },
+    {
+      "title": "Zadaxin (Thymalfasin): Side Effects, Uses, Dosage, Interactions, Warnings (RxList)",
+      "url": "https://www.rxlist.com/zadaxin-drug.htm"
+    }
+  ],
+  "tags": ["immune", "longevity"],
+  "status": "research"
+}

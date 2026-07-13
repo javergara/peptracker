@@ -1,0 +1,128 @@
+{
+  "slug": "melanotan-ii",
+  "name": "Melanotan II (MT-II)",
+  "aliases": [
+    "Melanotan 2",
+    "MT-II",
+    "MT-2",
+    "MTII",
+    "PT-AM",
+    "cyclic alpha-MSH analog"
+  ],
+  "category": "COSMETIC",
+  "summary": "Melanotan II is a synthetic cyclic heptapeptide analog of alpha-melanocyte-stimulating hormone (alpha-MSH) and a non-selective melanocortin receptor agonist. It is studied for its ability to stimulate melanin production (tanning) and, via central melanocortin pathways, sexual arousal. It is not approved for human use in any country.",
+  "mechanism": "Melanotan II is a superpotent, metabolically stabilized analog of alpha-MSH. Structural modifications - norleucine and D-phenylalanine substitutions plus a lactam (cyclic 2-7) bridge - retain the His-Phe-Arg-Trp melanocortin pharmacophore while resisting enzymatic breakdown, giving it far greater potency and a longer duration of action than native alpha-MSH.\n\nIt acts as a non-selective agonist at the melanocortin receptors MC1R, MC3R, MC4R, and MC5R. Agonism at MC1R on cutaneous melanocytes activates adenylate cyclase and raises intracellular cAMP, upregulating tyrosinase and shifting melanogenesis toward eumelanin, which darkens the skin independent of UV exposure. Central agonism at MC4R (and MC3R) in the hypothalamus is responsible for its effects on sexual arousal/erectile function and on appetite suppression, while MC5R is expressed in peripheral exocrine tissues. This broad, non-selective receptor engagement explains both the tanning effect and the range of off-target adverse effects.",
+  "benefits": [
+    "Stimulates melanin synthesis (skin darkening/tanning) with little or no UV exposure (MC1R)",
+    "Studied historically as a potential photoprotective / skin-cancer chemopreventive strategy",
+    "Central melanocortin (MC4R) agonism can increase sexual arousal and erectile response",
+    "May suppress appetite via MC4R signaling (observed, not a validated indication)"
+  ],
+  "risks": [
+    "Not FDA-approved and not licensed for human use in the US, UK, EU, or Australia; sold only as an unregulated research chemical",
+    "Regulatory bodies (FDA, UK MHRA, Australia TGA) have issued explicit safety warnings against use",
+    "Non-selective melanocortin agonism drives multiple off-target effects (GI, cardiovascular, sexual, pigmentary)",
+    "Darkening, enlargement, and rapid appearance of moles/nevi (including dysplastic nevi) reported; melanoma has been diagnosed in users, and a causal role cannot be excluded",
+    "Serious adverse events reported in case reports: priapism, rhabdomyolysis, exogenous hypercortisolism, and acute renal failure",
+    "Unregulated products carry contamination, mislabeling, and dosing-accuracy risks",
+    "No long-term human safety data; product purity and true content are unverifiable"
+  ],
+  "sideEffects": [
+    "Nausea and vomiting (very common, reported in a large fraction of users, dose-limiting in trials)",
+    "Facial flushing",
+    "Spontaneous or prolonged erections in males; risk of priapism (a urologic emergency)",
+    "Spontaneous yawning and stretching",
+    "Appetite loss",
+    "Injection-site reactions (redness, soreness)",
+    "Darkening of existing moles, freckles, and new nevus formation; hyperpigmentation of the face, gums/oral mucosa, and areolae",
+    "Fatigue, dizziness, and headache"
+  ],
+  "dosage": {
+    "low": "0.25",
+    "standard": "0.25-0.5",
+    "high": "1",
+    "unit": "mg",
+    "notes": "Common educational protocol (not medical advice): a low-dose loading phase of ~250-500 mcg (0.25-0.5 mg) once daily to build pigment, then a reduced maintenance phase of ~250-1000 mcg once or twice weekly to sustain it. Starting low (e.g. 250 mcg) markedly reduces the very common nausea and flushing. Fair-skinned individuals should use lower doses. Effect is cumulative with UV exposure, so pigment develops over 1-3 weeks.",
+    "timing": "Often injected in the evening because early-onset nausea, flushing, and yawning are better tolerated during sleep; some also report reduced nausea when dosed with food. Doses are typically kept small during loading to limit GI effects rather than titrated aggressively upward.",
+    "maxDose": "Community use rarely exceeds ~1 mg per dose. This ceiling is anecdotal, not clinically established - there is no validated safe maximum, higher doses sharply increase nausea/flushing and the risk of priapism, and no human trials support exceeding phase I escalation doses.",
+    "protocols": [
+      {
+        "label": "Loading then maintenance (educational, not advice)",
+        "steps": [
+          {
+            "weeks": "1-2",
+            "amount": 250,
+            "unit": "mcg",
+            "note": "Loading: 250 mcg (0.25 mg) once daily to build pigment while limiting nausea/flushing. Increase cautiously toward 500 mcg only if well tolerated. Pair with modest UV exposure - the effect is cumulative."
+          },
+          {
+            "weeks": "3-4",
+            "amount": 500,
+            "unit": "mcg",
+            "note": "Continue loading up to ~500 mcg/day until the desired base tan is reached; watch moles/nevi closely and stop if any lesion changes."
+          },
+          {
+            "weeks": "5+",
+            "amount": 500,
+            "unit": "mcg",
+            "note": "Maintenance: ~250-1000 mcg once or twice weekly to sustain pigmentation once the target shade is reached, rather than daily dosing."
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "Once daily during a short loading phase, then 1-2x weekly for maintenance",
+  "halfLife": "Primary human pharmacokinetic data are limited; secondary sources commonly cite a terminal elimination half-life on the order of ~30-36 hours after subcutaneous dosing (peak ~4-6 h), while the visible tanning effect persists far longer (days to weeks) via sustained melanogenesis rather than lingering peptide.",
+  "halfLifeHours": 33,
+  "cycleLength": "Loading over ~1-4 weeks to reach a base tan, then intermittent maintenance dosing; periodic breaks are advised, with skin/mole self-checks throughout.",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "10 mg vial + 2 mL bacteriostatic water = 5 mg/mL (5000 mcg/mL), so 500 mcg = 0.1 mL (10 units on a U-100 insulin syringe) and 250 mcg = 0.05 mL (5 units). Add water slowly down the vial wall and swirl gently - do not shake."
+  },
+  "storage": "Store lyophilized vials refrigerated (2-8C) or frozen and protected from light. After reconstitution, refrigerate at 2-8C and use within ~2-4 weeks; do not freeze the reconstituted solution.",
+  "contraindications": [
+    "Personal or family history of melanoma, dysplastic nevus syndrome, or numerous/atypical moles",
+    "Any new, changing, darkening, or irregular skin lesion (stop and seek dermatologic evaluation)",
+    "History of priapism, sickle cell disease, or conditions predisposing to prolonged erection",
+    "Uncontrolled cardiovascular disease (melanocortin agonism can affect blood pressure/heart rate)",
+    "Pregnancy and breastfeeding",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "pt-141",
+      "kind": "caution",
+      "note": "PT-141 (bremelanotide) is a metabolite-related melanocortin (MC4R/MC1R) agonist. Combining two melanocortin agonists stacks overlapping effects and adverse-event risk - additive nausea, flushing, blood-pressure changes, and a higher chance of prolonged erection/priapism. Avoid concurrent use."
+    }
+  ],
+  "references": [
+    {
+      "title": "Dorr RT et al. Evaluation of melanotan-II, a superpotent cyclic melanotropic peptide in a pilot phase-I clinical study (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8637402/"
+    },
+    {
+      "title": "Preformulation studies with melanotan-II: a potential skin cancer chemopreventive peptide (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/7983590/"
+    },
+    {
+      "title": "NMR Insights into Structure-Function Relationships in the Binding of Melanocortin Analogues to the MC1R Receptor (PMC)",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6152105/"
+    },
+    {
+      "title": "Melanotan Tanning Injection: A Rare Cause of Priapism (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7930850/"
+    },
+    {
+      "title": "Changes in Oral Mucosa Associated with Melanotan II Injections: A Case Report (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12942211/"
+    },
+    {
+      "title": "Melanotan II - DermNet (dermatological overview and safety)",
+      "url": "https://dermnetnz.org/topics/melanotan-ii"
+    }
+  ],
+  "tags": ["skin-antiaging"],
+  "status": "research"
+}

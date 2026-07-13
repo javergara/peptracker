@@ -81,6 +81,33 @@ export async function logoutAction() {
 }
 
 /**
+ * Permanently delete the signed-in account and **all** its data. Requires the
+ * current password (a hijacked session shouldn't be able to nuke the account).
+ * Deleting the `Account` cascades to every profile and all profile-owned rows
+ * (doses, cycles, vials, labs, measurements, …) via `onDelete: Cascade`, then
+ * the session is cleared and the user is redirected to /login.
+ *
+ * Note: progress-photo blobs in Vercel Blob are NOT removed here (they're keyed
+ * by pathname, not FK) — a follow-up blob sweep would be needed for full erasure.
+ */
+export async function deleteAccountAction(formData: FormData) {
+  const accountId = await requireAccountId();
+  const password = String(formData.get("password") ?? "");
+
+  const account = await prisma.account.findUnique({
+    where: { id: accountId },
+    select: { passwordHash: true },
+  });
+  if (!account) throw new Error("Account not found.");
+
+  const ok = await bcrypt.compare(password, account.passwordHash);
+  if (!ok) throw new Error("Password is incorrect.");
+
+  await prisma.account.delete({ where: { id: accountId } });
+  await signOut({ redirectTo: "/login" });
+}
+
+/**
  * Change the signed-in account's password. Requires the current password
  * (defense-in-depth against a hijacked session) and an 8+ char new one. Throws
  * on failure so the ActionForm surfaces the message as a toast.

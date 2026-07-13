@@ -1,0 +1,136 @@
+{
+  "slug": "sermorelin",
+  "name": "Sermorelin",
+  "aliases": [
+    "Sermorelin acetate",
+    "GHRH (1-29)",
+    "GRF (1-29)",
+    "GHRF (1-29)",
+    "Geref",
+    "Geref Diagnostic"
+  ],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "Sermorelin is a synthetic 29-amino-acid peptide corresponding to the biologically active fragment of growth hormone-releasing hormone (GHRH 1-29). It stimulates the anterior pituitary to produce and release its own growth hormone (GH), raising IGF-1, and was formerly FDA-approved (as Geref) both as a diagnostic agent and for GH deficiency in children before being discontinued for commercial reasons.",
+  "mechanism": "Sermorelin is the acetate salt of the first 29 amino acids of endogenous human growth hormone-releasing hormone (GHRH), the shortest fully bioactive fragment of the 44-amino-acid parent hormone. It binds the GHRH receptor (GHRHR), a Gs-coupled receptor on somatotroph cells of the anterior pituitary.\n\nReceptor binding activates adenylyl cyclase, raising intracellular cyclic AMP and activating protein kinase A (PKA). This drives transcription of the GH gene and exocytosis of GH-containing secretory granules. Because sermorelin acts as a true secretagogue, it stimulates the pituitary to synthesize and release the body's own GH rather than supplying exogenous GH, so it preserves negative feedback (via somatostatin and IGF-1) and the natural pulsatile pattern of GH secretion. This feedback dependence is thought to make it self-limiting and reduces the risk of the supraphysiologic, non-pulsatile GH excess seen with exogenous GH.\n\nSermorelin carries no chemical modification to resist enzymatic degradation, so it is rapidly cleaved by dipeptidyl peptidase-IV (DPP-IV) between residues Ala2 and Asp3, giving a very short half-life (~10-20 minutes). Analogs such as Modified GRF 1-29 (the CJC-1295 without-DAC core) and CJC-1295 with DAC add substitutions or an albumin-binding complex specifically to blunt this DPP-IV degradation and extend activity. Like other GHRH analogs, sermorelin acts through a different receptor than the ghrelin-mimetic GHRPs (e.g. ipamorelin), so the two classes combine for a larger, complementary GH pulse.",
+  "benefits": [
+    "Stimulates endogenous, pulsatile GH release and raises IGF-1 rather than supplying exogenous GH",
+    "Preserves pituitary negative feedback, making GH elevation relatively self-limiting and physiologic",
+    "Reliably provoked pituitary GH release in diagnostic testing (its original FDA-approved use)",
+    "In studies of daily bedtime dosing in older adults, raised nocturnal GH and IGF-1 (IGF-1 ~35% in one report) with increases in lean mass and decreases in visceral fat",
+    "A 6-month study in elderly adults reported improvements in cognitive measures (problem solving, processing speed, working memory)",
+    "Studied for supporting body composition, recovery, and sleep quality via the GH/IGF-1 axis",
+    "Synergizes with GHRPs such as ipamorelin for a larger combined GH pulse"
+  ],
+  "risks": [
+    "No longer marketed as an FDA-approved product; Geref was withdrawn in 2008-2009 (a business decision, not for safety or effectiveness) and it is now available only via compounding pharmacies by prescription",
+    "Prohibited at all times by WADA (GHRH / GH-secretagogue class) in competitive sport",
+    "Stimulating the GH/IGF-1 axis is a theoretical concern with active or prior malignancy",
+    "Can transiently raise blood glucose and reduce insulin sensitivity via GH effects",
+    "Long-term safety and efficacy data in healthy adults are limited; much anti-aging use is off-label and extrapolated",
+    "Quality and purity of research-grade or compounded material vary; contamination risk with non-pharmaceutical sources"
+  ],
+  "sideEffects": [
+    "Injection-site reactions: redness, swelling, itching, or pain (the most common effect)",
+    "Facial flushing and transient warmth shortly after injection",
+    "Headache and dizziness",
+    "Nausea, altered taste, or vomiting (less common)",
+    "Water retention, tingling, or numbness (paresthesia) with higher GH/IGF-1 elevation",
+    "Joint aches or carpal-tunnel-like symptoms with excessive GH stimulation",
+    "Hyperactivity or difficulty sleeping if dosed too late; vivid dreams"
+  ],
+  "dosage": {
+    "low": "100",
+    "standard": "200-300",
+    "high": "500",
+    "unit": "mcg",
+    "notes": "Common educational protocols use ~100-500 mcg subcutaneously once daily at bedtime; the historical Geref labeling for adult diagnostic/therapeutic use referenced roughly 1 mcg/kg (about 200-300 mcg for a 60-80 kg adult). Bedtime dosing on an empty stomach reinforces the natural overnight GH pulse; food (especially carbohydrate and fat) blunts the response. Often paired 1:1 with a GHRP such as ipamorelin. This is educational information, not medical advice.",
+    "timing": "Inject SUBQ once daily at bedtime on an empty stomach (avoid food ~2 h before and ~20-30 min after, since elevated blood glucose/fat blunts the GH pulse). Bedtime timing reinforces the largest natural (nocturnal) GH pulse. Some protocols add a post-workout dose.",
+    "maxDose": "~500 mcg per dose is a common community ceiling; higher amounts mainly add side effects (water retention, paresthesia, reduced insulin sensitivity) without proportionally more GH because pituitary GHRH-receptor stimulation saturates and negative feedback limits release. No maximum is clinically established for non-approved adult anti-aging use.",
+    "protocols": [
+      {
+        "label": "Standard (daily bedtime)",
+        "steps": [
+          {
+            "weeks": "1-2",
+            "amount": 200,
+            "unit": "mcg",
+            "note": "Once daily pre-sleep, fasted, to assess tolerance"
+          },
+          {
+            "weeks": "3-12",
+            "amount": 300,
+            "unit": "mcg",
+            "note": "Common working dose; some titrate toward 500 mcg. Often paired 1:1 with 100-300 mcg ipamorelin"
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "Once daily, typically at bedtime on an empty stomach; some add a post-workout dose",
+  "halfLife": "Very short: roughly 10-20 minutes (some sources cite as low as ~5-13 minutes) due to rapid DPP-IV degradation, though the GH-stimulating effect can persist for a few hours after a dose",
+  "halfLifeHours": 0.25,
+  "cycleLength": "Commonly run in cycles of about 3-6 months of daily use with periodic breaks; older clinical studies dosed daily for up to 6-12 months while monitoring IGF-1",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 2,
+    "notes": "5 mg vial + 2 mL bacteriostatic water = 2.5 mg/mL (2500 mcg/mL), so 250 mcg = 0.1 mL (10 units on a U-100 insulin syringe) and 300 mcg = 0.12 mL (12 units). Add the diluent slowly down the vial wall and swirl gently; do not shake. Adjust diluent volume to make per-dose measurement convenient."
+  },
+  "storage": "Store lyophilized vials refrigerated (2-8C) or frozen and protected from light. After reconstitution, refrigerate at 2-8C and use within ~2-3 weeks (sermorelin is comparatively fragile in solution); do not freeze the reconstituted solution.",
+  "contraindications": [
+    "Active or history of cancer / malignancy (GH-IGF-1 axis stimulation is a theoretical growth concern)",
+    "Pregnancy and breastfeeding",
+    "Poorly controlled diabetes or significant insulin resistance without close monitoring (GH can impair glucose control)",
+    "Untreated hypothyroidism (blunts the GH response; correct first)",
+    "Competitive athletes subject to anti-doping testing (WADA-prohibited)",
+    "Known hypersensitivity to sermorelin or GHRH analogs"
+  ],
+  "interactions": [
+    {
+      "with": "ipamorelin",
+      "kind": "synergy",
+      "note": "Classic GHRH + GHRP combination. Sermorelin (a GHRH analog) drives GH release through the GHRH receptor while ipamorelin (a selective GH-releasing peptide / ghrelin-receptor agonist) triggers a GH pulse through a separate receptor; together they produce a larger, more reliable GH pulse than either alone, and ipamorelin keeps cortisol/prolactin low. Frequently paired 1:1 in the same syringe."
+    },
+    {
+      "with": "cjc-1295",
+      "kind": "caution",
+      "note": "CJC-1295 (and its without-DAC form, Modified GRF 1-29) is a longer-acting analog of the same GHRH 1-29 sequence acting on the same pituitary GHRH receptor. Running sermorelin alongside CJC-1295 is redundant rather than additive - it stacks two GHRH analogs and compounds GH/IGF-1 elevation (fluid retention, joint symptoms, reduced insulin sensitivity) with little benefit over choosing one GHRH analog plus a GHRP."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Tesamorelin is also a stabilized GHRH analog acting on the same GHRH receptor. Combining it with sermorelin overlaps the same mechanism, so it is redundant and compounds effects on IGF-1, glucose, and fluid retention rather than adding benefit; choose one GHRH analog rather than layering two."
+    }
+  ],
+  "references": [
+    {
+      "title": "Sermorelin: A better approach to management of adult-onset growth hormone insufficiency? (Walker RF, Clin Interv Aging 2006, PMC full text)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2699646/"
+    },
+    {
+      "title": "Treating age-related changes in somatotrophic hormones, sleep, and cognition (Vitiello et al., Dialogues Clin Neurosci 2006, PMC full text)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3181657/"
+    },
+    {
+      "title": "Growth Hormone and Aging (Endotext, NCBI Bookshelf - GHRH/sermorelin effects on GH/IGF-1 and body composition)",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK279163/"
+    },
+    {
+      "title": "Sermorelin - Wikipedia (structure, GHRH 1-29 mechanism, DPP-IV degradation, half-life, Geref FDA approval and withdrawal)",
+      "url": "https://en.wikipedia.org/wiki/Sermorelin"
+    },
+    {
+      "title": "Sermorelin acetate - DrugBank (pharmacology, GHRHR mechanism, pharmacokinetics)",
+      "url": "https://go.drugbank.com/drugs/DB00010"
+    }
+  ],
+  "tags": [
+    "gh-axis",
+    "muscle-growth",
+    "recovery-injury",
+    "fat-loss",
+    "sleep",
+    "longevity"
+  ],
+  "status": "research"
+}

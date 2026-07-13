@@ -1,0 +1,107 @@
+{
+  "slug": "pt-141",
+  "name": "PT-141 (Bremelanotide)",
+  "aliases": ["Bremelanotide", "Vyleesi", "PT 141", "PT141"],
+  "category": "NOOTROPIC_ANXIOLYTIC",
+  "summary": "PT-141 (bremelanotide) is a synthetic cyclic heptapeptide melanocortin receptor agonist studied for sexual desire and arousal. Unlike PDE5 inhibitors that act on blood flow, it works centrally in the brain; the acetate form (Vyleesi) is FDA-approved for hypoactive sexual desire disorder (HSDD) in premenopausal women.",
+  "mechanism": "Bremelanotide is a cyclic seven-amino-acid peptide (stabilized by a lactam bridge between Asp and Lys residues) derived from the alpha-MSH / Melanotan-II lineage but re-engineered for receptor selectivity and without the tanning-focused activity of Melanotan II. It non-selectively activates melanocortin receptors with an approximate order of potency MC1R > MC4R > MC3R > MC5R > MC2R; at therapeutic doses the effects most relevant to sexual function are mediated by MC4R (with MC1R activation underlying pigmentary side effects).\n\nThe mechanism is CNS-mediated rather than vascular. Agonism of hypothalamic melanocortin receptors in the paraventricular nucleus and medial preoptic area modulates the dopaminergic sexual-arousal pathway, increasing dopamine release in brain regions mapped to sexual desire. This is why bremelanotide can influence the 'desire' side of sexual response independently of the peripheral, blood-flow mechanism targeted by PDE5 inhibitors. A notable pharmacokinetic feature is that behavioral effects on sexual function persist for roughly 4-8 hours despite a plasma half-life of only about 2.7 hours.",
+  "benefits": [
+    "FDA-approved (as Vyleesi) for acquired, generalized HSDD in premenopausal women",
+    "Centrally acting: influences sexual desire/arousal, not just peripheral blood flow",
+    "On-demand ('as needed') use rather than daily continuous dosing",
+    "Studied off-label in men for erectile function and low libido",
+    "Works through a mechanism distinct from PDE5 inhibitors, so it does not rely on vasodilation"
+  ],
+  "risks": [
+    "Approved only for a narrow indication (premenopausal HSDD); use in men or for general 'libido enhancement' is off-label and largely unstudied",
+    "Compounded/research-grade PT-141 is not FDA-approved and lacks purity/sterility guarantees",
+    "Transient increases in blood pressure and decreases in heart rate after each dose; caution with uncontrolled hypertension or cardiovascular disease",
+    "Contraindicated in people with uncontrolled hypertension or known cardiovascular disease per the Vyleesi label",
+    "Focal hyperpigmentation (skin/gum darkening) can develop, especially with frequent dosing and in darker skin, and may not fully reverse",
+    "Not established as safe in pregnancy or breastfeeding"
+  ],
+  "sideEffects": [
+    "Nausea (very common; reported by ~40% in trials, sometimes requiring anti-emetics)",
+    "Flushing and headache",
+    "Injection-site reactions (redness, irritation)",
+    "Transient blood pressure elevation and heart-rate reduction (usually resolve within ~12 hours)",
+    "Focal hyperpigmentation of face, gums, or breasts with repeated/frequent use",
+    "Vomiting, dizziness, or fatigue in some users"
+  ],
+  "dosage": {
+    "low": "1",
+    "standard": "1.75",
+    "high": "2",
+    "unit": "mg",
+    "notes": "The FDA-approved Vyleesi dose is 1.75 mg subcutaneously (abdomen or thigh) as needed, at least 45 minutes before anticipated sexual activity. Research/community protocols often start lower (~1 mg) to gauge nausea and blood-pressure response before moving to the standard dose. This is a common educational protocol, not medical advice.",
+    "timing": "Dosed 'as needed' (PRN), roughly 45 minutes to a few hours before anticipated activity, rather than on a fixed daily schedule. Effects on desire/arousal can persist several hours after a single dose.",
+    "maxDose": "Do not take more than one dose within any 24-hour period, and no more than 8 doses per month. Dosing more frequently (e.g., daily) sharply increases the risk of focal hyperpigmentation and additive blood-pressure effects.",
+    "protocols": [
+      {
+        "label": "As-needed (PRN) tolerability approach",
+        "steps": [
+          {
+            "weeks": "Test dose",
+            "amount": 1,
+            "unit": "mg",
+            "note": "A lower initial dose is commonly used to assess nausea and blood-pressure response before moving to the standard dose."
+          },
+          {
+            "weeks": "Standard",
+            "amount": 1.75,
+            "unit": "mg",
+            "note": "1.75 mg subcutaneously as needed, at least 45 minutes before activity. Max 1 dose/24h and 8 doses/month."
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "as needed (PRN); no more than once per 24 hours and up to 8 doses per month",
+  "halfLife": "Plasma half-life ~2.7 hours; behavioral effects on sexual function can persist ~4-8 hours",
+  "halfLifeHours": 2.7,
+  "cycleLength": "Not cycled continuously; used on-demand per intimate occasion rather than in fixed multi-week cycles",
+  "reconstitution": {
+    "vialMg": 10,
+    "bacWaterMl": 2,
+    "notes": "10 mg vial + 2 mL bacteriostatic water = 5 mg/mL (5000 mcg/mL), so a 1.75 mg dose = 0.35 mL (35 units on a U-100 insulin syringe) and 1 mg = 0.2 mL (20 units). The approved Vyleesi product ships as a pre-filled 1.75 mg/0.3 mL autoinjector and does not require reconstitution."
+  },
+  "storage": "Store lyophilized vials refrigerated or frozen and protected from light. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. The pre-filled Vyleesi autoinjector is stored at room temperature per its label.",
+  "contraindications": [
+    "Uncontrolled hypertension or known cardiovascular disease (per Vyleesi label)",
+    "Pregnancy and breastfeeding",
+    "History of significant focal hyperpigmentation or darker skin types prone to it (use with caution / less frequent dosing)",
+    "Known hypersensitivity to bremelanotide or melanocortin agonists"
+  ],
+  "interactions": [
+    {
+      "with": "melanotan-ii",
+      "kind": "caution",
+      "note": "Both are melanocortin receptor agonists (PT-141 is derived from the Melanotan-II lineage). Combining or overlapping them risks additive melanocortin effects: nausea, blood-pressure changes, and especially focal hyperpigmentation. Avoid stacking; do not layer PT-141 on top of ongoing Melanotan II dosing."
+    }
+  ],
+  "references": [
+    {
+      "title": "VYLEESI (bremelanotide injection) - FDA Full Prescribing Information (accessdata.fda.gov)",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2019/210557s000lbl.pdf"
+    },
+    {
+      "title": "Bremelanotide Monograph for Professionals - Drugs.com",
+      "url": "https://www.drugs.com/monograph/bremelanotide.html"
+    },
+    {
+      "title": "Bremelanotide for the treatment of hypoactive sexual desire disorder (PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31593258/"
+    },
+    {
+      "title": "Bremelanotide for Female Sexual Dysfunctions: A Review (PMC)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7960054/"
+    },
+    {
+      "title": "Label: VYLEESI- bremelanotide injection - DailyMed",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f1d0c1b5-2f39-4bad-a6a4-0066e3ad5dcf"
+    }
+  ],
+  "tags": ["cognition-mood"],
+  "status": "research"
+}
