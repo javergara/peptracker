@@ -96,9 +96,18 @@ export function DataControls() {
     }
     startTransition(async () => {
       try {
-        const count = await importMeasurementsCsv(wearableCsv);
-        toast.success(`Imported ${count} measurement(s)`);
-        setWearableCsv("");
+        const { imported, skipped, duplicates } =
+          await importMeasurementsCsv(wearableCsv);
+        const extras: string[] = [];
+        if (duplicates > 0) extras.push(`${duplicates} duplicate(s) skipped`);
+        for (const s of skipped) extras.push(`${s.count} ${s.reason}`);
+        const detail = extras.length ? ` · ${extras.join(", ")}` : "";
+        if (imported > 0) {
+          toast.success(`Imported ${imported} measurement(s)${detail}`);
+          setWearableCsv("");
+        } else {
+          toast.error(`Nothing imported${detail || " — no valid rows found."}`);
+        }
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "CSV import failed.");
       }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/queries";
+import { parseMeasurementsCsv } from "@/lib/csv-import";
 
 export async function updateUserSettings(formData: FormData) {
   const user = await getCurrentUser();
@@ -460,114 +461,69 @@ export async function exportDosesCsv(): Promise<string> {
   );
 }
 
-/**
- * Measurement types accepted by CSV import — mirrors `TYPE_LABELS` on
- * `/metrics` (weight/bodyFat/sleep/recovery/restingHr/hrv/steps/workout are
- * the wearable-relevant ones; `custom` is a free-form catch-all).
- */
-const KNOWN_MEASUREMENT_TYPES = new Set([
-  "weight",
-  "bodyFat",
-  "sleep",
-  "recovery",
-  "restingHr",
-  "hrv",
-  "steps",
-  "workout",
-  "custom",
-]);
-
-/** Split one CSV line into cells, handling double-quoted fields (","/quotes inside). */
-function parseCsvLine(line: string): string[] {
-  const cells: string[] = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (inQuotes) {
-      if (ch === '"') {
-        if (line[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        cur += ch;
-      }
-    } else if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === ",") {
-      cells.push(cur);
-      cur = "";
-    } else {
-      cur += ch;
-    }
-  }
-  cells.push(cur);
-  return cells;
+export interface CsvImportResult {
+  imported: number;
+  /** Rows skipped, grouped by reason (bad date, unknown type, …). */
+  skipped: { reason: string; count: number }[];
+  /** Rows dropped as duplicates (within the file OR already in the DB). */
+  duplicates: number;
 }
 
 /**
- * Import wearable/manual measurement rows from a simple CSV: a header row of
- * `date,type,value[,unit]` (column order flexible, `unit` optional) followed
- * by one row per reading. `type` must be one of the known measurement types
- * (weight, bodyFat, sleep, recovery, restingHr, hrv, steps, workout, custom).
- * Rows that fail to parse or use an unknown type are silently skipped —
- * import bulk-creates via `createMany` (user-scoped) and returns the count of
- * rows actually imported.
+ * Import wearable/manual measurement rows from CSV: a header row (aliases like
+ * `timestamp`/`metric`/`val` are accepted; column order flexible; `unit`
+ * optional) followed by one row per reading. Parsing/validation is the pure,
+ * tested `parseMeasurementsCsv` (header + type aliasing, non-locale-ambiguous
+ * dates, in-file dedup). This action then **dedups against existing rows** in
+ * the DB and reports what was imported, skipped (with reasons), and de-duped —
+ * instead of silently dropping rows. User-scoped; bulk-creates via `createMany`.
  */
-export async function importMeasurementsCsv(csvText: string): Promise<number> {
+export async function importMeasurementsCsv(
+  csvText: string,
+): Promise<CsvImportResult> {
   const user = await getCurrentUser();
-  const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length < 2) {
-    throw new Error("CSV needs a header row and at least one data row.");
-  }
+  const parsed = parseMeasurementsCsv(csvText);
+  let duplicates = parsed.duplicatesInFile;
 
-  const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
-  const dateIdx = header.indexOf("date");
-  const typeIdx = header.indexOf("type");
-  const valueIdx = header.indexOf("value");
-  const unitIdx = header.indexOf("unit");
-  if (dateIdx === -1 || typeIdx === -1 || valueIdx === -1) {
-    throw new Error(
-      "CSV header must include date, type, value (unit optional).",
+  let rows = parsed.rows;
+  if (rows.length > 0) {
+    // Dedup against what's already stored in the window this import covers.
+    const times = rows.map((r) => r.recordedAt.getTime());
+    const min = new Date(Math.min(...times));
+    const max = new Date(Math.max(...times));
+    const existing = await prisma.measurement.findMany({
+      where: {
+        userId: user.id,
+        recordedAt: { gte: min, lte: max },
+      },
+      select: { type: true, value: true, recordedAt: true },
+    });
+    const existingKeys = new Set(
+      existing.map((e) => `${e.type}|${e.recordedAt.getTime()}|${e.value}`),
     );
+    const before = rows.length;
+    rows = rows.filter(
+      (r) =>
+        !existingKeys.has(`${r.type}|${r.recordedAt.getTime()}|${r.value}`),
+    );
+    duplicates += before - rows.length;
   }
 
-  const rows: {
-    userId: string;
-    type: string;
-    value: number;
-    unit: string | null;
-    recordedAt: Date;
-  }[] = [];
-  for (const line of lines.slice(1)) {
-    const cells = parseCsvLine(line);
-    const rawDate = cells[dateIdx]?.trim();
-    const type = cells[typeIdx]?.trim();
-    const rawValue = cells[valueIdx]?.trim();
-    const unit = unitIdx !== -1 ? cells[unitIdx]?.trim() || null : null;
-
-    if (!rawDate || !type || !rawValue) continue;
-    if (!KNOWN_MEASUREMENT_TYPES.has(type)) continue;
-    const value = Number(rawValue);
-    if (!Number.isFinite(value)) continue;
-    const recordedAt = new Date(rawDate);
-    if (Number.isNaN(recordedAt.getTime())) continue;
-
-    rows.push({ userId: user.id, type, value, unit, recordedAt });
+  if (rows.length > 0) {
+    await prisma.measurement.createMany({
+      data: rows.map((r) => ({
+        userId: user.id,
+        type: r.type,
+        value: r.value,
+        unit: r.unit,
+        recordedAt: r.recordedAt,
+      })),
+    });
+    revalidatePath("/metrics");
+    revalidatePath("/");
   }
 
-  if (rows.length === 0) {
-    throw new Error("No valid rows found in the CSV.");
-  }
-
-  await prisma.measurement.createMany({ data: rows });
-
-  revalidatePath("/metrics");
-  revalidatePath("/");
-  return rows.length;
+  return { imported: rows.length, skipped: parsed.skipped, duplicates };
 }
 
 /** Lab results for the active profile as CSV text. */
