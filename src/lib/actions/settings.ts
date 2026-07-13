@@ -24,9 +24,22 @@ export async function updateUserSettings(formData: FormData) {
       ? birthYearNum
       : null;
 
+  // IANA timezone — validate against the runtime's known zones so a bad value
+  // can't be stored (empty = clear it → reminders fall back to server time).
+  const tzRaw = String(formData.get("timezone") ?? "").trim();
+  let timezone: string | null = null;
+  if (tzRaw) {
+    try {
+      new Intl.DateTimeFormat("en-CA", { timeZone: tzRaw });
+      timezone = tzRaw;
+    } catch {
+      timezone = null;
+    }
+  }
+
   await prisma.user.update({
     where: { id: user.id },
-    data: { name, weightUnit, doseUnit, sex, birthYear },
+    data: { name, weightUnit, doseUnit, sex, birthYear, timezone },
   });
 
   revalidatePath("/settings");

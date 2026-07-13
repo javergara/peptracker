@@ -6,6 +6,7 @@ import {
   formatDate,
   isWithinRange,
   parseLocalDate,
+  zonedToday,
 } from "@/lib/dates";
 
 describe("dates", () => {
@@ -97,6 +98,30 @@ describe("dates", () => {
       expect(parseLocalDate(undefined)).toBeNull();
       expect(parseLocalDate("2026/07/13")).toBeNull();
       expect(parseLocalDate("13-07-2026")).toBeNull();
+    });
+  });
+
+  describe("zonedToday", () => {
+    it("returns the instant unchanged without a timezone", () => {
+      const now = new Date("2026-07-13T10:00:00Z");
+      expect(zonedToday(now, null)).toBe(now);
+      expect(zonedToday(now, undefined)).toBe(now);
+    });
+    it("resolves to the user's local calendar day (anchored at noon)", () => {
+      // 03:00 UTC on Jul 13 is still Jul 12 in Los Angeles (UTC-7/8).
+      const instant = new Date("2026-07-13T03:00:00Z");
+      const la = zonedToday(instant, "America/Los_Angeles");
+      expect(la.getFullYear()).toBe(2026);
+      expect(la.getMonth()).toBe(6); // July
+      expect(la.getDate()).toBe(12);
+      expect(la.getHours()).toBe(12);
+      // Same instant is already Jul 13 in Tokyo (UTC+9).
+      const tk = zonedToday(instant, "Asia/Tokyo");
+      expect(tk.getDate()).toBe(13);
+    });
+    it("falls back to the instant on an invalid timezone", () => {
+      const now = new Date("2026-07-13T10:00:00Z");
+      expect(zonedToday(now, "Not/AZone")).toBe(now);
     });
   });
 });

@@ -23,6 +23,13 @@ export const metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const user = await getCurrentUser();
 
+  // Full IANA timezone list from the runtime (falls back to a short list on
+  // older engines). Drives the reminder-timezone picker.
+  const timezones: string[] =
+    typeof Intl.supportedValuesOf === "function"
+      ? Intl.supportedValuesOf("timeZone")
+      : ["UTC", "America/New_York", "America/Los_Angeles", "Europe/London"];
+
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader
@@ -132,6 +139,30 @@ export default async function SettingsPage() {
             Sex and birth year are used to show sex- and age-appropriate
             biomarker reference ranges. Optional.
           </p>
+
+          <div className="space-y-1.5">
+            <label htmlFor="set-timezone" className="text-sm font-medium">
+              Timezone
+            </label>
+            <select
+              id="set-timezone"
+              name="timezone"
+              defaultValue={user.timezone ?? ""}
+              className="border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+            >
+              <option value="">Auto (server time)</option>
+              {timezones.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+            <p className="text-muted-foreground text-xs">
+              Your daily dose reminders compute &ldquo;today&rdquo; in this
+              timezone so they fire on the right day.
+            </p>
+          </div>
+
           <SubmitButton>Save settings</SubmitButton>
         </ActionForm>
       </div>
