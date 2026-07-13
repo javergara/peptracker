@@ -1,0 +1,114 @@
+{
+  "slug": "aod-9604",
+  "name": "AOD-9604 (Anti-Obesity Drug 9604)",
+  "aliases": [
+    "AOD9604",
+    "Tyr-hGH 177-191",
+    "Advanced Obesity Drug 9604",
+    "Lipolytic fragment of hGH"
+  ],
+  "category": "GH_SECRETAGOGUE",
+  "summary": "AOD-9604 is a modified 16-amino-acid fragment of the C-terminus of human growth hormone (Tyr-hGH 177-191), engineered to retain the fat-mobilizing (lipolytic) activity of GH without its effects on IGF-1, blood glucose, or cell growth. It is studied as a fat-loss compound, though human efficacy evidence is limited and mixed. It is categorized here under Growth Hormone because it is a GH-derived fragment, but note it does NOT raise IGF-1 or act on the classic GH receptor.",
+  "mechanism": "AOD-9604 corresponds to the lipolytic C-terminal domain of human growth hormone (residues 176-191) with an added N-terminal tyrosine for stability, giving Tyr-hGH 177-191. In preclinical models it stimulates lipolysis (breakdown of stored triglycerides) and inhibits lipogenesis (conversion of food into new fat), reproducing the fat-reducing effect of full GH without its diabetogenic or growth-promoting actions.\n\nMechanistically, the fat-loss effect is tied to the beta-3 adrenergic receptor (beta3-AR), the principal lipolytic receptor on adipocytes. In obese and beta3-AR knockout mice, Heffernan et al. showed that chronic AOD-9604 reduced body weight and increased beta3-AR expression in fat, but the weight-reducing effect was lost in beta3-AR knockout animals, indicating the receptor is required for the chronic effect even though the peptide does not appear to bind beta3-AR directly. Critically, unlike full-length GH, AOD-9604 does not activate the GH receptor, does not raise serum IGF-1, and does not impair glucose tolerance in human studies.",
+  "benefits": [
+    "Stimulates lipolysis (fat breakdown) and inhibits lipogenesis in preclinical models",
+    "Reduces body weight and body fat in obese mice via a beta-3 adrenergic-dependent pathway",
+    "Does not raise IGF-1 or impair glucose tolerance, unlike full-length growth hormone",
+    "Appetite-neutral in studies (does not act on GLP-1 or central appetite pathways like GLP-1 drugs)",
+    "Very good safety/tolerability profile across six human trials (indistinguishable from placebo)",
+    "Explored anecdotally for cartilage/joint support, though human evidence is minimal"
+  ],
+  "risks": [
+    "Human efficacy evidence is limited and MIXED: the largest Phase IIb obesity trial failed to reach statistical significance vs placebo and development was discontinued (2007)",
+    "Not FDA-approved as a drug; it holds only GRAS (food-ingredient) recognition and is not an approved obesity therapeutic",
+    "Prohibited in sport (WADA prohibited list, S2 peptide hormones/growth factors)",
+    "No published dedicated human pharmacokinetic study of the subcutaneous route; SC dosing is extrapolated from oral/IV trial experience and community use",
+    "Long-term safety of injected research-grade material and typical fat-loss doses is not clinically established"
+  ],
+  "sideEffects": [
+    "Injection-site redness, irritation, or soreness (subcutaneous use)",
+    "Generally well tolerated; adverse-event rates were indistinguishable from placebo in trials",
+    "Occasional mild headache or fatigue reported anecdotally",
+    "No consistent effect on appetite, IGF-1, or blood glucose reported"
+  ],
+  "dosage": {
+    "low": "150",
+    "standard": "300",
+    "high": "500",
+    "unit": "mcg",
+    "notes": "Common educational protocol is roughly 250-500 mcg subcutaneously once daily; 300 mcg is the most frequently cited figure. Human clinical trials used ORAL tablets (1, 5, 10, 20, 30 mg) with the 1 mg oral dose performing best in the Phase 2 study; injectable SC microgram dosing is a community convention, not a validated clinical regimen. This is educational information, not medical advice.",
+    "timing": "Typically dosed once daily in the morning on an empty stomach; the very short half-life means the peptide clears quickly, so consistent daily timing is used rather than titration. Some protocols split into AM/PM doses. Not appetite-mediated, so timing relative to meals is for consistency rather than hunger control.",
+    "maxDose": "Community SC use rarely exceeds ~500-600 mcg/day. Human oral trials went as high as 30 mg/day; higher doses did not improve fat loss (the 1 mg oral arm performed best), so escalating dose has no demonstrated benefit. Any ceiling here is anecdotal and not clinically established.",
+    "protocols": [
+      {
+        "label": "Standard (fixed daily, subcutaneous)",
+        "steps": [
+          {
+            "weeks": "1-12",
+            "amount": 300,
+            "unit": "mcg",
+            "note": "300 mcg subcutaneously once daily, typically AM on an empty stomach. Microgram SC dosing is a community convention extrapolated from oral trial data; human SC efficacy is not clinically validated."
+          }
+        ]
+      }
+    ]
+  },
+  "route": "SUBQ",
+  "frequency": "once daily (sometimes split AM/PM)",
+  "halfLife": "Short; reported elimination half-life of roughly 30-40 minutes (~38 min), cleared rapidly",
+  "halfLifeHours": 0.63,
+  "cycleLength": "Commonly run in blocks of about 12 weeks, often stacked with diet and exercise; trials evaluated 12-24 week treatment periods",
+  "reconstitution": {
+    "vialMg": 5,
+    "bacWaterMl": 2,
+    "notes": "5 mg vial + 2 mL bacteriostatic water = 2.5 mg/mL (2500 mcg/mL), so 300 mcg = 0.12 mL (12 units on a U-100 insulin syringe) and 500 mcg = 0.2 mL (20 units). Swirl gently to dissolve; do not shake."
+  },
+  "storage": "Store lyophilized vials frozen or refrigerated. After reconstitution, refrigerate at 2-8C and use within ~4 weeks. Protect from light and avoid repeated freeze-thaw.",
+  "contraindications": [
+    "Active or history of cancer (general caution with growth-derived research peptides)",
+    "Pregnancy and breastfeeding",
+    "Competitive athletes subject to anti-doping testing (WADA-prohibited)",
+    "Known hypersensitivity to the peptide"
+  ],
+  "interactions": [
+    {
+      "with": "cjc-1295",
+      "kind": "synergy",
+      "note": "Body-composition stacking rationale: CJC-1295 raises endogenous GH/IGF-1 to support lean mass and recovery, while AOD-9604 targets adipocyte lipolysis without adding to the IGF-1 load. Synergy is theoretical/anecdotal for fat-loss goals; no controlled human trial validates the combination and both are non-approved research compounds."
+    },
+    {
+      "with": "ipamorelin",
+      "kind": "synergy",
+      "note": "Commonly paired for recomposition: Ipamorelin is a selective GH secretagogue (GH pulse without strong cortisol/prolactin effects) and AOD-9604 adds a direct lipolytic angle. Educational framing only; combined safety and efficacy are unstudied in humans."
+    },
+    {
+      "with": "tesamorelin",
+      "kind": "caution",
+      "note": "Both are marketed for fat reduction, but Tesamorelin robustly raises IGF-1 while AOD-9604 does not; stacking two fat-loss GH-axis compounds compounds cost and monitoring needs without added evidence. Consider IGF-1 and glucose monitoring and avoid redundant fat-loss agents."
+    }
+  ],
+  "references": [
+    {
+      "title": "Heffernan et al. The effects of human GH and its lipolytic fragment (AOD9604) on lipid metabolism in obese and beta3-AR knock-out mice (Endocrinology 2001, PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11713213/"
+    },
+    {
+      "title": "Heffernan et al. The lipolytic action of AOD9604 (hGH fragment 177-191) in isolated rat adipocytes (Endocrinology 2001, PubMed)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11316784/"
+    },
+    {
+      "title": "Stier et al. Safety and Tolerability of the Hexadecapeptide AOD9604 in Humans (Journal of Endocrinology and Metabolism 2013)",
+      "url": "https://jofem.org/index.php/jofem/article/view/157"
+    },
+    {
+      "title": "The effect of AOD9604 on weight loss in obese adults: randomized, double-blind, placebo-controlled multicenter study (ResearchGate)",
+      "url": "https://www.researchgate.net/publication/295313034_The_effect_of_AOD9604_on_weight_loss_in_obese_adults_Results_of_a_randomized_double-blind_placebo-controlled_multicenter_study"
+    },
+    {
+      "title": "Moré et al. Safety and Metabolism of AOD9604, a Novel Nutraceutical Ingredient for Improved Metabolic Health (Journal of Endocrinology and Metabolism)",
+      "url": "https://jofem.org/index.php/jofem/article/view/213/278"
+    }
+  ],
+  "tags": ["fat-loss", "metabolic", "gh-axis"],
+  "status": "research"
+}
