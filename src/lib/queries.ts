@@ -801,3 +801,47 @@ export async function getTodaysCheckIn() {
   today.setHours(0, 0, 0, 0);
   return getCheckIn(today);
 }
+
+// --- Food & calories -------------------------------------------------------
+
+/**
+ * Food logs for a single local-midnight `date`, ordered for meal grouping.
+ * Meal ordering is applied by the caller (via MEAL_TYPES) since it's a fixed,
+ * non-alphabetical sequence; here we just give a stable within-day order.
+ */
+export async function getFoodLogsForDay(date: Date) {
+  const user = await getActiveUser();
+  return prisma.foodLog.findMany({
+    where: { userId: user.id, date },
+    orderBy: [{ mealType: "asc" }, { loggedAt: "asc" }],
+  });
+}
+
+/** The active profile's "My Foods" library, alphabetical. */
+export async function listFoodItems() {
+  const user = await getActiveUser();
+  return prisma.foodItem.findMany({
+    where: { userId: user.id },
+    orderBy: { name: "asc" },
+  });
+}
+
+/** Food logs within a date range (for the metrics daily-aggregate series). */
+export async function getFoodLogsInRange(start: Date, end: Date) {
+  const user = await getActiveUser();
+  return prisma.foodLog.findMany({
+    where: { userId: user.id, date: { gte: start, lte: end } },
+    orderBy: [{ date: "asc" }, { loggedAt: "asc" }],
+  });
+}
+
+/** The active profile's daily nutrition targets (null when unset). */
+export async function getNutritionGoals() {
+  const user = await getActiveUser();
+  return {
+    calorieGoal: user.calorieGoal,
+    proteinGoal: user.proteinGoal,
+    carbGoal: user.carbGoal,
+    fatGoal: user.fatGoal,
+  };
+}

@@ -40,6 +40,7 @@ import {
   getDoseLogsInRange,
   listCheckIns,
   listLabs,
+  getFoodLogsInRange,
 } from "@/lib/queries";
 import { toDateInputValue } from "@/lib/dates";
 import { asCheckInRatings, CHECKIN_MARKERS } from "@/types/checkin";
@@ -161,13 +162,43 @@ export default async function MetricsPage({
   const fetchStart = new Date(now);
   fetchStart.setDate(fetchStart.getDate() - 365);
 
-  const [measurements, user, doseLogs, labs, checkIns] = await Promise.all([
-    listMeasurements(),
-    getCurrentUser(),
-    getDoseLogsInRange(fetchStart, now),
-    listLabs(),
-    listCheckIns(),
-  ]);
+  const [measurements, user, doseLogs, labs, checkIns, foodLogs] =
+    await Promise.all([
+      listMeasurements(),
+      getCurrentUser(),
+      getDoseLogsInRange(fetchStart, now),
+      listLabs(),
+      listCheckIns(),
+      getFoodLogsInRange(fetchStart, now),
+    ]);
+
+  // Daily-aggregated nutrition series (one point per day = sum of that day's
+  // logs). Built once, all-time; the correlation explorer uses it whole and the
+  // trend chart clips it to the window. Feeds e.g. a calories-vs-weight insight.
+  const FOOD_METRICS = [
+    { key: "calories", label: "Calories", unit: "kcal" },
+    { key: "protein", label: "Protein (intake)", unit: "g" },
+    { key: "carbs", label: "Carbs (intake)", unit: "g" },
+    { key: "fat", label: "Fat (intake)", unit: "g" },
+  ] as const;
+  const foodDaily = new Map<string, Map<number, number>>(
+    FOOD_METRICS.map((m) => [m.key, new Map<number, number>()]),
+  );
+  for (const log of foodLogs) {
+    const t = log.date.getTime();
+    for (const m of FOOD_METRICS) {
+      const dayMap = foodDaily.get(m.key)!;
+      dayMap.set(t, (dayMap.get(t) ?? 0) + (log[m.key] ?? 0));
+    }
+  }
+  const foodSeries = FOOD_METRICS.map((m) => ({
+    key: `f:${m.key}`,
+    label: m.label,
+    unit: m.unit as string | null,
+    points: [...foodDaily.get(m.key)!.entries()]
+      .map(([t, value]) => ({ t, value: Math.round(value) }))
+      .sort((a, b) => a.t - b.t),
+  }));
 
   const profileColor = user.color ?? "var(--chart-1)";
 
@@ -270,6 +301,9 @@ export default async function MetricsPage({
         .map((r) => ({ t: r.takenAt.getTime(), value: r.value }))
         .sort((a, b) => a.t - b.t),
     });
+  }
+  for (const s of foodSeries) {
+    if (s.points.length > 0) corrSeries.push(s);
   }
 
   // --- Trend series (windowed to selected range) ----------------------------
@@ -384,6 +418,21 @@ export default async function MetricsPage({
         key: `l:${marker}`,
         label: marker,
         unit: rows[0]?.unit ?? null,
+        color: nextColor(),
+        points: windowed,
+      });
+    } else {
+      nextColor();
+    }
+  }
+
+  for (const s of foodSeries) {
+    const windowed = clipPoints(s.points, windowStart);
+    if (windowed.length > 0) {
+      trendSeries.push({
+        key: s.key,
+        label: s.label,
+        unit: s.unit,
         color: nextColor(),
         points: windowed,
       });

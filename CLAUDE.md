@@ -262,15 +262,19 @@ client"`). Reuse these; don't reinvent gauges/panels.
   class in `globals.css` is a token-scoping trick: it locally remaps the neutral
   tokens to a dark violet scale so any child (nav, profile switcher, account menu,
   disclaimer) reads correctly on the rail without per-component edits. Applied to
-  the `<aside>` + mobile `SheetContent` in `app-shell.tsx`. Sidebar nav is grouped:
-  Overview · Tracking · Health · Library · Settings · **Tools**. The Tools group
-  holds **`SidebarCalculator`** (`src/components/peptides/sidebar-calculator.tsx`)
-  — a nav-styled trigger that opens the `ReconstitutionCalculator` in a centered
+  the `<aside>` + mobile `SheetContent` in `app-shell.tsx`. Sidebar nav (`NAV` in
+  `app-shell.tsx`) is grouped by domain: Dashboard · **Peptides** (log, cycles,
+  inventory, library, stacks, suggestions) · **Supplementation** · **Food** ·
+  **Health** (metrics, labs, photos, biomarkers, check-in, journal) · Settings.
+  A shared **quick-access block** above the groups holds Search, **Calendar**
+  (spans every domain, so it lives here not in a group), and
+  **`SidebarCalculator`** (`src/components/peptides/sidebar-calculator.tsx`) — a
+  nav-styled trigger that opens the `ReconstitutionCalculator` in a centered
   dialog for quick reconstitution math from anywhere (generic, no `peptideId`).
   On mobile (`<lg`) an **Ink
   bottom tab bar** (`MobileTabBar` in `app-shell.tsx`, `--gradient-ink-bar`) gives
-  quick access to Home/Log/Calendar/Metrics; the hamburger `Sheet` stays for full
-  nav. `main` gets extra bottom padding on mobile so content clears the bar.
+  quick access to Home/Log/Calendar/Food/Metrics; the hamburger `Sheet` stays for
+  full nav. `main` gets extra bottom padding on mobile so content clears the bar.
 - **Logo:** `src/components/brand/peptra-logo.tsx` — `PeptraMark` (gradient SVG,
   unique ids via `useId`) + `PeptraLogo` (mark + wordmark). App icon/favicon =
   `src/app/icon.svg`; PWA = `src/app/manifest.ts`. App name in `APP_NAME`.
@@ -331,7 +335,8 @@ Hosted on **Vercel**; **Neon Postgres** + **Vercel Blob**; **Auth.js** login.
 `/login` · `/signup` · `/` dashboard · `/log` (+`/[id]/edit`, `?page&peptide`) ·
 `/calendar` · `/cycles` (+`/new`,`/[id]`,`/[id]/edit`, `?status`) · `/inventory`
 (`?tab=active|stock`, `?peptide`) · `/metrics` · `/labs` · `/photos` (`?page`) ·
-`/journal` · `/checkin` · `/peptides` (+`/[slug]`) · `/stacks`
+`/journal` · `/checkin` · `/food` (`?tab=today|foods|goals`, `?date`) ·
+`/peptides` (+`/[slug]`) · `/stacks`
 (+`/new`,`/[slug]`,`/[slug]/edit`) · `/suggestions` · `/supplements` ·
 `/biomarkers` (+`/[slug]`) · `/settings`. Auth routes render bare; everything else
 is gated. Global **⌘K search** (`src/components/search/global-search.tsx`, index
@@ -471,7 +476,7 @@ typical**, not authoritative (they vary by lab/assay).
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
   `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
-  `titration`, `cycle-timeline`. Keep pure math out of components so it stays testable.
+  `titration`, `cycle-timeline`, `food`. Keep pure math out of components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the
@@ -596,6 +601,21 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   via `/api/photos/[id]`). UI is `components/photos/photo-board.tsx` (client):
   full images (object-contain), click-to-zoom lightbox, and a Before/After with
   selectable photos (defaults oldest→newest).
+- **Food & calories:** `/food` (`?tab=today|foods|goals`, `?date`),
+  `src/lib/actions/food.ts` + food queries in `queries.ts`. Two profile-owned
+  models: **`FoodItem`** (reusable "My Foods" library, per-serving nutrition) and
+  **`FoodLog`** (a logged entry; calories/macros stored as the TOTAL for the
+  logged `quantity` so the metrics page can sum columns directly). Meal types +
+  macro config live in `src/types/food.ts`; pure math (scale/sum/goal progress/
+  macro split) in **`src/lib/food.ts`** (tested). Daily nutrition **goals** are
+  columns on `User` (`calorieGoal`/`proteinGoal`/`carbGoal`/`fatGoal`). Today tab
+  = calorie ring + macro bars (`components/food/nutrition-summary.tsx`, reuses
+  `AdherenceRing`) over meal-grouped rows; My Foods tab = library CRUD + one-tap
+  quick-add (`logFoodItem`); Goals tab = `setNutritionGoals`. Food log delete uses
+  the **undo-toast** snapshot pattern (like doses). Metrics: `getFoodLogsInRange`
+  is aggregated per-day into `f:calories|protein|carbs|fat` `TrendSeries` in
+  `metrics/page.tsx`, so nutrition charts and correlations (e.g. calories vs
+  weight) surface automatically.
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization

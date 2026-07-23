@@ -416,6 +416,154 @@ async function main() {
     }
   }
 
+  // Food tracker: default nutrition goals + a starter "My Foods" library and a
+  // day of logs, so /food and its metrics series aren't empty in dev.
+  if (user.calorieGoal == null) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        calorieGoal: 2200,
+        proteinGoal: 160,
+        carbGoal: 220,
+        fatGoal: 70,
+      },
+    });
+  }
+
+  const foodItemCount = await prisma.foodItem.count({
+    where: { userId: user.id },
+  });
+  if (foodItemCount === 0) {
+    const foods = [
+      {
+        name: "Chicken breast",
+        servingSize: 100,
+        servingUnit: "g",
+        calories: 165,
+        protein: 31,
+        carbs: 0,
+        fat: 3.6,
+        fiber: 0,
+      },
+      {
+        name: "White rice (cooked)",
+        servingSize: 100,
+        servingUnit: "g",
+        calories: 130,
+        protein: 2.7,
+        carbs: 28,
+        fat: 0.3,
+        fiber: 0.4,
+      },
+      {
+        name: "Greek yogurt (nonfat)",
+        servingSize: 170,
+        servingUnit: "g",
+        calories: 100,
+        protein: 17,
+        carbs: 6,
+        fat: 0.7,
+        fiber: 0,
+      },
+      {
+        name: "Whole egg",
+        servingSize: 1,
+        servingUnit: "large",
+        calories: 72,
+        protein: 6.3,
+        carbs: 0.4,
+        fat: 4.8,
+        fiber: 0,
+      },
+      {
+        name: "Banana",
+        servingSize: 1,
+        servingUnit: "medium",
+        calories: 105,
+        protein: 1.3,
+        carbs: 27,
+        fat: 0.4,
+        fiber: 3.1,
+      },
+      {
+        name: "Olive oil",
+        servingSize: 1,
+        servingUnit: "tbsp",
+        calories: 119,
+        protein: 0,
+        carbs: 0,
+        fat: 13.5,
+        fiber: 0,
+      },
+    ];
+    await prisma.foodItem.createMany({
+      data: foods.map((f) => ({ userId: user.id, ...f })),
+    });
+  }
+
+  const foodLogCount = await prisma.foodLog.count({
+    where: { userId: user.id },
+  });
+  if (foodLogCount === 0) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const entries = [
+      {
+        mealType: "breakfast",
+        name: "Greek yogurt (nonfat)",
+        quantity: 1,
+        calories: 100,
+        protein: 17,
+        carbs: 6,
+        fat: 0.7,
+        fiber: 0,
+      },
+      {
+        mealType: "breakfast",
+        name: "Banana",
+        quantity: 1,
+        calories: 105,
+        protein: 1.3,
+        carbs: 27,
+        fat: 0.4,
+        fiber: 3.1,
+      },
+      {
+        mealType: "lunch",
+        name: "Chicken breast",
+        quantity: 2,
+        calories: 330,
+        protein: 62,
+        carbs: 0,
+        fat: 7.2,
+        fiber: 0,
+      },
+      {
+        mealType: "lunch",
+        name: "White rice (cooked)",
+        quantity: 1.5,
+        calories: 195,
+        protein: 4.1,
+        carbs: 42,
+        fat: 0.5,
+        fiber: 0.6,
+      },
+      {
+        mealType: "dinner",
+        name: "Whole egg",
+        quantity: 3,
+        calories: 216,
+        protein: 18.9,
+        carbs: 1.2,
+        fat: 14.4,
+        fiber: 0,
+      },
+    ];
+    await prisma.foodLog.createMany({
+      data: entries.map((e) => ({ userId: user.id, date: today, ...e })),
+    });
+  }
+
   console.log(`Seed complete for user "${user.name}" (${user.id})`);
   console.log(`Demo login -> ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
 }

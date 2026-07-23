@@ -25,12 +25,14 @@ import {
   Sun,
   Syringe,
   TestTube,
+  UtensilsCrossed,
 } from "lucide-react";
 
 const TAB_BAR_TABS = [
   { href: "/", label: "Home", icon: LayoutDashboard, exact: true },
   { href: "/log", label: "Log", icon: Syringe, exact: false },
   { href: "/calendar", label: "Calendar", icon: CalendarDays, exact: false },
+  { href: "/food", label: "Food", icon: UtensilsCrossed, exact: false },
   { href: "/metrics", label: "Metrics", icon: LineChart, exact: false },
 ] as const;
 
@@ -86,16 +88,23 @@ const NAV: NavGroup[] = [
     items: [{ href: "/", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
-    label: "Tracking",
+    label: "Peptides",
     items: [
       { href: "/log", label: "Log Dose", icon: Syringe },
-      { href: "/calendar", label: "Calendar", icon: CalendarDays },
       { href: "/cycles", label: "Cycles", icon: CalendarRange },
       { href: "/inventory", label: "Inventory", icon: Package },
-      { href: "/supplements", label: "Supplements", icon: Pill },
-      { href: "/checkin", label: "Check-in", icon: ClipboardCheck },
-      { href: "/journal", label: "Journal", icon: NotebookPen },
+      { href: "/peptides", label: "Peptides", icon: BookOpen },
+      { href: "/stacks", label: "Stacks", icon: Layers },
+      { href: "/suggestions", label: "Suggestions", icon: Sparkles },
     ],
+  },
+  {
+    label: "Supplementation",
+    items: [{ href: "/supplements", label: "Supplements", icon: Pill }],
+  },
+  {
+    label: "Food",
+    items: [{ href: "/food", label: "Food", icon: UtensilsCrossed }],
   },
   {
     label: "Health",
@@ -103,15 +112,9 @@ const NAV: NavGroup[] = [
       { href: "/metrics", label: "Metrics", icon: LineChart },
       { href: "/labs", label: "Labs", icon: TestTube },
       { href: "/photos", label: "Photos", icon: Images },
-    ],
-  },
-  {
-    label: "Library",
-    items: [
-      { href: "/peptides", label: "Peptides", icon: BookOpen },
       { href: "/biomarkers", label: "Biomarkers", icon: HeartPulse },
-      { href: "/stacks", label: "Stacks", icon: Layers },
-      { href: "/suggestions", label: "Suggestions", icon: Sparkles },
+      { href: "/checkin", label: "Check-in", icon: ClipboardCheck },
+      { href: "/journal", label: "Journal", icon: NotebookPen },
     ],
   },
   {
@@ -150,6 +153,21 @@ function NavLinks({
             ⌘K
           </kbd>
         </button>
+        {/* Calendar spans every domain (doses, cycles, …) so it lives in the
+            shared quick-access block above the grouped nav. */}
+        <Link
+          href="/calendar"
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            isActive(pathname, "/calendar")
+              ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+          )}
+        >
+          <CalendarDays className="size-4 shrink-0" />
+          Calendar
+        </Link>
         {/* Quick reconstitution calculator — kept at the very top for fast access. */}
         <SidebarCalculator />
       </div>
