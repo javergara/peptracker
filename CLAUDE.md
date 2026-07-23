@@ -476,7 +476,8 @@ typical**, not authoritative (they vary by lab/assay).
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
   `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
-  `titration`, `cycle-timeline`, `food`. Keep pure math out of components so it stays testable.
+  `titration`, `cycle-timeline`, `food`, `food-catalog`. Keep pure math out of
+  components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the
@@ -611,7 +612,12 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   columns on `User` (`calorieGoal`/`proteinGoal`/`carbGoal`/`fatGoal`). Today tab
   = calorie ring + macro bars (`components/food/nutrition-summary.tsx`, reuses
   `AdherenceRing`) over meal-grouped rows; My Foods tab = library CRUD + one-tap
-  quick-add (`logFoodItem`); Goals tab = `setNutritionGoals`. Food log delete uses
+  quick-add (`logFoodItem`); Goals tab = `setNutritionGoals`. The add-food picker
+  also offers a **built-in global catalog** (`src/lib/food-catalog.ts`, tested) —
+  ~40 common + Colombian staples (arepa, plátano, aguacate, fríjoles, …) with
+  per-100g nutrition + serving presets ("1 egg" vs "100 g"); selecting one
+  auto-fills the macros for the chosen serving, then the servings qty multiplies.
+  Bilingual names make Spanish search terms match. Food log delete uses
   the **undo-toast** snapshot pattern (like doses). Metrics: `getFoodLogsInRange`
   is aggregated per-day into `f:calories|protein|carbs|fat` `TrendSeries` in
   `metrics/page.tsx`, so nutrition charts and correlations (e.g. calories vs

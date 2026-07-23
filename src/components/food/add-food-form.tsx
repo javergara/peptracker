@@ -14,6 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addFoodLog } from "@/lib/actions/food";
+import {
+  FOOD_CATALOG,
+  FOOD_CATEGORY_LABELS,
+  catalogServingNutrition,
+  getCatalogFood,
+  type CatalogFood,
+} from "@/lib/food-catalog";
 import { MEAL_TYPES, type MealTypeKey } from "@/types/food";
 
 export interface FoodItemOption {
@@ -50,7 +57,10 @@ export function AddFoodForm({
   items: FoodItemOption[];
   defaultMeal?: MealTypeKey;
 }) {
+  const [source, setSource] = useState<string | null>(null);
   const [foodItemId, setFoodItemId] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<CatalogFood | null>(null);
+  const [servingIdx, setServingIdx] = useState(0);
   const [name, setName] = useState("");
   const [meal, setMeal] = useState<string>(defaultMeal);
   const [quantity, setQuantity] = useState("1");
@@ -61,13 +71,46 @@ export function AddFoodForm({
   const [fat, setFat] = useState("");
   const [fiber, setFiber] = useState("");
 
-  const options = items.map((i) => ({
-    value: i.id,
-    label: i.brand ? `${i.name} — ${i.brand}` : i.name,
-  }));
+  // Grouped picker: the user's saved foods first, then the built-in catalog by
+  // category. Values are namespaced so we know which set was chosen.
+  const options = [
+    ...items.map((i) => ({
+      value: `item:${i.id}`,
+      label: i.brand ? `${i.name} — ${i.brand}` : i.name,
+      group: "My Foods",
+    })),
+    ...FOOD_CATALOG.map((f) => ({
+      value: `cat:${f.slug}`,
+      label: f.name,
+      group: FOOD_CATEGORY_LABELS[f.category] ?? "Other",
+    })),
+  ];
+
+  function fillNutrition(n: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber?: number | null;
+  }) {
+    setCalories(numStr(n.calories));
+    setProtein(numStr(n.protein));
+    setCarbs(numStr(n.carbs));
+    setFat(numStr(n.fat));
+    setFiber(numStr(n.fiber));
+  }
+
+  function applyServing(food: CatalogFood, idx: number) {
+    const serving = food.servings[idx] ?? food.servings[0];
+    setServingUnit(serving.label);
+    fillNutrition(catalogServingNutrition(food, serving));
+  }
 
   function reset() {
+    setSource(null);
     setFoodItemId(null);
+    setCatalog(null);
+    setServingIdx(0);
     setName("");
     setQuantity("1");
     setServingUnit("");
@@ -78,19 +121,38 @@ export function AddFoodForm({
     setFiber("");
   }
 
-  function pickItem(id: string | null) {
-    setFoodItemId(id);
-    if (!id) return;
-    const item = items.find((i) => i.id === id);
-    if (!item) return;
-    setName(item.name);
-    setServingUnit(item.servingUnit ?? "");
-    setCalories(numStr(item.calories));
-    setProtein(numStr(item.protein));
-    setCarbs(numStr(item.carbs));
-    setFat(numStr(item.fat));
-    setFiber(numStr(item.fiber));
-    setQuantity("1");
+  function pickSource(value: string | null) {
+    setSource(value);
+    if (!value) {
+      setFoodItemId(null);
+      setCatalog(null);
+      return;
+    }
+    if (value.startsWith("item:")) {
+      const item = items.find((i) => `item:${i.id}` === value);
+      setCatalog(null);
+      setServingIdx(0);
+      if (!item) return;
+      setFoodItemId(item.id);
+      setName(item.name);
+      setServingUnit(item.servingUnit ?? "");
+      fillNutrition(item);
+      setQuantity("1");
+    } else if (value.startsWith("cat:")) {
+      const food = getCatalogFood(value.slice(4));
+      setFoodItemId(null);
+      if (!food) return;
+      setCatalog(food);
+      setServingIdx(0);
+      setName(food.name);
+      applyServing(food, 0);
+      setQuantity("1");
+    }
+  }
+
+  function pickServing(idx: number) {
+    setServingIdx(idx);
+    if (catalog) applyServing(catalog, idx);
   }
 
   return (
@@ -107,21 +169,45 @@ export function AddFoodForm({
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="foodItemId" value={foodItemId ?? ""} />
 
-      {items.length > 0 ? (
-        <div className="space-y-1.5 sm:col-span-2 lg:col-span-4">
-          <label className="text-sm font-medium">
-            Quick pick from My Foods{" "}
-            <span className="text-muted-foreground font-normal">
-              — optional
-            </span>
+      <div className="space-y-1.5 sm:col-span-2 lg:col-span-4">
+        <label className="text-sm font-medium">
+          Pick a food{" "}
+          <span className="text-muted-foreground font-normal">
+            — search the built-in list or your saved foods
+          </span>
+        </label>
+        <SearchableSelect
+          options={options}
+          value={source}
+          onValueChange={pickSource}
+          placeholder="Search foods… e.g. egg, arroz, aguacate"
+          aria-label="Pick a food"
+        />
+      </div>
+
+      {catalog ? (
+        <div className="space-y-1.5 sm:col-span-2">
+          <label htmlFor="food-serving" className="text-sm font-medium">
+            Serving
           </label>
-          <SearchableSelect
-            options={options}
-            value={foodItemId}
-            onValueChange={pickItem}
-            placeholder="Search saved foods…"
-            aria-label="Pick a saved food"
-          />
+          <Select
+            value={String(servingIdx)}
+            onValueChange={(v) => pickServing(Number(v))}
+            items={Object.fromEntries(
+              catalog.servings.map((s, i) => [String(i), s.label]),
+            )}
+          >
+            <SelectTrigger id="food-serving">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {catalog.servings.map((s, i) => (
+                <SelectItem key={s.label} value={String(i)}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       ) : null}
 
