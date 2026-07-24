@@ -57,6 +57,7 @@ const TYPE_LABELS: Record<string, string> = {
   hrv: "HRV",
   steps: "Steps",
   workout: "Workout duration",
+  water: "Water",
   custom: "Custom",
 };
 
@@ -70,6 +71,7 @@ const TYPE_DEFAULT_UNIT: Record<string, string> = {
   hrv: "ms",
   steps: "steps",
   workout: "min",
+  water: "mL",
 };
 
 /** Types where a LOWER value is the improving direction (used for tile deltas). */
@@ -180,6 +182,9 @@ export default async function MetricsPage({
     { key: "protein", label: "Protein (intake)", unit: "g" },
     { key: "carbs", label: "Carbs (intake)", unit: "g" },
     { key: "fat", label: "Fat (intake)", unit: "g" },
+    { key: "fiber", label: "Fiber (intake)", unit: "g" },
+    { key: "sugar", label: "Sugar (intake)", unit: "g" },
+    { key: "sodium", label: "Sodium (intake)", unit: "mg" },
   ] as const;
   const foodDaily = new Map<string, Map<number, number>>(
     FOOD_METRICS.map((m) => [m.key, new Map<number, number>()]),

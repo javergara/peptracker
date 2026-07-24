@@ -49,6 +49,9 @@ model User {
   proteinGoal Int? // grams
   carbGoal    Int? // grams
   fatGoal     Int? // grams
+  fiberGoal   Int? // grams
+  sodiumGoal  Int? // mg
+  waterGoal   Int? // mL
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -429,6 +432,14 @@ model FoodItem {
   carbs       Float     @default(0) // grams
   fat         Float     @default(0) // grams
   fiber       Float? // grams (optional)
+  sugar       Float? // grams (optional)
+  saturatedFat Float? // grams (optional)
+  sodium      Float? // mg (optional)
+  source      String? // provenance, e.g. "USDA FDC 123456" (library/recipe)
+  // Recipe support: a FoodItem with `ingredients != null` IS a saved recipe. Its
+  // per-serving nutrition above = summed ingredients ÷ recipeServings.
+  ingredients Json? // RecipeIngredient[] (see src/types/food.ts)
+  recipeServings Float? // servings the recipe makes
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -454,6 +465,9 @@ model FoodLog {
   carbs       Float     @default(0) // grams (total)
   fat         Float     @default(0) // grams (total)
   fiber       Float? // grams (total, optional)
+  sugar       Float? // grams (total, optional)
+  saturatedFat Float? // grams (total, optional)
+  sodium      Float? // mg (total, optional)
   notes       String?
   loggedAt    DateTime  @default(now()) // wall-clock time of entry (tiebreaker)
   createdAt   DateTime  @default(now())

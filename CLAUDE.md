@@ -476,8 +476,8 @@ typical**, not authoritative (they vary by lab/assay).
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
   `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
-  `titration`, `cycle-timeline`, `food`, `food-catalog`. Keep pure math out of
-  components so it stays testable.
+  `titration`, `cycle-timeline`, `food`, `food-catalog`, `tdee`, `food-report`.
+  Keep pure math out of components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the
@@ -619,9 +619,19 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   auto-fills the macros for the chosen serving, then the servings qty multiplies.
   Bilingual names make Spanish search terms match. Food log delete uses
   the **undo-toast** snapshot pattern (like doses). Metrics: `getFoodLogsInRange`
-  is aggregated per-day into `f:calories|protein|carbs|fat` `TrendSeries` in
-  `metrics/page.tsx`, so nutrition charts and correlations (e.g. calories vs
-  weight) surface automatically.
+  is aggregated per-day into `f:calories|protein|carbs|fat|fiber|sugar|sodium`
+  `TrendSeries` in `metrics/page.tsx`, so nutrition charts and correlations (e.g.
+  calories vs weight) surface automatically. **Tier-1 additions** (`/food` tabs
+  Today · My Foods · **Report** · Goals): richer nutrients (sugar/sat-fat/sodium
+  columns + fiber/sodium goals; the ~40-food catalog is USDA-verified with a
+  `source`); a **recipe builder** (`FoodItem.ingredients` Json + `recipeServings`
+  → per-serving nutrition; `saveRecipe`); **recents / copy-day / log-again**
+  (`getRecentFoodLogs`, `logAgain`, `copyDay`); **water** (a `type:"water"`
+  Measurement in mL, `logWater`/`getWaterForDay`, goal `User.waterGoal`); a
+  **weekly report** (`src/lib/food-report.ts`, tested); and the flagship
+  **adaptive-TDEE** card (`src/lib/tdee.ts`, tested — estimates maintenance
+  calories from the weight trend vs intake via `linearRegression`, with a
+  "use as goal" action, under the Disclaimer).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization

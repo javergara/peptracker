@@ -426,6 +426,9 @@ async function main() {
         proteinGoal: 160,
         carbGoal: 220,
         fatGoal: 70,
+        fiberGoal: 30,
+        sodiumGoal: 2300,
+        waterGoal: 2500,
       },
     });
   }
@@ -501,13 +504,62 @@ async function main() {
     });
   }
 
+  const midnight = (daysAgo: number) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - daysAgo);
+    return d;
+  };
+
+  // Recipe (a composed FoodItem) so the recipe surface + badge have an example.
+  const recipeCount = await prisma.foodItem.count({
+    where: { userId: user.id, name: "Chicken & rice bowl" },
+  });
+  if (recipeCount === 0) {
+    await prisma.foodItem.create({
+      data: {
+        userId: user.id,
+        name: "Chicken & rice bowl",
+        servingSize: 1,
+        servingUnit: "1 serving",
+        source: "Recipe",
+        recipeServings: 2,
+        // Per-serving = (2×chicken + 1.5×rice) ÷ 2.
+        calories: 263,
+        protein: 33,
+        carbs: 21,
+        fat: 3.9,
+        ingredients: [
+          {
+            name: "Chicken breast",
+            amount: 2,
+            unit: "100 g",
+            calories: 330,
+            protein: 62,
+            carbs: 0,
+            fat: 7.2,
+          },
+          {
+            name: "White rice (cooked)",
+            amount: 1.5,
+            unit: "1 cup",
+            calories: 195,
+            protein: 4.1,
+            carbs: 42,
+            fat: 0.5,
+          },
+        ],
+      },
+    });
+  }
+
   const foodLogCount = await prisma.foodLog.count({
     where: { userId: user.id },
   });
   if (foodLogCount === 0) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const entries = [
+    // ~14 days of logs so the weekly report, streak, and adaptive-TDEE estimate
+    // all have data to work with.
+    const template = [
       {
         mealType: "breakfast",
         name: "Greek yogurt (nonfat)",
@@ -517,6 +569,8 @@ async function main() {
         carbs: 6,
         fat: 0.7,
         fiber: 0,
+        sugar: 4,
+        sodium: 60,
       },
       {
         mealType: "breakfast",
@@ -527,6 +581,8 @@ async function main() {
         carbs: 27,
         fat: 0.4,
         fiber: 3.1,
+        sugar: 14,
+        sodium: 1,
       },
       {
         mealType: "lunch",
@@ -537,6 +593,8 @@ async function main() {
         carbs: 0,
         fat: 7.2,
         fiber: 0,
+        sugar: 0,
+        sodium: 148,
       },
       {
         mealType: "lunch",
@@ -547,6 +605,8 @@ async function main() {
         carbs: 42,
         fat: 0.5,
         fiber: 0.6,
+        sugar: 0.2,
+        sodium: 2,
       },
       {
         mealType: "dinner",
@@ -557,10 +617,79 @@ async function main() {
         carbs: 1.2,
         fat: 14.4,
         fiber: 0,
+        sugar: 1,
+        sodium: 210,
+      },
+      {
+        mealType: "dinner",
+        name: "Olive oil",
+        quantity: 1,
+        calories: 119,
+        protein: 0,
+        carbs: 0,
+        fat: 13.5,
+        fiber: 0,
+        sugar: 0,
+        sodium: 0,
       },
     ];
-    await prisma.foodLog.createMany({
-      data: entries.map((e) => ({ userId: user.id, date: today, ...e })),
+    const data = [];
+    for (let daysAgo = 0; daysAgo < 14; daysAgo++) {
+      const date = midnight(daysAgo);
+      for (const e of template) {
+        const jitter = e.mealType === "dinner" ? (daysAgo % 3) * 40 : 0;
+        data.push({
+          userId: user.id,
+          date,
+          ...e,
+          calories: e.calories + jitter,
+        });
+      }
+    }
+    await prisma.foodLog.createMany({ data });
+  }
+
+  // A gently downward weight trend across the window so TDEE reads a deficit.
+  const recentWeightCount = await prisma.measurement.count({
+    where: {
+      userId: user.id,
+      type: "weight",
+      recordedAt: { gte: midnight(20) },
+    },
+  });
+  if (recentWeightCount < 4) {
+    const pts = [
+      { d: 14, v: 85.8 },
+      { d: 11, v: 85.6 },
+      { d: 8, v: 85.3 },
+      { d: 5, v: 85.1 },
+      { d: 2, v: 84.9 },
+    ];
+    await prisma.measurement.createMany({
+      data: pts.map((w) => ({
+        userId: user.id,
+        type: "weight",
+        value: w.v,
+        unit: "kg",
+        recordedAt: midnight(w.d),
+      })),
+    });
+  }
+
+  // Today's water so the water ring isn't empty.
+  const waterCount = await prisma.measurement.count({
+    where: { userId: user.id, type: "water" },
+  });
+  if (waterCount === 0) {
+    const now = new Date();
+    await prisma.measurement.createMany({
+      data: [500, 500, 250].map((ml) => ({
+        userId: user.id,
+        type: "water",
+        value: ml,
+        unit: "mL",
+        recordedAt: now,
+      })),
     });
   }
 

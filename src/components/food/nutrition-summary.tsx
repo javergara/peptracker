@@ -6,7 +6,7 @@ import {
   type Nutrition,
   type NutritionGoals,
 } from "@/lib/food";
-import { MACROS } from "@/types/food";
+import { MACROS, MICROS } from "@/types/food";
 
 /** A single macro progress bar (grams consumed vs goal). */
 function MacroBar({
@@ -108,12 +108,36 @@ export function NutritionSummary({
               color={m.color}
             />
           ))}
-          {totals.fiber != null ? (
-            <p className="num text-muted-foreground pt-1 text-xs">
-              Fiber {Math.round(totals.fiber)} g
-            </p>
-          ) : null}
         </div>
+      </div>
+
+      {/* Micros row — fiber/sugar/sat-fat/sodium (goal shown for fiber/sodium). */}
+      <div className="border-border mt-4 flex flex-wrap gap-x-6 gap-y-1.5 border-t pt-3">
+        {MICROS.map((m) => {
+          const value = totals[m.key];
+          if (value == null) return null;
+          const goal =
+            m.key === "fiber"
+              ? goals.fiberGoal
+              : m.key === "sodium"
+                ? goals.sodiumGoal
+                : null;
+          return (
+            <div key={m.key} className="text-sm">
+              <span className="text-muted-foreground">{m.label} </span>
+              <span className="num text-foreground">
+                {Math.round(value)}
+                {goal ? (
+                  <span className="text-muted-foreground">
+                    /{goal} {m.unit}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground"> {m.unit}</span>
+                )}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

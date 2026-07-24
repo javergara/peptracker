@@ -82,6 +82,11 @@ function FoodItemRow({ item, date }: { item: FoodItemData; date: string }) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{item.name}</span>
+          {item.isRecipe ? (
+            <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium">
+              Recipe
+            </span>
+          ) : null}
           {item.brand ? (
             <span className="text-muted-foreground text-xs">{item.brand}</span>
           ) : null}

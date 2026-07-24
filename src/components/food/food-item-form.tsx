@@ -18,6 +18,11 @@ export interface FoodItemData {
   carbs: number;
   fat: number;
   fiber: number | null;
+  sugar: number | null;
+  saturatedFat: number | null;
+  sodium: number | null;
+  /** True when this saved food is a composed recipe (drives the badge). */
+  isRecipe?: boolean;
 }
 
 /**
@@ -195,6 +200,60 @@ export function FoodItemForm({
           min={0}
           step="any"
           defaultValue={item?.fiber ?? ""}
+          className="num"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label
+          htmlFor={`fi-sugar-${item?.id ?? "new"}`}
+          className="text-sm font-medium"
+        >
+          Sugar (g){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id={`fi-sugar-${item?.id ?? "new"}`}
+          name="sugar"
+          type="number"
+          min={0}
+          step="any"
+          defaultValue={item?.sugar ?? ""}
+          className="num"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label
+          htmlFor={`fi-satfat-${item?.id ?? "new"}`}
+          className="text-sm font-medium"
+        >
+          Sat. fat (g){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id={`fi-satfat-${item?.id ?? "new"}`}
+          name="saturatedFat"
+          type="number"
+          min={0}
+          step="any"
+          defaultValue={item?.saturatedFat ?? ""}
+          className="num"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label
+          htmlFor={`fi-sodium-${item?.id ?? "new"}`}
+          className="text-sm font-medium"
+        >
+          Sodium (mg){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id={`fi-sodium-${item?.id ?? "new"}`}
+          name="sodium"
+          type="number"
+          min={0}
+          step="any"
+          defaultValue={item?.sodium ?? ""}
           className="num"
         />
       </div>

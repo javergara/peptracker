@@ -11,6 +11,10 @@ export type Nutrition = {
   carbs: number;
   fat: number;
   fiber?: number | null;
+  sugar?: number | null;
+  saturatedFat?: number | null;
+  /** Sodium in milligrams (all other nutrients are grams). */
+  sodium?: number | null;
 };
 
 export type NutritionGoals = {
@@ -18,6 +22,9 @@ export type NutritionGoals = {
   proteinGoal: number | null;
   carbGoal: number | null;
   fatGoal: number | null;
+  fiberGoal?: number | null;
+  sodiumGoal?: number | null;
+  waterGoal?: number | null;
 };
 
 /** Round to `d` decimal places, avoiding float noise (e.g. 0.1*3). */
@@ -32,21 +39,46 @@ export const EMPTY_NUTRITION: Nutrition = {
   carbs: 0,
   fat: 0,
   fiber: null,
+  sugar: null,
+  saturatedFat: null,
+  sodium: null,
 };
+
+/**
+ * Optional nutrients carried alongside the core macros. Grams except `sodium`
+ * (mg) — scaling/summing math is identical; only the display rounding differs.
+ */
+const OPTIONAL_NUTRIENTS = [
+  "fiber",
+  "sugar",
+  "saturatedFat",
+  "sodium",
+] as const;
+type OptionalNutrient = (typeof OPTIONAL_NUTRIENTS)[number];
+
+/** Sodium is whole-mg; the rest round to one gram-decimal. */
+function roundNutrient(key: OptionalNutrient, value: number): number {
+  return key === "sodium" ? Math.round(value) : round(value);
+}
 
 /**
  * Scale a per-serving nutrition object by `quantity` servings. Calories round
  * to whole numbers; macros to one decimal. A negative/NaN quantity clamps to 0.
+ * Optional nutrients (fiber/sugar/sat-fat/sodium) scale when present, else null.
  */
 export function scaleNutrition(base: Nutrition, quantity: number): Nutrition {
   const q = Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
-  return {
+  const out: Nutrition = {
     calories: Math.round(base.calories * q),
     protein: round(base.protein * q),
     carbs: round(base.carbs * q),
     fat: round(base.fat * q),
-    fiber: base.fiber == null ? null : round(base.fiber * q),
   };
+  for (const key of OPTIONAL_NUTRIENTS) {
+    const v = base[key];
+    out[key] = v == null ? null : roundNutrient(key, v * q);
+  }
+  return out;
 }
 
 /** Sum a list of nutrition entries into a single total. */
@@ -55,25 +87,41 @@ export function sumNutrition(items: Nutrition[]): Nutrition {
   let protein = 0;
   let carbs = 0;
   let fat = 0;
-  let fiber = 0;
-  let hasFiber = false;
+  const opt: Record<OptionalNutrient, number> = {
+    fiber: 0,
+    sugar: 0,
+    saturatedFat: 0,
+    sodium: 0,
+  };
+  const hasOpt: Record<OptionalNutrient, boolean> = {
+    fiber: false,
+    sugar: false,
+    saturatedFat: false,
+    sodium: false,
+  };
   for (const n of items) {
     calories += n.calories || 0;
     protein += n.protein || 0;
     carbs += n.carbs || 0;
     fat += n.fat || 0;
-    if (n.fiber != null) {
-      fiber += n.fiber;
-      hasFiber = true;
+    for (const key of OPTIONAL_NUTRIENTS) {
+      const v = n[key];
+      if (v != null) {
+        opt[key] += v;
+        hasOpt[key] = true;
+      }
     }
   }
-  return {
+  const out: Nutrition = {
     calories: Math.round(calories),
     protein: round(protein),
     carbs: round(carbs),
     fat: round(fat),
-    fiber: hasFiber ? round(fiber) : null,
   };
+  for (const key of OPTIONAL_NUTRIENTS) {
+    out[key] = hasOpt[key] ? roundNutrient(key, opt[key]) : null;
+  }
+  return out;
 }
 
 /**

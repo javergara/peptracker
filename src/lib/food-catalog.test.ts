@@ -20,6 +20,25 @@ describe("FOOD_CATALOG integrity", () => {
     }
   });
 
+  it("gives every food full per-100g nutrients + a source", () => {
+    for (const food of FOOD_CATALOG) {
+      const n = food.per100g;
+      for (const key of [
+        "calories",
+        "protein",
+        "carbs",
+        "fat",
+        "fiber",
+        "sugar",
+        "saturatedFat",
+        "sodium",
+      ] as const) {
+        expect(typeof n[key]).toBe("number");
+      }
+      expect(food.source.length).toBeGreaterThan(0);
+    }
+  });
+
   it("includes a 100 g/ml serving for every food", () => {
     for (const food of FOOD_CATALOG) {
       expect(food.servings.some((s) => s.grams === 100)).toBe(true);

@@ -33,6 +33,9 @@ export interface FoodItemOption {
   carbs: number;
   fat: number;
   fiber: number | null;
+  sugar: number | null;
+  saturatedFat: number | null;
+  sodium: number | null;
 }
 
 const MEAL_ITEMS: Record<string, string> = Object.fromEntries(
@@ -70,6 +73,9 @@ export function AddFoodForm({
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
   const [fiber, setFiber] = useState("");
+  const [sugar, setSugar] = useState("");
+  const [saturatedFat, setSaturatedFat] = useState("");
+  const [sodium, setSodium] = useState("");
 
   // Grouped picker: the user's saved foods first, then the built-in catalog by
   // category. Values are namespaced so we know which set was chosen.
@@ -92,12 +98,18 @@ export function AddFoodForm({
     carbs: number;
     fat: number;
     fiber?: number | null;
+    sugar?: number | null;
+    saturatedFat?: number | null;
+    sodium?: number | null;
   }) {
     setCalories(numStr(n.calories));
     setProtein(numStr(n.protein));
     setCarbs(numStr(n.carbs));
     setFat(numStr(n.fat));
     setFiber(numStr(n.fiber));
+    setSugar(numStr(n.sugar));
+    setSaturatedFat(numStr(n.saturatedFat));
+    setSodium(numStr(n.sodium));
   }
 
   function applyServing(food: CatalogFood, idx: number) {
@@ -119,6 +131,9 @@ export function AddFoodForm({
     setCarbs("");
     setFat("");
     setFiber("");
+    setSugar("");
+    setSaturatedFat("");
+    setSodium("");
   }
 
   function pickSource(value: string | null) {
@@ -345,6 +360,57 @@ export function AddFoodForm({
           step="any"
           value={fiber}
           onChange={(e) => setFiber(e.target.value)}
+          className="num"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="food-sugar" className="text-sm font-medium">
+          Sugar (g){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id="food-sugar"
+          name="sugar"
+          type="number"
+          min={0}
+          step="any"
+          value={sugar}
+          onChange={(e) => setSugar(e.target.value)}
+          className="num"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="food-satfat" className="text-sm font-medium">
+          Sat. fat (g){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id="food-satfat"
+          name="saturatedFat"
+          type="number"
+          min={0}
+          step="any"
+          value={saturatedFat}
+          onChange={(e) => setSaturatedFat(e.target.value)}
+          className="num"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="food-sodium" className="text-sm font-medium">
+          Sodium (mg){" "}
+          <span className="text-muted-foreground font-normal">— optional</span>
+        </label>
+        <Input
+          id="food-sodium"
+          name="sodium"
+          type="number"
+          min={0}
+          step="any"
+          value={sodium}
+          onChange={(e) => setSodium(e.target.value)}
           className="num"
         />
       </div>

@@ -38,6 +38,9 @@ export interface FoodLogRowData {
   carbs: number;
   fat: number;
   fiber: number | null;
+  sugar: number | null;
+  saturatedFat: number | null;
+  sodium: number | null;
   notes: string | null;
 }
 
@@ -196,6 +199,20 @@ export function FoodLogRow({ log }: { log: FoodLogRowData }) {
               className="num"
             />
           </div>
+          {/* Preserve the optional nutrients (edit uses servings=1, so these
+              totals are the per-serving values updateFoodLog re-scales). */}
+          {log.fiber != null ? (
+            <input type="hidden" name="fiber" value={log.fiber} />
+          ) : null}
+          {log.sugar != null ? (
+            <input type="hidden" name="sugar" value={log.sugar} />
+          ) : null}
+          {log.saturatedFat != null ? (
+            <input type="hidden" name="saturatedFat" value={log.saturatedFat} />
+          ) : null}
+          {log.sodium != null ? (
+            <input type="hidden" name="sodium" value={log.sodium} />
+          ) : null}
           <div className="space-y-1.5 sm:col-span-2">
             <label
               htmlFor={`f-notes-${log.id}`}

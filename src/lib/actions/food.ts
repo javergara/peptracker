@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getActiveUser } from "@/lib/active-user";
 import { parseLocalDate, toDateInputValue } from "@/lib/dates";
-import { scaleNutrition } from "@/lib/food";
-import { parseMealType } from "@/types/food";
+import { scaleNutrition, sumNutrition } from "@/lib/food";
+import { asRecipeIngredients, parseMealType } from "@/types/food";
 
 /**
  * Food & calorie tracker mutations. FoodLog + FoodItem are profile-owned, so
@@ -28,13 +28,19 @@ function todayLocal(): Date {
 }
 
 function readItemNutrition(formData: FormData) {
-  const fiberRaw = String(formData.get("fiber") ?? "").trim();
+  const optional = (key: string): number | null => {
+    const raw = String(formData.get(key) ?? "").trim();
+    return raw ? num(formData.get(key)) : null;
+  };
   return {
     calories: num(formData.get("calories")),
     protein: num(formData.get("protein")),
     carbs: num(formData.get("carbs")),
     fat: num(formData.get("fat")),
-    fiber: fiberRaw ? num(formData.get("fiber")) : null,
+    fiber: optional("fiber"),
+    sugar: optional("sugar"),
+    saturatedFat: optional("saturatedFat"),
+    sodium: optional("sodium"),
   };
 }
 
@@ -53,6 +59,9 @@ export type RestorableFoodLog = {
   carbs: number;
   fat: number;
   fiber: number | null;
+  sugar: number | null;
+  saturatedFat: number | null;
+  sodium: number | null;
   notes: string | null;
 };
 
@@ -127,6 +136,9 @@ export async function logFoodItem(foodItemId: string, formData: FormData) {
       carbs: item.carbs,
       fat: item.fat,
       fiber: item.fiber,
+      sugar: item.sugar,
+      saturatedFat: item.saturatedFat,
+      sodium: item.sodium,
     },
     quantity,
   );
@@ -202,6 +214,9 @@ export async function deleteFoodLog(id: string): Promise<RestorableFoodLog> {
     carbs: log.carbs,
     fat: log.fat,
     fiber: log.fiber,
+    sugar: log.sugar,
+    saturatedFat: log.saturatedFat,
+    sodium: log.sodium,
     notes: log.notes,
   };
 }
@@ -232,6 +247,9 @@ export async function restoreFoodLog(data: RestorableFoodLog) {
       carbs: data.carbs,
       fat: data.fat,
       fiber: data.fiber,
+      sugar: data.sugar,
+      saturatedFat: data.saturatedFat,
+      sodium: data.sodium,
       notes: data.notes,
     },
   });
@@ -299,8 +317,202 @@ export async function setNutritionGoals(formData: FormData) {
       proteinGoal: goal("proteinGoal"),
       carbGoal: goal("carbGoal"),
       fatGoal: goal("fatGoal"),
+      fiberGoal: goal("fiberGoal"),
+      sodiumGoal: goal("sodiumGoal"),
+      waterGoal: goal("waterGoal"),
     },
   });
   revalidatePath("/food");
   revalidatePath("/");
+}
+
+/** Set only the calorie goal (used by the TDEE card's "Use as goal"). */
+export async function applyCalorieGoal(kcal: number) {
+  const user = await getActiveUser();
+  const value = Math.round(kcal);
+  if (!Number.isFinite(value) || value <= 0) return;
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { calorieGoal: value },
+  });
+  revalidatePath("/food");
+  revalidatePath("/");
+}
+
+// --- Recipes (a FoodItem composed of ingredients) ---
+
+/**
+ * Build a recipe's stored fields from its posted ingredients. Ingredient
+ * nutrition is the TOTAL each contributes; the recipe's per-serving nutrition =
+ * summed ingredients ÷ servings.
+ */
+function buildRecipe(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const brand = String(formData.get("brand") ?? "").trim() || null;
+  const recipeServings =
+    Math.max(num(formData.get("recipeServings"), 1), 0) || 1;
+
+  let parsed: unknown = [];
+  try {
+    parsed = JSON.parse(String(formData.get("ingredients") ?? "[]"));
+  } catch {
+    parsed = [];
+  }
+  const ingredients = asRecipeIngredients(parsed);
+  if (ingredients.length === 0) {
+    throw new Error("Add at least one ingredient.");
+  }
+
+  const perServing = scaleNutrition(
+    sumNutrition(ingredients),
+    1 / recipeServings,
+  );
+  return {
+    name,
+    brand,
+    servingSize: 1,
+    servingUnit: "1 serving",
+    source: "Recipe",
+    recipeServings,
+    ingredients,
+    ...perServing,
+  };
+}
+
+export async function saveRecipe(formData: FormData) {
+  const user = await getActiveUser();
+  const data = buildRecipe(formData);
+  if (!data.name) throw new Error("A recipe name is required.");
+  await prisma.foodItem.create({ data: { userId: user.id, ...data } });
+  revalidatePath("/food");
+}
+
+export async function updateRecipe(id: string, formData: FormData) {
+  const user = await getActiveUser();
+  const data = buildRecipe(formData);
+  if (!data.name) throw new Error("A recipe name is required.");
+  const res = await prisma.foodItem.updateMany({
+    where: { id, userId: user.id },
+    data,
+  });
+  if (res.count === 0) throw new Error("Recipe not found.");
+  revalidatePath("/food");
+}
+
+// --- Recents / copy-day / log-again ---
+
+/** Re-log a past food entry onto a target day + meal (snapshot copy). */
+export async function logAgain(foodLogId: string, formData: FormData) {
+  const user = await getActiveUser();
+  const log = await prisma.foodLog.findFirst({
+    where: { id: foodLogId, userId: user.id },
+  });
+  if (!log) throw new Error("Food not found.");
+
+  const date =
+    parseLocalDate(String(formData.get("date") ?? "")) ?? todayLocal();
+  const mealType = parseMealType(
+    String(formData.get("mealType") ?? log.mealType),
+  );
+
+  await prisma.foodLog.create({
+    data: {
+      userId: user.id,
+      date,
+      mealType,
+      foodItemId: log.foodItemId,
+      name: log.name,
+      quantity: log.quantity,
+      servingUnit: log.servingUnit,
+      calories: log.calories,
+      protein: log.protein,
+      carbs: log.carbs,
+      fat: log.fat,
+      fiber: log.fiber,
+      sugar: log.sugar,
+      saturatedFat: log.saturatedFat,
+      sodium: log.sodium,
+    },
+  });
+  revalidatePath("/food");
+  revalidatePath("/");
+  revalidatePath("/metrics");
+}
+
+/** Copy every log from one day to another (e.g. "copy yesterday"). */
+export async function copyDay(formData: FormData) {
+  const user = await getActiveUser();
+  const from = parseLocalDate(String(formData.get("fromDate") ?? ""));
+  const to =
+    parseLocalDate(String(formData.get("toDate") ?? "")) ?? todayLocal();
+  if (!from) throw new Error("Pick a day to copy from.");
+
+  const logs = await prisma.foodLog.findMany({
+    where: { userId: user.id, date: from },
+  });
+  if (logs.length === 0) throw new Error("That day has no food to copy.");
+
+  await prisma.foodLog.createMany({
+    data: logs.map((l) => ({
+      userId: user.id,
+      date: to,
+      mealType: l.mealType,
+      foodItemId: l.foodItemId,
+      name: l.name,
+      quantity: l.quantity,
+      servingUnit: l.servingUnit,
+      calories: l.calories,
+      protein: l.protein,
+      carbs: l.carbs,
+      fat: l.fat,
+      fiber: l.fiber,
+      sugar: l.sugar,
+      saturatedFat: l.saturatedFat,
+      sodium: l.sodium,
+    })),
+  });
+  revalidatePath("/food");
+  revalidatePath("/");
+  revalidatePath("/metrics");
+}
+
+// --- Water (a type:"water" Measurement, in mL) ---
+
+/** Log a water amount (mL) on a given day; anchored at noon so day-bucketing is TZ-safe. */
+export async function logWater(ml: number, dateStr: string) {
+  const user = await getActiveUser();
+  const amount = Math.round(ml);
+  if (!Number.isFinite(amount) || amount === 0) return;
+  const day = parseLocalDate(dateStr) ?? todayLocal();
+  const recordedAt = new Date(day.getTime() + 12 * 60 * 60 * 1000);
+
+  await prisma.measurement.create({
+    data: {
+      userId: user.id,
+      type: "water",
+      value: amount,
+      unit: "mL",
+      recordedAt,
+    },
+  });
+  revalidatePath("/food");
+  revalidatePath("/metrics");
+}
+
+/** Remove the most recent water entry on a day (undo for the +250 buttons). */
+export async function undoLastWater(dateStr: string) {
+  const user = await getActiveUser();
+  const day = parseLocalDate(dateStr) ?? todayLocal();
+  const next = new Date(day.getTime() + 24 * 60 * 60 * 1000);
+  const last = await prisma.measurement.findFirst({
+    where: {
+      userId: user.id,
+      type: "water",
+      recordedAt: { gte: day, lt: next },
+    },
+    orderBy: { recordedAt: "desc" },
+  });
+  if (last) await prisma.measurement.delete({ where: { id: last.id } });
+  revalidatePath("/food");
+  revalidatePath("/metrics");
 }

@@ -843,5 +843,60 @@ export async function getNutritionGoals() {
     proteinGoal: user.proteinGoal,
     carbGoal: user.carbGoal,
     fatGoal: user.fatGoal,
+    fiberGoal: user.fiberGoal,
+    sodiumGoal: user.sodiumGoal,
+    waterGoal: user.waterGoal,
   };
+}
+
+/**
+ * Recently-logged distinct foods (most recent first) for the Today-tab quick-add
+ * strip. Dedupes by name, keeping the newest snapshot of each. Pulls a small
+ * recent window, then dedupes in JS (cheaper than a distinct query for this size).
+ */
+export async function getRecentFoodLogs(limit = 12) {
+  const user = await getActiveUser();
+  const rows = await prisma.foodLog.findMany({
+    where: { userId: user.id },
+    orderBy: [{ date: "desc" }, { loggedAt: "desc" }],
+    take: 60,
+  });
+  const seen = new Set<string>();
+  const out: typeof rows = [];
+  for (const r of rows) {
+    const key = r.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(r);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** Total water (mL) logged on a local-day (type:"water" measurements). */
+export async function getWaterForDay(date: Date) {
+  const user = await getActiveUser();
+  const next = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+  const rows = await prisma.measurement.findMany({
+    where: {
+      userId: user.id,
+      type: "water",
+      recordedAt: { gte: date, lt: next },
+    },
+    select: { value: true },
+  });
+  return rows.reduce((sum, r) => sum + r.value, 0);
+}
+
+/** Weight measurements in a range (kg-or-lb values as stored) for TDEE. */
+export async function getWeightMeasurementsInRange(start: Date, end: Date) {
+  const user = await getActiveUser();
+  return prisma.measurement.findMany({
+    where: {
+      userId: user.id,
+      type: "weight",
+      recordedAt: { gte: start, lte: end },
+    },
+    orderBy: { recordedAt: "asc" },
+  });
 }

@@ -52,3 +52,44 @@ export const nutritionInputSchema = z.object({
   fiber: z.number().min(0).max(10000).nullable().optional(),
 });
 export type NutritionInput = z.infer<typeof nutritionInputSchema>;
+
+/**
+ * Extra nutrients shown under the macros (fiber/sugar/sat-fat are grams;
+ * sodium is mg). Config drives the "micros" display row + goal wiring. Keys
+ * match the Nutrition/columns in src/lib/food.ts + schema.
+ */
+export const MICROS = [
+  { key: "fiber", label: "Fiber", unit: "g" },
+  { key: "sugar", label: "Sugar", unit: "g" },
+  { key: "saturatedFat", label: "Sat. fat", unit: "g" },
+  { key: "sodium", label: "Sodium", unit: "mg" },
+] as const;
+
+export type MicroKey = (typeof MICROS)[number]["key"];
+
+/**
+ * One ingredient in a saved recipe (FoodItem.ingredients Json). Nutrition is the
+ * TOTAL that ingredient contributes to the recipe (already scaled by its amount).
+ */
+export const recipeIngredientSchema = z.object({
+  name: z.string().min(1).max(120),
+  amount: z.number().min(0).max(100000), // grams or servings, per `unit`
+  unit: z.string().max(40).nullable().optional(),
+  calories: z.number(),
+  protein: z.number(),
+  carbs: z.number(),
+  fat: z.number(),
+  fiber: z.number().nullable().optional(),
+  sugar: z.number().nullable().optional(),
+  saturatedFat: z.number().nullable().optional(),
+  sodium: z.number().nullable().optional(),
+});
+export type RecipeIngredient = z.infer<typeof recipeIngredientSchema>;
+
+export const recipeIngredientsSchema = z.array(recipeIngredientSchema);
+
+/** Parse a Prisma Json `ingredients` column into a validated array (or []). */
+export function asRecipeIngredients(value: unknown): RecipeIngredient[] {
+  const parsed = recipeIngredientsSchema.safeParse(value);
+  return parsed.success ? parsed.data : [];
+}

@@ -20,13 +20,33 @@ const chicken: Nutrition = {
 
 describe("scaleNutrition", () => {
   it("multiplies each field by the quantity", () => {
-    expect(scaleNutrition(chicken, 2)).toEqual({
+    expect(scaleNutrition(chicken, 2)).toMatchObject({
       calories: 330,
       protein: 62,
       carbs: 0,
       fat: 7.2,
       fiber: 0,
     });
+  });
+
+  it("scales optional nutrients (sugar/sat-fat) and rounds sodium to whole mg", () => {
+    const r = scaleNutrition(
+      {
+        calories: 100,
+        protein: 5,
+        carbs: 10,
+        fat: 2,
+        sugar: 4,
+        saturatedFat: 0.5,
+        sodium: 123,
+      },
+      2,
+    );
+    expect(r.sugar).toBe(8);
+    expect(r.saturatedFat).toBe(1);
+    expect(r.sodium).toBe(246);
+    // Nutrients not supplied stay null.
+    expect(r.fiber).toBeNull();
   });
 
   it("rounds calories to integers and macros to one decimal", () => {
@@ -66,6 +86,16 @@ describe("sumNutrition", () => {
     ).toBeNull();
     expect(sumNutrition([]).calories).toBe(0);
     expect(sumNutrition([EMPTY_NUTRITION])).toEqual(EMPTY_NUTRITION);
+  });
+
+  it("sums optional nutrients across entries, keeping sodium whole", () => {
+    const total = sumNutrition([
+      { calories: 100, protein: 0, carbs: 0, fat: 0, sugar: 2, sodium: 50 },
+      { calories: 100, protein: 0, carbs: 0, fat: 0, sugar: 3, sodium: 75 },
+    ]);
+    expect(total.sugar).toBe(5);
+    expect(total.sodium).toBe(125);
+    expect(total.saturatedFat).toBeNull();
   });
 });
 
