@@ -347,88 +347,87 @@ export function AddFoodForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="food-fiber" className="text-sm font-medium">
-          Fiber (g){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id="food-fiber"
-          name="fiber"
-          type="number"
-          min={0}
-          step="any"
-          value={fiber}
-          onChange={(e) => setFiber(e.target.value)}
-          className="num"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor="food-sugar" className="text-sm font-medium">
-          Sugar (g){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id="food-sugar"
-          name="sugar"
-          type="number"
-          min={0}
-          step="any"
-          value={sugar}
-          onChange={(e) => setSugar(e.target.value)}
-          className="num"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor="food-satfat" className="text-sm font-medium">
-          Sat. fat (g){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id="food-satfat"
-          name="saturatedFat"
-          type="number"
-          min={0}
-          step="any"
-          value={saturatedFat}
-          onChange={(e) => setSaturatedFat(e.target.value)}
-          className="num"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor="food-sodium" className="text-sm font-medium">
-          Sodium (mg){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id="food-sodium"
-          name="sodium"
-          type="number"
-          min={0}
-          step="any"
-          value={sodium}
-          onChange={(e) => setSodium(e.target.value)}
-          className="num"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor="food-unit" className="text-sm font-medium">
-          Serving unit{" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id="food-unit"
-          name="servingUnit"
-          value={servingUnit}
-          onChange={(e) => setServingUnit(e.target.value)}
-          placeholder="e.g. 1 cup, 100 g"
-          maxLength={40}
-        />
-      </div>
+      <details className="group sm:col-span-2 lg:col-span-4">
+        <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm font-medium select-none">
+          More nutrients &amp; serving unit{" "}
+          <span className="font-normal">— optional</span>
+        </summary>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1.5">
+            <label htmlFor="food-fiber" className="text-sm font-medium">
+              Fiber (g)
+            </label>
+            <Input
+              id="food-fiber"
+              name="fiber"
+              type="number"
+              min={0}
+              step="any"
+              value={fiber}
+              onChange={(e) => setFiber(e.target.value)}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="food-sugar" className="text-sm font-medium">
+              Sugar (g)
+            </label>
+            <Input
+              id="food-sugar"
+              name="sugar"
+              type="number"
+              min={0}
+              step="any"
+              value={sugar}
+              onChange={(e) => setSugar(e.target.value)}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="food-satfat" className="text-sm font-medium">
+              Sat. fat (g)
+            </label>
+            <Input
+              id="food-satfat"
+              name="saturatedFat"
+              type="number"
+              min={0}
+              step="any"
+              value={saturatedFat}
+              onChange={(e) => setSaturatedFat(e.target.value)}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="food-sodium" className="text-sm font-medium">
+              Sodium (mg)
+            </label>
+            <Input
+              id="food-sodium"
+              name="sodium"
+              type="number"
+              min={0}
+              step="any"
+              value={sodium}
+              onChange={(e) => setSodium(e.target.value)}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <label htmlFor="food-unit" className="text-sm font-medium">
+              Serving unit
+            </label>
+            <Input
+              id="food-unit"
+              name="servingUnit"
+              value={servingUnit}
+              onChange={(e) => setServingUnit(e.target.value)}
+              placeholder="e.g. 1 cup, 100 g"
+              maxLength={40}
+            />
+          </div>
+        </div>
+      </details>
 
       <div className="flex items-end sm:col-span-2 lg:col-span-4">
         <SubmitButton>

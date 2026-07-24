@@ -147,19 +147,27 @@ export function OffSearch({
   function runSearch() {
     if (!query.trim()) return;
     start(async () => {
-      const r = await searchFoodDatabase(query);
-      setResults(r);
-      setSearched(true);
+      try {
+        const r = await searchFoodDatabase(query);
+        setResults(r);
+        setSearched(true);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Search failed.");
+      }
     });
   }
 
   function runBarcode() {
     if (!barcode.trim()) return;
     start(async () => {
-      const f = await lookupFoodBarcode(barcode);
-      setResults(f ? [f] : []);
-      setSearched(true);
-      if (!f) toast.error("No product found for that barcode.");
+      try {
+        const f = await lookupFoodBarcode(barcode);
+        setResults(f ? [f] : []);
+        setSearched(true);
+        if (!f) toast.error("No product found for that barcode.");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Lookup failed.");
+      }
     });
   }
 

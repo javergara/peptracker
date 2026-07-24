@@ -85,32 +85,77 @@ const OFF_HEADERS = {
   "User-Agent": "PeptraFoodTracker/1.0 (personal health app)",
 };
 const FIELDS = "code,product_name,brands,serving_size,nutriments";
+const TIMEOUT_MS = 7000;
 
-/** Look up a single product by barcode (EAN/UPC). Returns null when not found. */
+/** Fetch with a hard timeout so a slow OFF endpoint can't hang the request. */
+async function offFetch(url: string): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      headers: OFF_HEADERS,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Look up a single product by barcode (EAN/UPC). Returns null when the product
+ * isn't in the database; THROWS on a network/HTTP failure (so the UI can tell
+ * "not found" apart from "couldn't reach the database").
+ */
 export async function lookupOffBarcode(
   barcode: string,
 ): Promise<OffFood | null> {
   const code = barcode.replace(/\D/g, "");
   if (!code) return null;
   const url = `https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=${FIELDS}`;
-  const res = await fetch(url, { headers: OFF_HEADERS });
-  if (!res.ok) return null;
+  const res = await offFetch(url);
+  if (!res.ok) throw new Error(`OFF ${res.status}`);
   const data = (await res.json()) as { status?: number; product?: OffProduct };
   if (data.status !== 1 || !data.product) return null;
   return normalizeOffProduct(data.product);
 }
 
-/** Search products by name; returns up to `limit` normalized matches. */
+/** How much of the optional nutrient data a result carries (for ranking). */
+function completeness(f: OffFood): number {
+  const p = f.per100g;
+  let score = 0;
+  for (const v of [p.fiber, p.sugar, p.saturatedFat, p.sodium]) {
+    if (v != null) score += 1;
+  }
+  if (p.protein > 0 || p.carbs > 0 || p.fat > 0) score += 1;
+  return score;
+}
+
+/**
+ * Search products by name; returns up to `limit` normalized matches. Fetches a
+ * wider page, then dedupes by name+brand and ranks the most complete entries
+ * first (OFF is crowdsourced, so results are noisy and often duplicated).
+ */
 export async function searchOff(query: string, limit = 12): Promise<OffFood[]> {
   const q = query.trim();
   if (!q) return [];
   const url =
     `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}` +
-    `&search_simple=1&action=process&json=1&page_size=${limit}&fields=${FIELDS}`;
-  const res = await fetch(url, { headers: OFF_HEADERS });
-  if (!res.ok) return [];
+    `&search_simple=1&action=process&json=1&page_size=${limit * 3}&fields=${FIELDS}`;
+  const res = await offFetch(url);
+  if (!res.ok) throw new Error(`OFF ${res.status}`);
   const data = (await res.json()) as { products?: OffProduct[] };
-  return (data.products ?? [])
-    .map(normalizeOffProduct)
-    .filter((f): f is OffFood => f !== null);
+
+  const seen = new Set<string>();
+  const deduped: OffFood[] = [];
+  for (const product of data.products ?? []) {
+    const food = normalizeOffProduct(product);
+    if (!food) continue;
+    const key = `${food.name}|${food.brand ?? ""}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(food);
+  }
+  return deduped
+    .sort((a, b) => completeness(b) - completeness(a))
+    .slice(0, limit);
 }

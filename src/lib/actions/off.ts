@@ -10,12 +10,15 @@ import { lookupOffBarcode, searchOff, type OffFood } from "@/lib/off";
  * degrade to empty results rather than throwing, so the UI stays usable offline.
  */
 
+const OFF_UNAVAILABLE = "Couldn't reach the food database. Try again.";
+
 export async function searchFoodDatabase(query: string): Promise<OffFood[]> {
   await getActiveUser();
   try {
     return await searchOff(query, 12);
   } catch {
-    return [];
+    // Network/timeout — distinct from a genuine empty result (which is []).
+    throw new Error(OFF_UNAVAILABLE);
   }
 }
 
@@ -26,6 +29,6 @@ export async function lookupFoodBarcode(
   try {
     return await lookupOffBarcode(barcode);
   } catch {
-    return null;
+    throw new Error(OFF_UNAVAILABLE);
   }
 }

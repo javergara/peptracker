@@ -354,23 +354,19 @@ export default async function FoodPage({
             </div>
           </div>
 
-          {/* Open Food Facts search */}
-          <div className="card-surface rounded-2xl">
-            <div className="border-border border-b px-5 pt-4 pb-3">
-              <Eyebrow className="mb-1">Food database</Eyebrow>
-              <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight">
-                <Search className="size-4" />
-                Search Open Food Facts
-              </h2>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Look up packaged products by name or barcode number, then log a
-                gram amount.
-              </p>
-            </div>
-            <div className="px-5 py-4">
+          {/* Open Food Facts search — collapsed by default (secondary path) */}
+          <details className="card-surface group rounded-2xl">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-4 text-base font-semibold tracking-tight select-none">
+              <Search className="size-4" />
+              Search food database
+              <span className="text-muted-foreground ml-1 text-sm font-normal">
+                — Open Food Facts (name or barcode)
+              </span>
+            </summary>
+            <div className="border-border border-t px-5 py-4">
               <OffSearch date={dateStr} />
             </div>
-          </div>
+          </details>
 
           {/* Logged meals */}
           {logs.length === 0 ? (

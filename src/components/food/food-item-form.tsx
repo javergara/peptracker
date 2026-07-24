@@ -203,60 +203,64 @@ export function FoodItemForm({
           className="num"
         />
       </div>
-      <div className="space-y-1.5">
-        <label
-          htmlFor={`fi-sugar-${item?.id ?? "new"}`}
-          className="text-sm font-medium"
-        >
-          Sugar (g){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id={`fi-sugar-${item?.id ?? "new"}`}
-          name="sugar"
-          type="number"
-          min={0}
-          step="any"
-          defaultValue={item?.sugar ?? ""}
-          className="num"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <label
-          htmlFor={`fi-satfat-${item?.id ?? "new"}`}
-          className="text-sm font-medium"
-        >
-          Sat. fat (g){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id={`fi-satfat-${item?.id ?? "new"}`}
-          name="saturatedFat"
-          type="number"
-          min={0}
-          step="any"
-          defaultValue={item?.saturatedFat ?? ""}
-          className="num"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <label
-          htmlFor={`fi-sodium-${item?.id ?? "new"}`}
-          className="text-sm font-medium"
-        >
-          Sodium (mg){" "}
-          <span className="text-muted-foreground font-normal">— optional</span>
-        </label>
-        <Input
-          id={`fi-sodium-${item?.id ?? "new"}`}
-          name="sodium"
-          type="number"
-          min={0}
-          step="any"
-          defaultValue={item?.sodium ?? ""}
-          className="num"
-        />
-      </div>
+      <details className="group sm:col-span-2 lg:col-span-4">
+        <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm font-medium select-none">
+          More nutrients <span className="font-normal">— optional</span>
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`fi-sugar-${item?.id ?? "new"}`}
+              className="text-sm font-medium"
+            >
+              Sugar (g)
+            </label>
+            <Input
+              id={`fi-sugar-${item?.id ?? "new"}`}
+              name="sugar"
+              type="number"
+              min={0}
+              step="any"
+              defaultValue={item?.sugar ?? ""}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`fi-satfat-${item?.id ?? "new"}`}
+              className="text-sm font-medium"
+            >
+              Sat. fat (g)
+            </label>
+            <Input
+              id={`fi-satfat-${item?.id ?? "new"}`}
+              name="saturatedFat"
+              type="number"
+              min={0}
+              step="any"
+              defaultValue={item?.saturatedFat ?? ""}
+              className="num"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`fi-sodium-${item?.id ?? "new"}`}
+              className="text-sm font-medium"
+            >
+              Sodium (mg)
+            </label>
+            <Input
+              id={`fi-sodium-${item?.id ?? "new"}`}
+              name="sodium"
+              type="number"
+              min={0}
+              step="any"
+              defaultValue={item?.sodium ?? ""}
+              className="num"
+            />
+          </div>
+        </div>
+      </details>
       <div className="flex items-end gap-2 sm:col-span-2">
         <SubmitButton size={editing ? "sm" : "default"}>
           {editing ? (
