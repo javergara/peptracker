@@ -339,6 +339,40 @@ export async function applyCalorieGoal(kcal: number) {
   revalidatePath("/");
 }
 
+/** Set calorie + macro goals together (used by the BMR goal wizard). */
+export async function applyComputedGoals(goals: {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}) {
+  const user = await getActiveUser();
+  const pos = (n: number) =>
+    Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      calorieGoal: pos(goals.calories),
+      proteinGoal: pos(goals.protein),
+      carbGoal: pos(goals.carbs),
+      fatGoal: pos(goals.fat),
+    },
+  });
+  revalidatePath("/food");
+  revalidatePath("/");
+}
+
+/** Persist the profile's height (cm) — set from the BMR wizard. */
+export async function setHeightCm(cm: number) {
+  const user = await getActiveUser();
+  const value = Math.round(cm);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { heightCm: Number.isFinite(value) && value > 0 ? value : null },
+  });
+  revalidatePath("/food");
+}
+
 // --- Recipes (a FoodItem composed of ingredients) ---
 
 /**

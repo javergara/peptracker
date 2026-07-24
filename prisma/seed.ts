@@ -432,6 +432,12 @@ async function main() {
       },
     });
   }
+  if (user.heightCm == null) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { heightCm: 178 },
+    });
+  }
 
   const foodItemCount = await prisma.foodItem.count({
     where: { userId: user.id },

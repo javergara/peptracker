@@ -900,3 +900,33 @@ export async function getWeightMeasurementsInRange(start: Date, end: Date) {
     orderBy: { recordedAt: "asc" },
   });
 }
+
+/** The active (open) intermittent-fasting session, or null. */
+export async function getActiveFast() {
+  const user = await getActiveUser();
+  return prisma.fastingSession.findFirst({
+    where: { userId: user.id, endedAt: null },
+    orderBy: { startedAt: "desc" },
+  });
+}
+
+/** Steps + workout minutes logged on a local-day (for net-calorie burn). */
+export async function getExerciseForDay(date: Date) {
+  const user = await getActiveUser();
+  const next = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+  const rows = await prisma.measurement.findMany({
+    where: {
+      userId: user.id,
+      type: { in: ["steps", "workout"] },
+      recordedAt: { gte: date, lt: next },
+    },
+    select: { type: true, value: true },
+  });
+  let steps = 0;
+  let workoutMinutes = 0;
+  for (const r of rows) {
+    if (r.type === "steps") steps += r.value;
+    else if (r.type === "workout") workoutMinutes += r.value;
+  }
+  return { steps, workoutMinutes };
+}

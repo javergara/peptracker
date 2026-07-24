@@ -43,6 +43,7 @@ model User {
   color      String? // hex accent for the profile switcher / calendar
   sex        String? // M | F | other — used for sex-aware biomarker reference ranges
   birthYear  Int? // used to derive age for age-aware reference ranges
+  heightCm   Int? // used for BMR/TDEE (Mifflin-St Jeor) in the food goal wizard
   timezone   String? // IANA tz (e.g. "America/New_York") — reminders compute "today" in it
   // Daily nutrition targets (food tracker) — null when unset.
   calorieGoal Int?
@@ -72,6 +73,7 @@ model User {
   checkIns          CheckIn[]
   foodItems         FoodItem[]
   foodLogs          FoodLog[]
+  fastingSessions   FastingSession[]
 
   @@index([accountId])
 }
@@ -477,4 +479,19 @@ model FoodLog {
 
   @@index([userId])
   @@index([foodItemId])
+}
+
+// Intermittent-fasting session. An open session (endedAt == null) is the active
+// fast; `targetHours` drives the timer's goal ring. One active fast per profile
+// is enforced in the action layer (not the schema).
+model FastingSession {
+  id          String    @id @default(cuid())
+  userId      String
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  targetHours Int       @default(16)
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

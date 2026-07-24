@@ -476,8 +476,9 @@ typical**, not authoritative (they vary by lab/assay).
   `reconstitution`, `schedule`, `suggestions`, `interactions`, `units`, `dates`,
   `adherence`, `sites`, `vials`, `stats`, `mood`, `cycles`, `stock`, `pk`,
   `cost`, `cycle-insights`, `cycle-cost`, `readiness`, `correlations`,
-  `titration`, `cycle-timeline`, `food`, `food-catalog`, `tdee`, `food-report`.
-  Keep pure math out of components so it stays testable.
+  `titration`, `cycle-timeline`, `food`, `food-catalog`, `tdee`, `food-report`,
+  `bmr`, `exercise-burn`, `fasting`, `off` (normalizer). Keep pure math out of
+  components so it stays testable.
 - E2E: **playwright** (`npm run test:e2e`) — `e2e/smoke.spec.ts` is data-driven
   (asserts on seeded content, resilient to markup). Covers every route incl.
   inventory/labs/photos, the adherence widget, profile switching, and the
@@ -631,7 +632,16 @@ peptideId, dose, unit }]` instead (a single dose is meaningless across a
   **weekly report** (`src/lib/food-report.ts`, tested); and the flagship
   **adaptive-TDEE** card (`src/lib/tdee.ts`, tested — estimates maintenance
   calories from the weight trend vs intake via `linearRegression`, with a
-  "use as goal" action, under the Disclaimer).
+  "use as goal" action, under the Disclaimer). **Tier-2 additions**: **Open Food
+  Facts** search + barcode lookup (`src/lib/off.ts` normalizer tested + fetchers;
+  `actions/off.ts` server actions; `components/food/off-search.tsx` — no live
+  camera scan, iOS Safari lacks `BarcodeDetector`); a **BMR/TDEE goal wizard**
+  (`src/lib/bmr.ts` Mifflin-St Jeor, tested; needs `User.heightCm`; `bmr-wizard.tsx`
+  → `applyComputedGoals`/`setHeightCm`); an **intermittent-fasting timer**
+  (`FastingSession` model, `src/lib/fasting.ts` tested, `actions/fasting.ts`,
+  `fasting-card.tsx`); and **net calories** (`src/lib/exercise-burn.ts` tested —
+  steps/workout → kcal from `getExerciseForDay`, feeds `NutritionSummary`
+  `exerciseKcal`).
 - **CSV/JSON export:** `src/lib/actions/settings.ts` + `data-controls.tsx`.
 
 ## Token optimization

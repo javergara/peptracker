@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Search,
   Target,
   UtensilsCrossed,
 } from "lucide-react";
@@ -27,7 +28,12 @@ import { CopyDayButton } from "@/components/food/copy-day-button";
 import { RecipeBuilder } from "@/components/food/recipe-builder";
 import { TdeeCard } from "@/components/food/tdee-card";
 import { WeeklyReport } from "@/components/food/weekly-report";
+import { OffSearch } from "@/components/food/off-search";
+import { FastingCard } from "@/components/food/fasting-card";
+import { BmrWizard } from "@/components/food/bmr-wizard";
 import {
+  getActiveFast,
+  getExerciseForDay,
   getFoodLogsForDay,
   getFoodLogsInRange,
   getNutritionGoals,
@@ -39,6 +45,8 @@ import {
 } from "@/lib/queries";
 import { setNutritionGoals } from "@/lib/actions/food";
 import { sumNutrition, type Nutrition } from "@/lib/food";
+import { exerciseBurn } from "@/lib/exercise-burn";
+import { type Sex } from "@/lib/bmr";
 import { computeTdee } from "@/lib/tdee";
 import {
   loggingStreak,
@@ -86,21 +94,54 @@ export default async function FoodPage({
   const analyticsStart = addDays(viewedDate, -30);
   const weightStart = addDays(viewedDate, -42);
 
-  const [user, logs, items, goals, recents, water, rangeLogs, weights] =
-    await Promise.all([
-      getCurrentUser(),
-      getFoodLogsForDay(viewedDate),
-      listFoodItems(),
-      getNutritionGoals(),
-      activeTab === "today" ? getRecentFoodLogs() : Promise.resolve([]),
-      activeTab === "today" ? getWaterForDay(viewedDate) : Promise.resolve(0),
-      needsAnalytics
-        ? getFoodLogsInRange(analyticsStart, viewedDate)
-        : Promise.resolve([]),
-      needsAnalytics
-        ? getWeightMeasurementsInRange(weightStart, viewedDate)
-        : Promise.resolve([]),
-    ]);
+  const [
+    user,
+    logs,
+    items,
+    goals,
+    recents,
+    water,
+    fast,
+    exercise,
+    rangeLogs,
+    weights,
+  ] = await Promise.all([
+    getCurrentUser(),
+    getFoodLogsForDay(viewedDate),
+    listFoodItems(),
+    getNutritionGoals(),
+    activeTab === "today" ? getRecentFoodLogs() : Promise.resolve([]),
+    activeTab === "today" ? getWaterForDay(viewedDate) : Promise.resolve(0),
+    activeTab === "today" ? getActiveFast() : Promise.resolve(null),
+    activeTab === "today"
+      ? getExerciseForDay(viewedDate)
+      : Promise.resolve({ steps: 0, workoutMinutes: 0 }),
+    needsAnalytics
+      ? getFoodLogsInRange(analyticsStart, viewedDate)
+      : Promise.resolve([]),
+    needsAnalytics
+      ? getWeightMeasurementsInRange(weightStart, viewedDate)
+      : Promise.resolve([]),
+  ]);
+
+  // Latest weight (kg) — used by both the BMR wizard and the net-calorie burn.
+  const latestWeight = weights.at(-1)?.value ?? null;
+  const weightKg =
+    latestWeight != null
+      ? user.weightUnit === "lb"
+        ? latestWeight * LB_TO_KG
+        : latestWeight
+      : null;
+  const exerciseKcal = exerciseBurn({
+    steps: exercise.steps,
+    workoutMinutes: exercise.workoutMinutes,
+    weightKg: weightKg ?? 70,
+  });
+
+  // BMR wizard inputs (Goals tab).
+  const age = user.birthYear ? new Date().getFullYear() - user.birthYear : null;
+  const bmrSex: Sex | null =
+    user.sex === "M" || user.sex === "F" ? user.sex : null;
 
   const totals: Nutrition = sumNutrition(
     logs.map((l) => ({
@@ -264,12 +305,23 @@ export default async function FoodPage({
             </Link>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
-            <NutritionSummary totals={totals} goals={goals} />
+          <NutritionSummary
+            totals={totals}
+            goals={goals}
+            exerciseKcal={exerciseKcal}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
             <WaterCard
               total={water}
               goal={goals.waterGoal ?? null}
               date={dateStr}
+            />
+            <FastingCard
+              fast={
+                fast
+                  ? { startedAt: fast.startedAt, targetHours: fast.targetHours }
+                  : null
+              }
             />
           </div>
 
@@ -299,6 +351,24 @@ export default async function FoodPage({
             </div>
             <div className="px-5 py-4">
               <AddFoodForm date={dateStr} items={itemOptions} />
+            </div>
+          </div>
+
+          {/* Open Food Facts search */}
+          <div className="card-surface rounded-2xl">
+            <div className="border-border border-b px-5 pt-4 pb-3">
+              <Eyebrow className="mb-1">Food database</Eyebrow>
+              <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                <Search className="size-4" />
+                Search Open Food Facts
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Look up packaged products by name or barcode number, then log a
+                gram amount.
+              </p>
+            </div>
+            <div className="px-5 py-4">
+              <OffSearch date={dateStr} />
             </div>
           </div>
 
@@ -410,6 +480,13 @@ export default async function FoodPage({
       {activeTab === "goals" ? (
         <div className="max-w-lg space-y-6">
           <TdeeCard result={tdee} />
+          <BmrWizard
+            weightKg={weightKg}
+            age={age}
+            sex={bmrSex}
+            heightCm={user.heightCm}
+            weightUnitLabel={user.weightUnit}
+          />
           <div className="card-surface rounded-2xl">
             <div className="border-border border-b px-5 pt-4 pb-3">
               <Eyebrow className="mb-1">Daily targets</Eyebrow>

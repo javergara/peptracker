@@ -61,13 +61,19 @@ function MacroBar({
 export function NutritionSummary({
   totals,
   goals,
+  exerciseKcal = 0,
 }: {
   totals: Nutrition;
   goals: NutritionGoals;
+  /** Estimated calories burned today — enables the "net calories" line. */
+  exerciseKcal?: number;
 }) {
   const caloriePct = goalProgress(totals.calories, goals.calorieGoal);
+  // Net budget: goal − eaten + burned (exercise gives calories back).
   const remaining =
-    goals.calorieGoal != null ? goals.calorieGoal - totals.calories : null;
+    goals.calorieGoal != null
+      ? goals.calorieGoal - totals.calories + exerciseKcal
+      : null;
   const macroGoal: Record<string, number | null> = {
     protein: goals.proteinGoal,
     carbs: goals.carbGoal,
@@ -97,6 +103,11 @@ export function NutritionSummary({
               Set a goal in the Goals tab
             </p>
           )}
+          {exerciseKcal > 0 ? (
+            <p className="num text-muted-foreground mt-0.5 text-[11px]">
+              incl. ~{exerciseKcal} kcal burned
+            </p>
+          ) : null}
         </div>
         <div className="w-full flex-1 space-y-3">
           {MACROS.map((m) => (
