@@ -19,7 +19,6 @@ import {
   restoreFoodLog,
   updateFoodLog,
 } from "@/lib/actions/food";
-import { toDateInputValue } from "@/lib/dates";
 import { MEAL_TYPES } from "@/types/food";
 
 const MEAL_ITEMS: Record<string, string> = Object.fromEntries(
@@ -44,11 +43,23 @@ export interface FoodLogRowData {
   notes: string | null;
 }
 
-export function FoodLogRow({ log }: { log: FoodLogRowData }) {
+export function FoodLogRow({
+  log,
+  dateInput,
+}: {
+  log: FoodLogRowData;
+  /**
+   * The log's day as `yyyy-MM-dd`, computed on the server so the edit keeps the
+   * entry on its original day. Never reformat `log.date` in the browser — a
+   * server-local-midnight instant shifts a day when formatted in a west-of-UTC
+   * timezone, moving the edited log off the viewed day (it "disappears").
+   */
+  dateInput: string;
+}) {
   const [editing, setEditing] = useState(false);
   const [isDeleting, startDelete] = useTransition();
   const boundUpdate = updateFoodLog.bind(null, log.id);
-  const dateValue = toDateInputValue(log.date);
+  const dateValue = dateInput;
 
   function handleDelete() {
     startDelete(async () => {

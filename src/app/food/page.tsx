@@ -393,7 +393,11 @@ export default async function FoodPage({
                     </div>
                     <div className="card-surface divide-border divide-y rounded-2xl">
                       {mealLogs.map((log) => (
-                        <FoodLogRow key={log.id} log={log} />
+                        <FoodLogRow
+                          key={log.id}
+                          log={log}
+                          dateInput={dateStr}
+                        />
                       ))}
                     </div>
                   </section>
