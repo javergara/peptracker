@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addFoodLog } from "@/lib/actions/food";
-import { scaleNutrition } from "@/lib/food";
+import { scaleNutrition, type Nutrition } from "@/lib/food";
 import {
   FOOD_CATALOG,
   FOOD_CATEGORY_LABELS,
@@ -28,6 +28,7 @@ export interface FoodItemOption {
   id: string;
   name: string;
   brand: string | null;
+  servingSize: number | null;
   servingUnit: string | null;
   calories: number;
   protein: number;
@@ -44,6 +45,32 @@ const MEAL_ITEMS: Record<string, string> = Object.fromEntries(
 );
 
 const numStr = (n: number | null | undefined) => (n == null ? "" : String(n));
+
+// Serving units we can convert to an arbitrary weight/volume. A saved food whose
+// serving is measured in these can be logged "by weight" — we scale its
+// per-serving macros by grams ÷ servingSize.
+const WEIGHT_UNITS = new Set(["g", "gr", "gram", "grams", "ml", "milliliter"]);
+
+/** The item's serving size in g/ml if it's a weight-based serving, else null. */
+function itemWeightBasis(item: FoodItemOption): number | null {
+  const unit = item.servingUnit?.trim().toLowerCase();
+  if (!unit || !WEIGHT_UNITS.has(unit)) return null;
+  return item.servingSize && item.servingSize > 0 ? item.servingSize : null;
+}
+
+/** A saved food's per-serving nutrition as a Nutrition object. */
+function itemNutrition(i: FoodItemOption): Nutrition {
+  return {
+    calories: i.calories,
+    protein: i.protein,
+    carbs: i.carbs,
+    fat: i.fat,
+    fiber: i.fiber,
+    sugar: i.sugar,
+    saturatedFat: i.saturatedFat,
+    sodium: i.sodium,
+  };
+}
 
 /**
  * Add-food form for the daily log. Free entry by default; picking a saved food
@@ -63,10 +90,12 @@ export function AddFoodForm({
 }) {
   const [source, setSource] = useState<string | null>(null);
   const [foodItemId, setFoodItemId] = useState<string | null>(null);
+  const [item, setItem] = useState<FoodItemOption | null>(null);
   const [catalog, setCatalog] = useState<CatalogFood | null>(null);
   const [servingIdx, setServingIdx] = useState(0);
-  // "By weight" mode: enter an exact gram amount for a catalog food and let the
-  // system compute the macros from its per-100 g values (e.g. "60 g of meat").
+  // "By weight" mode: enter an exact gram/ml amount and let the system compute
+  // the macros (e.g. "60 g of meat"). Available for catalog foods (per-100 g)
+  // and for saved foods whose serving is weight/volume-based (per servingSize).
   const [byWeight, setByWeight] = useState(false);
   const [grams, setGrams] = useState("100");
   const [name, setName] = useState("");
@@ -123,15 +152,38 @@ export function AddFoodForm({
     fillNutrition(catalogServingNutrition(food, serving));
   }
 
-  function applyGrams(food: CatalogFood, g: string) {
+  // Reference nutrition + basis (grams the reference is measured over) + unit
+  // for the current weighable source, or null when the source can't be weighed.
+  function weighBasis(): {
+    ref: Nutrition;
+    basis: number;
+    unit: string;
+  } | null {
+    if (catalog) return { ref: { ...catalog.per100g }, basis: 100, unit: "g" };
+    if (item) {
+      const basis = itemWeightBasis(item);
+      if (basis == null) return null;
+      return {
+        ref: itemNutrition(item),
+        basis,
+        unit: item.servingUnit?.trim().toLowerCase() ?? "g",
+      };
+    }
+    return null;
+  }
+
+  function applyGrams(g: string) {
+    const w = weighBasis();
+    if (!w) return;
     const n = Math.max(Number(g) || 0, 0);
-    setServingUnit(`${n} g`);
-    fillNutrition(scaleNutrition({ ...food.per100g }, n / 100));
+    setServingUnit(`${n} ${w.unit}`);
+    fillNutrition(scaleNutrition(w.ref, n / w.basis));
   }
 
   function reset() {
     setSource(null);
     setFoodItemId(null);
+    setItem(null);
     setCatalog(null);
     setServingIdx(0);
     setByWeight(false);
@@ -155,22 +207,25 @@ export function AddFoodForm({
     setGrams("100");
     if (!value) {
       setFoodItemId(null);
+      setItem(null);
       setCatalog(null);
       return;
     }
     if (value.startsWith("item:")) {
-      const item = items.find((i) => `item:${i.id}` === value);
+      const picked = items.find((i) => `item:${i.id}` === value) ?? null;
       setCatalog(null);
+      setItem(picked);
       setServingIdx(0);
-      if (!item) return;
-      setFoodItemId(item.id);
-      setName(item.name);
-      setServingUnit(item.servingUnit ?? "");
-      fillNutrition(item);
+      if (!picked) return;
+      setFoodItemId(picked.id);
+      setName(picked.name);
+      setServingUnit(picked.servingUnit ?? "");
+      fillNutrition(picked);
       setQuantity("1");
     } else if (value.startsWith("cat:")) {
       const food = getCatalogFood(value.slice(4));
       setFoodItemId(null);
+      setItem(null);
       if (!food) return;
       setCatalog(food);
       setServingIdx(0);
@@ -183,19 +238,49 @@ export function AddFoodForm({
   function pickServing(value: string) {
     if (value === "custom") {
       setByWeight(true);
-      if (catalog) applyGrams(catalog, grams);
+      applyGrams(grams);
       return;
     }
-    const idx = Number(value);
     setByWeight(false);
-    setServingIdx(idx);
-    if (catalog) applyServing(catalog, idx);
+    if (catalog) {
+      const idx = Number(value);
+      setServingIdx(idx);
+      applyServing(catalog, idx);
+    } else if (item) {
+      // Back to the item's single per-serving basis (quantity multiplies it).
+      setServingUnit(item.servingUnit ?? "");
+      fillNutrition(item);
+    }
   }
 
   function pickGrams(g: string) {
     setGrams(g);
-    if (catalog) applyGrams(catalog, g);
+    applyGrams(g);
   }
+
+  // Weighable = a catalog food (per-100 g) or a saved food with a g/ml serving.
+  const itemBasis = item ? itemWeightBasis(item) : null;
+  const canWeigh = catalog != null || itemBasis != null;
+  const weighUnit = catalog
+    ? "g"
+    : (item?.servingUnit?.trim().toLowerCase() ?? "g");
+  const itemServingLabel =
+    item && item.servingSize
+      ? `1 serving (${item.servingSize} ${item.servingUnit ?? ""})`.trim()
+      : "1 serving";
+  const servingOptions: [string, string][] = catalog
+    ? [
+        ...catalog.servings.map(
+          (s, i) => [String(i), s.label] as [string, string],
+        ),
+        ["custom", `By weight (${weighUnit})…`],
+      ]
+    : itemBasis != null
+      ? [
+          ["0", itemServingLabel],
+          ["custom", `By weight (${weighUnit})…`],
+        ]
+      : [];
 
   return (
     <ActionForm
@@ -227,40 +312,34 @@ export function AddFoodForm({
         />
       </div>
 
-      {catalog ? (
+      {canWeigh ? (
         <div className="space-y-1.5 sm:col-span-2">
           <label htmlFor="food-serving" className="text-sm font-medium">
             Serving
           </label>
           <Select
-            value={byWeight ? "custom" : String(servingIdx)}
+            value={byWeight ? "custom" : catalog ? String(servingIdx) : "0"}
             onValueChange={(v) => pickServing(String(v))}
-            items={{
-              ...Object.fromEntries(
-                catalog.servings.map((s, i) => [String(i), s.label]),
-              ),
-              custom: "By weight (g)…",
-            }}
+            items={Object.fromEntries(servingOptions)}
           >
             <SelectTrigger id="food-serving">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {catalog.servings.map((s, i) => (
-                <SelectItem key={s.label} value={String(i)}>
-                  {s.label}
+              {servingOptions.map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
                 </SelectItem>
               ))}
-              <SelectItem value="custom">By weight (g)…</SelectItem>
             </SelectContent>
           </Select>
         </div>
       ) : null}
 
-      {catalog && byWeight ? (
+      {canWeigh && byWeight ? (
         <div className="space-y-1.5 sm:col-span-2">
           <label htmlFor="food-grams" className="text-sm font-medium">
-            Weight (g)
+            Weight ({weighUnit})
           </label>
           <Input
             id="food-grams"
@@ -274,7 +353,9 @@ export function AddFoodForm({
             autoFocus
           />
           <p className="text-muted-foreground text-xs">
-            Macros are computed from this food&rsquo;s per-100 g values.
+            {catalog
+              ? "Macros are computed from this food’s per-100 g values."
+              : `Macros are computed from this food’s per-${item?.servingSize ?? ""} ${weighUnit} serving.`}
           </p>
         </div>
       ) : null}

@@ -214,6 +214,7 @@ export default async function FoodPage({
     id: i.id,
     name: i.name,
     brand: i.brand,
+    servingSize: i.servingSize,
     servingUnit: i.servingUnit,
     calories: i.calories,
     protein: i.protein,
