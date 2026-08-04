@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addFoodLog } from "@/lib/actions/food";
+import { scaleNutrition } from "@/lib/food";
 import {
   FOOD_CATALOG,
   FOOD_CATEGORY_LABELS,
@@ -64,6 +65,10 @@ export function AddFoodForm({
   const [foodItemId, setFoodItemId] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<CatalogFood | null>(null);
   const [servingIdx, setServingIdx] = useState(0);
+  // "By weight" mode: enter an exact gram amount for a catalog food and let the
+  // system compute the macros from its per-100 g values (e.g. "60 g of meat").
+  const [byWeight, setByWeight] = useState(false);
+  const [grams, setGrams] = useState("100");
   const [name, setName] = useState("");
   const [meal, setMeal] = useState<string>(defaultMeal);
   const [quantity, setQuantity] = useState("1");
@@ -118,11 +123,19 @@ export function AddFoodForm({
     fillNutrition(catalogServingNutrition(food, serving));
   }
 
+  function applyGrams(food: CatalogFood, g: string) {
+    const n = Math.max(Number(g) || 0, 0);
+    setServingUnit(`${n} g`);
+    fillNutrition(scaleNutrition({ ...food.per100g }, n / 100));
+  }
+
   function reset() {
     setSource(null);
     setFoodItemId(null);
     setCatalog(null);
     setServingIdx(0);
+    setByWeight(false);
+    setGrams("100");
     setName("");
     setQuantity("1");
     setServingUnit("");
@@ -138,6 +151,8 @@ export function AddFoodForm({
 
   function pickSource(value: string | null) {
     setSource(value);
+    setByWeight(false);
+    setGrams("100");
     if (!value) {
       setFoodItemId(null);
       setCatalog(null);
@@ -165,9 +180,21 @@ export function AddFoodForm({
     }
   }
 
-  function pickServing(idx: number) {
+  function pickServing(value: string) {
+    if (value === "custom") {
+      setByWeight(true);
+      if (catalog) applyGrams(catalog, grams);
+      return;
+    }
+    const idx = Number(value);
+    setByWeight(false);
     setServingIdx(idx);
     if (catalog) applyServing(catalog, idx);
+  }
+
+  function pickGrams(g: string) {
+    setGrams(g);
+    if (catalog) applyGrams(catalog, g);
   }
 
   return (
@@ -206,11 +233,14 @@ export function AddFoodForm({
             Serving
           </label>
           <Select
-            value={String(servingIdx)}
-            onValueChange={(v) => pickServing(Number(v))}
-            items={Object.fromEntries(
-              catalog.servings.map((s, i) => [String(i), s.label]),
-            )}
+            value={byWeight ? "custom" : String(servingIdx)}
+            onValueChange={(v) => pickServing(String(v))}
+            items={{
+              ...Object.fromEntries(
+                catalog.servings.map((s, i) => [String(i), s.label]),
+              ),
+              custom: "By weight (g)…",
+            }}
           >
             <SelectTrigger id="food-serving">
               <SelectValue />
@@ -221,8 +251,31 @@ export function AddFoodForm({
                   {s.label}
                 </SelectItem>
               ))}
+              <SelectItem value="custom">By weight (g)…</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      ) : null}
+
+      {catalog && byWeight ? (
+        <div className="space-y-1.5 sm:col-span-2">
+          <label htmlFor="food-grams" className="text-sm font-medium">
+            Weight (g)
+          </label>
+          <Input
+            id="food-grams"
+            type="number"
+            min={0}
+            step="any"
+            value={grams}
+            onChange={(e) => pickGrams(e.target.value)}
+            placeholder="e.g. 60"
+            className="num"
+            autoFocus
+          />
+          <p className="text-muted-foreground text-xs">
+            Macros are computed from this food&rsquo;s per-100 g values.
+          </p>
         </div>
       ) : null}
 
