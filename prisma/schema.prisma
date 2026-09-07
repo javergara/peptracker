@@ -76,6 +76,8 @@ model User {
   fastingSessions   FastingSession[]
   conditions        Condition[]
   familyHistory     FamilyHistoryEntry[]
+  medications          Medication[]
+  medicationDoseChanges MedicationDoseChange[]
 
   @@index([accountId])
 }
@@ -531,4 +533,41 @@ model FastingSession {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// A profile-owned medication (e.g. "Atorvastatina") — user-entered, not seeded
+// reference data. `biomarkerSlugs` optionally links into the global Biomarker
+// catalog for cross-referencing.
+model Medication {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String // display name, e.g. "Atorvastatina"
+  code           String? // optional ATC / free code
+  status         String    @default("active") // active | stopped
+  startDate      DateTime?
+  notes          String?
+  biomarkerSlugs Json? // string[] — related Biomarker catalog slugs
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  changes        MedicationDoseChange[]
+
+  @@index([userId])
+}
+
+// A dated dose change for a Medication (e.g. 40 mg -> 20 mg on a date, with a
+// reason).
+model MedicationDoseChange {
+  id           String     @id @default(cuid())
+  userId       String
+  medicationId String
+  dose         String // e.g. "40 mg"
+  reason       String?
+  effectiveAt  DateTime
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([medicationId])
 }

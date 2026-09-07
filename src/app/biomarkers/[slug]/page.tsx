@@ -7,6 +7,7 @@ import {
   FlaskConical,
   Info,
   Stethoscope,
+  Tablets,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
@@ -18,12 +19,19 @@ import {
   getInterventionBands,
   listConditionsForBiomarker,
   listLabsForBiomarker,
+  listMedicationsForBiomarker,
 } from "@/lib/queries";
 import {
   CONDITION_STATUS_LABELS,
   CONDITION_STATUS_STYLE,
   asConditionStatus,
 } from "@/types/health-profile";
+import {
+  MEDICATION_STATUS_LABELS,
+  MEDICATION_STATUS_STYLE,
+  asMedicationStatus,
+} from "@/types/medication";
+import { currentDose } from "@/lib/medications";
 import {
   asRefRanges,
   asReferences,
@@ -70,12 +78,14 @@ export default async function BiomarkerDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [biomarker, user, labs, linkedConditions] = await Promise.all([
-    getBiomarker(slug),
-    getCurrentUser(),
-    listLabsForBiomarker(slug),
-    listConditionsForBiomarker(slug),
-  ]);
+  const [biomarker, user, labs, linkedConditions, linkedMedications] =
+    await Promise.all([
+      getBiomarker(slug),
+      getCurrentUser(),
+      listLabsForBiomarker(slug),
+      listConditionsForBiomarker(slug),
+      listMedicationsForBiomarker(slug),
+    ]);
 
   if (!biomarker) notFound();
 
@@ -377,6 +387,47 @@ export default async function BiomarkerDetailPage({
                         )}
                       >
                         {CONDITION_STATUS_LABELS[status]}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {linkedMedications.length > 0 && (
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1 flex items-center gap-1.5">
+                  <Tablets className="size-3" />
+                  Your profile
+                </Eyebrow>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Medications linked to this marker
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2 px-5 py-4">
+                {linkedMedications.map((m) => {
+                  const status = asMedicationStatus(m.status);
+                  const dose = currentDose(m.changes);
+                  return (
+                    <Link
+                      key={m.id}
+                      href="/medications"
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors hover:opacity-80"
+                    >
+                      <span className="font-medium">{m.name}</span>
+                      {dose ? (
+                        <span className="num text-muted-foreground text-[11px]">
+                          {dose}
+                        </span>
+                      ) : null}
+                      <span
+                        className={cn(
+                          "rounded-full border px-1.5 py-0.5 text-[11px] font-medium",
+                          MEDICATION_STATUS_STYLE[status],
+                        )}
+                      >
+                        {MEDICATION_STATUS_LABELS[status]}
                       </span>
                     </Link>
                   );

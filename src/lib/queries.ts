@@ -814,6 +814,41 @@ export async function listConditionsForBiomarker(slug: string) {
   return rows.filter((c) => asStringArray(c.biomarkerSlugs).includes(slug));
 }
 
+// --- Medications (with dose-change history) ---------------------------
+
+/**
+ * The active profile's medications, each with its full dose-change history
+ * (newest change first). Not cached — user-scoped. The current dose is derived
+ * in the view via `currentDoseChange` (src/lib/medications.ts).
+ */
+export async function listMedications() {
+  const user = await getActiveUser();
+  return prisma.medication.findMany({
+    where: { userId: user.id },
+    orderBy: [{ status: "asc" }, { name: "asc" }],
+    include: {
+      changes: { orderBy: [{ effectiveAt: "desc" }, { createdAt: "desc" }] },
+    },
+  });
+}
+
+/**
+ * The active profile's medications that reference a given biomarker slug in their
+ * `biomarkerSlugs` Json array. Not cached — user-scoped. Used by the biomarker
+ * detail page to surface "your linked medications".
+ */
+export async function listMedicationsForBiomarker(slug: string) {
+  const user = await getActiveUser();
+  const rows = await prisma.medication.findMany({
+    where: { userId: user.id },
+    orderBy: [{ status: "asc" }, { name: "asc" }],
+    include: {
+      changes: { orderBy: [{ effectiveAt: "desc" }, { createdAt: "desc" }] },
+    },
+  });
+  return rows.filter((m) => asStringArray(m.biomarkerSlugs).includes(slug));
+}
+
 // --- Daily check-ins --------------------------------------------------
 
 /** The active profile's daily wellbeing check-ins, newest first. */

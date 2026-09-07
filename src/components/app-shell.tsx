@@ -25,6 +25,7 @@ import {
   Stethoscope,
   Sun,
   Syringe,
+  Tablets,
   TestTube,
   UtensilsCrossed,
 } from "lucide-react";
@@ -111,6 +112,7 @@ const NAV: NavGroup[] = [
     label: "Health",
     items: [
       { href: "/health", label: "Health Profile", icon: Stethoscope },
+      { href: "/medications", label: "Medications", icon: Tablets },
       { href: "/metrics", label: "Metrics", icon: LineChart },
       { href: "/labs", label: "Labs", icon: TestTube },
       { href: "/photos", label: "Photos", icon: Images },
