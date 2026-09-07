@@ -849,6 +849,25 @@ export async function listMedicationsForBiomarker(slug: string) {
   return rows.filter((m) => asStringArray(m.biomarkerSlugs).includes(slug));
 }
 
+// --- Imaging / studies log --------------------------------------------
+
+/**
+ * The active profile's imaging studies, newest first (by performed date, then
+ * follow-up, then creation). Not cached — user-scoped. Grouped by status in the
+ * view via `groupStudiesByStatus` (src/lib/studies.ts).
+ */
+export async function listStudies() {
+  const user = await getActiveUser();
+  return prisma.imagingStudy.findMany({
+    where: { userId: user.id },
+    orderBy: [
+      { performedAt: "desc" },
+      { followUpAt: "desc" },
+      { createdAt: "desc" },
+    ],
+  });
+}
+
 // --- Daily check-ins --------------------------------------------------
 
 /** The active profile's daily wellbeing check-ins, newest first. */

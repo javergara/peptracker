@@ -58,6 +58,8 @@ const TYPE_LABELS: Record<string, string> = {
   steps: "Steps",
   workout: "Workout duration",
   water: "Water",
+  bpSystolic: "Blood pressure (systolic)",
+  bpDiastolic: "Blood pressure (diastolic)",
   custom: "Custom",
 };
 
@@ -72,10 +74,18 @@ const TYPE_DEFAULT_UNIT: Record<string, string> = {
   steps: "steps",
   workout: "min",
   water: "mL",
+  bpSystolic: "mmHg",
+  bpDiastolic: "mmHg",
 };
 
 /** Types where a LOWER value is the improving direction (used for tile deltas). */
-const LOWER_IS_BETTER = new Set(["weight", "bodyFat", "restingHr"]);
+const LOWER_IS_BETTER = new Set([
+  "weight",
+  "bodyFat",
+  "restingHr",
+  "bpSystolic",
+  "bpDiastolic",
+]);
 
 /** Convert a range string to milliseconds. */
 function rangeToDays(range: RangeValue): number {

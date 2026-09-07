@@ -18,6 +18,8 @@ export const CANONICAL_MEASUREMENT_TYPES = [
   "hrv",
   "steps",
   "workout",
+  "bpSystolic",
+  "bpDiastolic",
   "custom",
 ] as const;
 export type MeasurementType = (typeof CANONICAL_MEASUREMENT_TYPES)[number];
@@ -47,6 +49,14 @@ const TYPE_ALIASES: Record<string, MeasurementType> = {
   workout: "workout",
   exercise: "workout",
   activity: "workout",
+  bpsystolic: "bpSystolic",
+  systolic: "bpSystolic",
+  systolicbp: "bpSystolic",
+  sbp: "bpSystolic",
+  bpdiastolic: "bpDiastolic",
+  diastolic: "bpDiastolic",
+  diastolicbp: "bpDiastolic",
+  dbp: "bpDiastolic",
   custom: "custom",
 };
 
