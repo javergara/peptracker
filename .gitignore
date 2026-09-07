@@ -64,3 +64,7 @@ prisma/*.db-journal
 
 # private personal medical documents — never commit
 /javergara_medical_metrics
+
+# profile-import payloads + backups (personal health data) — keep only the example
+/imports/*
+!/imports/example.import.json

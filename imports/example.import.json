@@ -1,0 +1,104 @@
+{
+  "email": "user@example.com",
+  "userId": "REPLACE_WITH_TARGET_USER_ID",
+  "profile": {
+    "heightCm": 180,
+    "timezone": "America/Bogota",
+    "calorieGoal": 2500,
+    "proteinGoal": 180
+  },
+  "labs": [
+    {
+      "marker": "Total Testosterone (T)",
+      "value": 557,
+      "unit": "ng/dL",
+      "refLow": 348,
+      "refHigh": 1197,
+      "biomarkerSlug": "total-testosterone",
+      "takenAt": "2026-09-05T12:00:00Z"
+    }
+  ],
+  "measurements": [
+    {
+      "type": "weight",
+      "value": 82.5,
+      "unit": "kg",
+      "recordedAt": "2026-09-05T08:00:00Z"
+    }
+  ],
+  "vials": [
+    {
+      "peptide": "bpc-157",
+      "totalMcg": 5000,
+      "remainingMcg": 5000,
+      "status": "sealed"
+    }
+  ],
+  "stock": [
+    {
+      "peptide": "tb-500",
+      "vialMcg": 5000,
+      "quantity": 2,
+      "dose": 2.5,
+      "doseUnit": "mg",
+      "frequency": "twice-weekly"
+    }
+  ],
+  "cycles": [
+    {
+      "name": "Wolverine recovery",
+      "startDate": "2026-09-01",
+      "endDate": "2026-10-01",
+      "status": "active",
+      "peptide": "bpc-157"
+    }
+  ],
+  "doses": [
+    {
+      "peptide": "bpc-157",
+      "amount": 250,
+      "unit": "mcg",
+      "takenAt": "2026-09-05T09:00:00Z",
+      "route": "subcutaneous",
+      "site": "abdomen-left"
+    }
+  ],
+  "supplements": [
+    {
+      "name": "Vitamin D3",
+      "category": "vitamin",
+      "dose": "2000 IU",
+      "frequency": "daily",
+      "timing": "morning",
+      "startDate": "2026-01-01",
+      "status": "active"
+    }
+  ],
+  "labReminders": [
+    {
+      "label": "Recheck lipid panel + transaminases",
+      "dueAt": "2026-11-07",
+      "biomarkerSlug": "ldl-cholesterol",
+      "note": "statin follow-up"
+    }
+  ],
+  "conditions": [
+    {
+      "name": "Dyslipidemia",
+      "status": "monitoring",
+      "code": "E78.5",
+      "system": "Lipids",
+      "onsetDate": "2026-01-01",
+      "notes": "diet + statin",
+      "biomarkerSlugs": ["ldl-cholesterol", "hdl-cholesterol"],
+      "relatedPeptides": []
+    }
+  ],
+  "familyHistory": [
+    {
+      "relative": "father",
+      "condition": "Type 2 diabetes",
+      "notes": "diagnosed ~60y"
+    }
+  ]
+}

@@ -660,3 +660,7 @@ Subagents return **concise, structured results** (paths changed, decisions, next
 steps) — not full file dumps — so the main thread stays cheap. Prefer the skills
 in `.claude/skills/` (`/add-peptide`, `/add-biomarker`, `/add-stack`, `/add-vial`,
 `/new-feature`, `/db-migrate`, `/seed-refresh`) which orchestrate these agents.
+For bulk-loading a user's own data (labs, inventory, dose history, profile
+settings) into a profile, use **`/import-profile`** — a read-first, dry-run +
+confirm + apply flow over `scripts/import-profile.ts` (never deletes; writes hit
+the shared Neon DB, so it always confirms before applying).

@@ -1,0 +1,62 @@
+{
+  "slug": "igg",
+  "name": "Immunoglobulin G (IgG)",
+  "aliases": [
+    "IgG",
+    "Gamma globulin",
+    "Immunoglobulin G, serum",
+    "Total IgG",
+    "Quantitative IgG"
+  ],
+  "system": "INFLAMMATION",
+  "unit": "mg/dL",
+  "summary": "IgG is the most abundant antibody (immunoglobulin) in blood, produced by plasma cells to provide long-term, specific immunity against germs the body has previously encountered. Total serum IgG reflects the overall size of this antibody pool and is a core measure of humoral immune status.",
+  "whatItMeans": "A high total IgG (hypergammaglobulinemia) is often seen with chronic infections, chronic liver disease (hepatitis, cirrhosis), autoimmune conditions, and, when a single clone dominates (monoclonal gammopathy), plasma-cell disorders such as multiple myeloma. A low total IgG (hypogammaglobulinemia) points toward reduced antibody production or loss, as in primary immunodeficiencies (e.g., common variable immunodeficiency), some cancers, protein loss (kidney or gut), malnutrition, or certain medications, and can raise infection risk. Because both high and low values matter and the causes are broad, IgG is interpreted alongside IgA/IgM, protein electrophoresis, and the clinical picture. This is educational information, not a diagnosis. (No system in this catalog is dedicated to immunology, so IgG is filed under INFLAMMATION as the closest immune-related grouping.)",
+  "raises": [
+    "Chronic or recurrent infections",
+    "Chronic liver disease (chronic hepatitis, cirrhosis, autoimmune hepatitis)",
+    "Autoimmune and connective-tissue diseases (e.g., lupus, rheumatoid arthritis)",
+    "Monoclonal gammopathy / multiple myeloma (IgG type) and some lymphomas",
+    "Chronic inflammation and IgG4-related disease"
+  ],
+  "lowers": [
+    "Primary immunodeficiency (e.g., common variable immunodeficiency, agammaglobulinemia)",
+    "Protein loss via nephrotic syndrome or protein-losing enteropathy",
+    "Malnutrition and malabsorption",
+    "Immunosuppressive or B-cell-depleting drugs (e.g., rituximab, corticosteroids), chemotherapy",
+    "Some plasma-cell and lymphoid cancers that suppress normal (polyclonal) antibody production"
+  ],
+  "confounders": [
+    "Recent immunoglobulin replacement (IVIG/SCIG) or blood/plasma products transiently raise measured IgG",
+    "Assay method and each laboratory's reference interval vary, so cutoffs differ between labs",
+    "A normal total IgG can mask a monoclonal spike or an IgG-subclass deficiency; electrophoresis/subclass testing may be needed",
+    "Pregnancy, hydration status, and age shift results (values differ markedly in infants and children)"
+  ],
+  "relatedPeptides": ["thymosin-alpha-1"],
+  "ranges": [
+    {
+      "low": 700,
+      "high": 1600,
+      "unit": "mg/dL",
+      "note": "General adult total serum IgG reference range; educational/typical and assay-dependent. Reported adult intervals vary by lab (e.g., Mayo Clinic Laboratories ~767-1590 mg/dL; some labs report ~560-1800 mg/dL). Interpret against your lab's stated range."
+    }
+  ],
+  "references": [
+    {
+      "title": "MedlinePlus: Immunoglobulins (IgA, IgG, IgM) Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/immunoglobulins-blood-test/"
+    },
+    {
+      "title": "MedlinePlus Medical Encyclopedia: Immunoglobulins - serum",
+      "url": "https://medlineplus.gov/ency/article/003545.htm"
+    },
+    {
+      "title": "Cleveland Clinic: Immunoglobulins Test",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/22350-immunoglobulins"
+    },
+    {
+      "title": "Mayo Clinic Laboratories: Immunoglobulins (IgG, IgA, and IgM), Serum",
+      "url": "https://www.mayocliniclabs.com/test-catalog/overview/8156"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import {
   BookOpen,
   FlaskConical,
   Info,
+  Stethoscope,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
@@ -15,8 +16,14 @@ import {
   getBiomarker,
   getCurrentUser,
   getInterventionBands,
+  listConditionsForBiomarker,
   listLabsForBiomarker,
 } from "@/lib/queries";
+import {
+  CONDITION_STATUS_LABELS,
+  CONDITION_STATUS_STYLE,
+  asConditionStatus,
+} from "@/types/health-profile";
 import {
   asRefRanges,
   asReferences,
@@ -63,10 +70,11 @@ export default async function BiomarkerDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [biomarker, user, labs] = await Promise.all([
+  const [biomarker, user, labs, linkedConditions] = await Promise.all([
     getBiomarker(slug),
     getCurrentUser(),
     listLabsForBiomarker(slug),
+    listConditionsForBiomarker(slug),
   ]);
 
   if (!biomarker) notFound();
@@ -341,6 +349,41 @@ export default async function BiomarkerDetailPage({
 
         {/* ── Your History ── */}
         <TabsContent value="your-history" className="space-y-4 pt-4">
+          {linkedConditions.length > 0 && (
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1 flex items-center gap-1.5">
+                  <Stethoscope className="size-3" />
+                  Your profile
+                </Eyebrow>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Conditions linked to this marker
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2 px-5 py-4">
+                {linkedConditions.map((c) => {
+                  const status = asConditionStatus(c.status);
+                  return (
+                    <Link
+                      key={c.id}
+                      href="/health"
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors hover:opacity-80"
+                    >
+                      <span className="font-medium">{c.name}</span>
+                      <span
+                        className={cn(
+                          "rounded-full border px-1.5 py-0.5 text-[11px] font-medium",
+                          CONDITION_STATUS_STYLE[status],
+                        )}
+                      >
+                        {CONDITION_STATUS_LABELS[status]}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {labs.length > 0 ? (
             <div className="card-surface rounded-2xl">
               <div className="border-border border-b px-5 pt-4 pb-3">

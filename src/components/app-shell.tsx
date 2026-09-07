@@ -22,6 +22,7 @@ import {
   Search,
   Settings,
   Sparkles,
+  Stethoscope,
   Sun,
   Syringe,
   TestTube,
@@ -109,6 +110,7 @@ const NAV: NavGroup[] = [
   {
     label: "Health",
     items: [
+      { href: "/health", label: "Health Profile", icon: Stethoscope },
       { href: "/metrics", label: "Metrics", icon: LineChart },
       { href: "/labs", label: "Labs", icon: TestTube },
       { href: "/photos", label: "Photos", icon: Images },

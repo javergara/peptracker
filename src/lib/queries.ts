@@ -9,6 +9,7 @@ import {
   type InterventionInput,
 } from "@/lib/interventions";
 import { computeStockLevels, type StockLevel } from "@/lib/stock";
+import { asStringArray } from "@/types/peptide";
 
 /**
  * The peptide library, preset stacks, biomarker catalog, and interaction edges
@@ -773,6 +774,44 @@ export async function listJournalEntries() {
     where: { userId: user.id },
     orderBy: { date: "desc" },
   });
+}
+
+// --- Health profile (conditions + family history) ---------------------
+
+/**
+ * The active profile's conditions/diagnoses. Not cached — user-scoped. Ordered
+ * by onset (newest first), then name for stable ties. Grouping by status is done
+ * in the view via `groupConditionsByStatus` (src/lib/health-profile.ts).
+ */
+export async function listConditions() {
+  const user = await getActiveUser();
+  return prisma.condition.findMany({
+    where: { userId: user.id },
+    orderBy: [{ onsetDate: { sort: "desc", nulls: "last" } }, { name: "asc" }],
+  });
+}
+
+/** The active profile's family-history entries. Not cached — user-scoped. */
+export async function listFamilyHistory() {
+  const user = await getActiveUser();
+  return prisma.familyHistoryEntry.findMany({
+    where: { userId: user.id },
+    orderBy: [{ relative: "asc" }, { condition: "asc" }],
+  });
+}
+
+/**
+ * The active profile's conditions that reference a given biomarker slug in their
+ * `biomarkerSlugs` Json array. Not cached — user-scoped. Used by the biomarker
+ * detail page to surface "your linked conditions".
+ */
+export async function listConditionsForBiomarker(slug: string) {
+  const user = await getActiveUser();
+  const rows = await prisma.condition.findMany({
+    where: { userId: user.id },
+    orderBy: [{ onsetDate: { sort: "desc", nulls: "last" } }, { name: "asc" }],
+  });
+  return rows.filter((c) => asStringArray(c.biomarkerSlugs).includes(slug));
 }
 
 // --- Daily check-ins --------------------------------------------------
