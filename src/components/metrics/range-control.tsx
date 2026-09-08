@@ -10,6 +10,7 @@ const RANGES = [
   { label: "30d", value: "30d" },
   { label: "90d", value: "90d" },
   { label: "1y", value: "1y" },
+  { label: "All", value: "all" },
 ] as const;
 
 export type RangeValue = (typeof RANGES)[number]["value"];

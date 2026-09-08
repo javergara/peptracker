@@ -137,6 +137,9 @@ function rangeToDays(range: RangeValue): number {
       return 90;
     case "1y":
       return 365;
+    case "all":
+      // Large enough to cover any real history (no window clipping).
+      return 100_000;
   }
 }
 
@@ -199,7 +202,7 @@ export default async function MetricsPage({
 }) {
   const params = await searchParams;
   const rawRange = params.range as RangeValue | undefined;
-  const validRanges: RangeValue[] = ["7d", "30d", "90d", "1y"];
+  const validRanges: RangeValue[] = ["7d", "30d", "90d", "1y", "all"];
   const range: RangeValue =
     rawRange && validRanges.includes(rawRange) ? rawRange : DEFAULT_RANGE;
 
@@ -208,10 +211,11 @@ export default async function MetricsPage({
   const rangeMs = rangeToDays(range) * 86_400_000;
   const windowStart = now.getTime() - rangeMs;
 
-  // Fetch all-time for chart data (correlation explorer needs full history),
-  // then clip to the range window for display.
+  // Fetch enough history for chart data (correlation explorer needs full
+  // history), then clip to the range window for display. At least 1y so the
+  // shorter ranges keep full correlation context; "all" fetches everything.
   const fetchStart = new Date(now);
-  fetchStart.setDate(fetchStart.getDate() - 365);
+  fetchStart.setDate(fetchStart.getDate() - Math.max(rangeToDays(range), 365));
 
   const [measurements, user, doseLogs, labs, checkIns, foodLogs] =
     await Promise.all([
@@ -264,7 +268,7 @@ export default async function MetricsPage({
     { key: "recovery", label: "Recovery", defaultUnit: "/100" },
   ] as const;
 
-  const rangeLabel = range; // e.g. "30d"
+  const rangeLabel = range === "all" ? "all time" : range; // e.g. "30d"
 
   const tiles = TILE_TYPES.map(({ key, label, defaultUnit }) => {
     const rows = measurements.filter((m) => m.type === key);
@@ -544,7 +548,7 @@ export default async function MetricsPage({
           </CardTitle>
           <CardDescription className="mt-0.5 text-[12.5px]">
             Pick one metric to see how it&apos;s evolving on its own scale —
-            last {range}.
+            last {rangeLabel}.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -560,7 +564,7 @@ export default async function MetricsPage({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="font-display text-base font-semibold">
-                Compare trends — last {range}
+                Compare trends — last {rangeLabel}
               </CardTitle>
               <CardDescription className="mt-0.5 text-[12.5px]">
                 Toggle any series. Lines share a timeline but keep their own
