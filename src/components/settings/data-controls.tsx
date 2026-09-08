@@ -186,7 +186,9 @@ export function DataControls() {
           Header row <code className="font-mono">date,type,value,unit</code>{" "}
           (unit optional). <code className="font-mono">type</code> must be one
           of weight, bodyFat, sleep, recovery, restingHr, hrv, steps, workout,
-          custom. Invalid rows are skipped; each valid row becomes a new
+          activeEnergy, custom, or a wearable metric (distance, flights, sleep
+          stages, heart-rate avg/max/min, walking speed/length, headphone
+          audio). Invalid rows are skipped; each valid row becomes a new
           measurement (additive, no dedup).
         </p>
       </div>
