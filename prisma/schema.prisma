@@ -306,6 +306,8 @@ model LabResult {
   notes         String?
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  qualitativeValue String? // e.g. "non-reactive" | "reactive" | "positive" | "negative"; set instead of numeric value for qualitative markers
+
   @@index([userId])
 }
 
@@ -364,6 +366,9 @@ model Biomarker {
   direction       String? // "high" = higher is worse, "low" = lower is worse, null = context-dependent
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  valueType          String @default("numeric") // numeric | qualitative
+  qualitativeOptions Json? // for qualitative markers: { options: string[], normal: string, abnormal?: string[] }
 }
 
 // Continuous supplements (vitamins, minerals, omega-3, creatine, …). Tracked as

@@ -7,6 +7,7 @@ import { getActiveUser } from "@/lib/active-user";
 import {
   ageFromBirthYear,
   asRefRanges,
+  asQualitativeOptions,
   resolveRange,
   type ResolvedRange,
 } from "@/types/biomarker";
@@ -82,6 +83,149 @@ export async function addLab(formData: FormData) {
   });
   revalidatePath("/labs");
   if (biomarkerSlug) revalidatePath(`/biomarkers/${biomarkerSlug}`);
+}
+
+/**
+ * Log a QUALITATIVE (categorical) result — e.g. an infectious serology whose
+ * outcome is reactive / non-reactive rather than a number. The biomarker must be
+ * a catalog entry with `valueType: "qualitative"`; the chosen result must be one
+ * of its `qualitativeOptions.options`. Numeric `value` stores a 0 placeholder
+ * (the column is non-null) and the real result lives in `qualitativeValue`.
+ */
+export async function addQualitativeLab(formData: FormData) {
+  const user = await getActiveUser();
+  const biomarkerSlug = String(formData.get("biomarkerSlug") ?? "").trim();
+  const result = String(formData.get("qualitativeValue") ?? "").trim();
+  const takenAt = String(formData.get("takenAt") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim();
+
+  if (!biomarkerSlug) {
+    throw new Error("Choose a serology marker.");
+  }
+  const bm = await prisma.biomarker.findUnique({
+    where: { slug: biomarkerSlug },
+  });
+  if (!bm || bm.valueType !== "qualitative") {
+    throw new Error("That marker isn't a qualitative serology.");
+  }
+  const options = asQualitativeOptions(bm.qualitativeOptions);
+  if (!options) {
+    throw new Error("This marker is missing its result options.");
+  }
+  const valid = options.options.some(
+    (o) => o.trim().toLowerCase() === result.trim().toLowerCase(),
+  );
+  if (!result || !valid) {
+    throw new Error("Choose a valid result.");
+  }
+
+  await prisma.labResult.create({
+    data: {
+      userId: user.id,
+      marker: bm.name,
+      biomarkerSlug,
+      value: 0,
+      qualitativeValue: result,
+      unit: bm.unit || null,
+      refLow: null,
+      refHigh: null,
+      takenAt: takenAt ? new Date(takenAt) : new Date(),
+      notes: notes || null,
+    },
+  });
+  revalidatePath("/labs");
+  revalidatePath(`/biomarkers/${biomarkerSlug}`);
+}
+
+/**
+ * Bulk-import parsed lab rows (from the PDF-import review table). The client
+ * sends a JSON `rows` payload it already let the user review + edit; each row is
+ * a numeric result with an optional catalog link + per-row date. Ownership is
+ * stamped here; ranges are snapshotted (provided values win, else resolved from
+ * the catalog for the active profile).
+ */
+export async function importLabResults(formData: FormData) {
+  const user = await getActiveUser();
+  const raw = String(formData.get("rows") ?? "");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("Could not read the reviewed rows.");
+  }
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("Add at least one row to import.");
+  }
+
+  const age = ageFromBirthYear(user.birthYear);
+  const data: {
+    userId: string;
+    marker: string;
+    biomarkerSlug: string | null;
+    value: number;
+    unit: string | null;
+    refLow: number | null;
+    refHigh: number | null;
+    takenAt: Date;
+    notes: string | null;
+  }[] = [];
+
+  for (const item of parsed as Record<string, unknown>[]) {
+    const marker = String(item.marker ?? "").trim();
+    const value = Number(item.value);
+    if (!marker || Number.isNaN(value)) continue;
+
+    const slug = String(item.biomarkerSlug ?? "").trim() || null;
+    let unit = String(item.unit ?? "").trim() || null;
+    let refLow =
+      item.refLow != null && item.refLow !== "" ? Number(item.refLow) : null;
+    let refHigh =
+      item.refHigh != null && item.refHigh !== "" ? Number(item.refHigh) : null;
+    if (refLow != null && Number.isNaN(refLow)) refLow = null;
+    if (refHigh != null && Number.isNaN(refHigh)) refHigh = null;
+
+    // Snapshot from catalog when linked and the row didn't carry a range/unit.
+    let markerName = marker;
+    if (slug) {
+      const bm = await prisma.biomarker.findUnique({ where: { slug } });
+      if (bm) {
+        const range = resolveRange(asRefRanges(bm.ranges), {
+          sex: user.sex,
+          age,
+        });
+        markerName = bm.name;
+        if (!unit) unit = range?.unit ?? bm.unit ?? null;
+        if (refLow === null && refHigh === null && range) {
+          refLow = range.low ?? null;
+          refHigh = range.high ?? null;
+        }
+      }
+    }
+
+    const takenAtRaw = String(item.takenAt ?? "");
+    const takenAt = takenAtRaw ? new Date(takenAtRaw) : new Date();
+    if (Number.isNaN(takenAt.getTime())) continue;
+
+    data.push({
+      userId: user.id,
+      marker: markerName,
+      biomarkerSlug: slug,
+      value,
+      unit,
+      refLow,
+      refHigh,
+      takenAt,
+      notes: null,
+    });
+  }
+
+  if (data.length === 0) {
+    throw new Error("No valid rows to import.");
+  }
+
+  await prisma.labResult.createMany({ data });
+  revalidatePath("/labs");
+  revalidatePath("/metrics");
 }
 
 /**

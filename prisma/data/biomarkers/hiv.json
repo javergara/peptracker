@@ -1,0 +1,47 @@
+{
+  "slug": "hiv",
+  "name": "HIV (antibody/antigen screen)",
+  "aliases": [
+    "VIH",
+    "HIV Ab/Ag",
+    "HIV 4th generation",
+    "HIV combo",
+    "prueba de VIH"
+  ],
+  "system": "INFECTION",
+  "unit": "",
+  "summary": "A laboratory HIV antigen/antibody (\"4th generation\" combo) screen looks for both antibodies the immune system makes against HIV and the p24 antigen, a viral protein that appears in blood before antibodies develop.",
+  "whatItMeans": "A non-reactive (negative) result means no HIV antigen or antibody was detected in the sample, though a very recent exposure can still be missed. A reactive (positive) screen is not a diagnosis on its own: it must be followed by confirmatory testing (such as an HIV-1/HIV-2 differentiation immunoassay, historically a Western blot, or a nucleic acid test) before HIV infection is confirmed. Because tests only turn reactive after seroconversion, an exposure within the window period (roughly 18-45 days for a lab antigen/antibody test) can produce a non-reactive result even when infection has occurred, so retesting is advised after a possible recent exposure.",
+  "raises": [],
+  "lowers": [],
+  "confounders": [
+    "Window period after exposure",
+    "Acute infection before seroconversion"
+  ],
+  "relatedPeptides": [],
+  "ranges": [],
+  "references": [
+    {
+      "title": "CDC — Types of HIV Tests",
+      "url": "https://www.cdc.gov/hiv/testing/index.html"
+    },
+    {
+      "title": "MedlinePlus — HIV Screening Test",
+      "url": "https://medlineplus.gov/lab-tests/hiv-screening-test/"
+    },
+    {
+      "title": "WHO — HIV and AIDS fact sheet",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/hiv-aids"
+    },
+    {
+      "title": "MedlinePlus — HIV/AIDS",
+      "url": "https://medlineplus.gov/hivaids.html"
+    }
+  ],
+  "valueType": "qualitative",
+  "qualitativeOptions": {
+    "options": ["non-reactive", "reactive"],
+    "normal": "non-reactive",
+    "abnormal": ["reactive"]
+  }
+}

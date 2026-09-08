@@ -52,6 +52,7 @@ export const SYSTEM_BADGE: Record<BiomarkerSystem, string> = {
   VITAMIN: "bg-lime-500/15 text-lime-700 dark:text-lime-300 border-lime-500/30",
   INFLAMMATION:
     "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/30",
+  INFECTION: "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30",
   OTHER:
     "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };

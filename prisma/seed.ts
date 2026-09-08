@@ -82,6 +82,8 @@ type RawBiomarker = {
   ranges: Record<string, unknown>[];
   references: { title: string; url: string }[];
   direction?: string;
+  valueType?: string;
+  qualitativeOptions?: Record<string, unknown>;
 };
 
 function loadBiomarkers(): RawBiomarker[] {
@@ -235,6 +237,10 @@ async function main() {
       ranges: (b.ranges ?? []) as object,
       references: b.references ?? [],
       direction: b.direction ?? null,
+      valueType: b.valueType ?? "numeric",
+      qualitativeOptions: (b.qualitativeOptions ?? undefined) as
+        | object
+        | undefined,
     };
     await prisma.biomarker.upsert({
       where: { slug: b.slug },

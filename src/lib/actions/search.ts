@@ -43,6 +43,7 @@ const STATIC_NAV: SearchItem[] = [
   { type: "nav", label: "Calendar", href: "/calendar" },
   { type: "nav", label: "Inventory", href: "/inventory" },
   { type: "nav", label: "Labs", href: "/labs" },
+  { type: "nav", label: "Import labs from PDF", href: "/labs/import" },
   { type: "nav", label: "Studies", href: "/studies" },
   { type: "nav", label: "Metrics", href: "/metrics" },
   { type: "nav", label: "Photos", href: "/photos" },

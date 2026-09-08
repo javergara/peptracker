@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated Prisma client — not our code.
     "src/generated/**",
+    // Vendored static assets (e.g. the pdf.js worker) — minified, not our code.
+    "public/**",
   ]),
   {
     rules: {

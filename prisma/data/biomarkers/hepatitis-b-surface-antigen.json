@@ -1,0 +1,47 @@
+{
+  "slug": "hepatitis-b-surface-antigen",
+  "name": "Hepatitis B surface antigen (HBsAg)",
+  "aliases": [
+    "HBsAg",
+    "antígeno de superficie hepatitis B",
+    "hepatitis B surface antigen",
+    "Australia antigen"
+  ],
+  "system": "INFECTION",
+  "unit": "",
+  "summary": "HBsAg is a protein on the surface of the hepatitis B virus (HBV); its presence in blood is the primary marker of a current HBV infection, whether acute or chronic. It is typically the first serologic marker to appear after exposure.",
+  "whatItMeans": "A non-reactive (negative) result means no HBsAg was detected, so current active HBV infection is unlikely. A reactive (positive) result indicates a current infection and that the person is considered infectious; it does not, by itself, distinguish acute from chronic disease, so it should be confirmed and interpreted alongside the full HBV panel (anti-HBs, total and IgM anti-HBc, and often HBV DNA). HBsAg persisting for more than 6 months generally indicates chronic infection. Note that HBsAg reflects active infection, not immunity — immunity from vaccination or resolved infection is shown by anti-HBs (surface antibody), not HBsAg. This is educational information, not a diagnosis; results should be reviewed with a clinician.",
+  "raises": [],
+  "lowers": [],
+  "confounders": [
+    "Recent HBV vaccination (transient HBsAg positivity, typically within ~30 days of a dose)",
+    "Window period (early after exposure HBsAg may not yet be detectable)",
+    "Assay differences and rare false positives/negatives requiring confirmatory testing"
+  ],
+  "relatedPeptides": [],
+  "ranges": [],
+  "references": [
+    {
+      "title": "CDC — Interpretation of Hepatitis B Serologic Test Results",
+      "url": "https://www.cdc.gov/hepatitis/hbv/interpretationofhepbserologicresults.htm"
+    },
+    {
+      "title": "WHO — Hepatitis B (Fact Sheet)",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/hepatitis-b"
+    },
+    {
+      "title": "MedlinePlus — Hepatitis B",
+      "url": "https://medlineplus.gov/hepatitisb.html"
+    },
+    {
+      "title": "Mayo Clinic — Hepatitis B: Diagnosis & Treatment",
+      "url": "https://www.mayoclinic.org/diseases-conditions/hepatitis-b/diagnosis-treatment/drc-20366821"
+    }
+  ],
+  "valueType": "qualitative",
+  "qualitativeOptions": {
+    "options": ["non-reactive", "reactive"],
+    "normal": "non-reactive",
+    "abnormal": ["reactive"]
+  }
+}

@@ -35,7 +35,9 @@ import { currentDose } from "@/lib/medications";
 import {
   asRefRanges,
   asReferences,
+  asQualitativeOptions,
   ageFromBirthYear,
+  isQualitativeNormal,
   resolveRange,
   SYSTEM_LABELS,
   type BiomarkerSystem,
@@ -120,6 +122,10 @@ export default async function BiomarkerDetailPage({
   const ranges = asRefRanges(biomarker.ranges);
 
   const system = biomarker.system as BiomarkerSystem;
+
+  // Qualitative (serology) markers have categorical results, no numeric range.
+  const isQualitative = biomarker.valueType === "qualitative";
+  const qOpts = asQualitativeOptions(biomarker.qualitativeOptions);
 
   // Resolve profile-specific reference range.
   const age = ageFromBirthYear(user.birthYear);
@@ -235,7 +241,25 @@ export default async function BiomarkerDetailPage({
               </h2>
             </div>
             <div className="space-y-4 px-5 py-4">
-              {resolved ? (
+              {isQualitative ? (
+                <div className="space-y-2">
+                  <p className="text-foreground text-base">
+                    Expected result:{" "}
+                    <span className="text-ok font-semibold capitalize">
+                      {qOpts?.normal ?? "non-reactive"}
+                    </span>
+                  </p>
+                  {qOpts && (
+                    <p className="text-muted-foreground text-sm">
+                      Possible results:{" "}
+                      <span className="capitalize">
+                        {qOpts.options.join(", ")}
+                      </span>
+                      .
+                    </p>
+                  )}
+                </div>
+              ) : resolved ? (
                 <>
                   {/* Range value display */}
                   <div className="flex flex-wrap items-baseline gap-2">
@@ -444,15 +468,49 @@ export default async function BiomarkerDetailPage({
                 </h2>
               </div>
               <div className="px-5 py-4">
-                <MarkerTimelineChart
-                  points={points}
-                  bands={bands}
-                  refLow={refLow}
-                  refHigh={refHigh}
-                  unit={biomarker.unit}
-                  color={user.color ?? "var(--chart-1)"}
-                />
-                {latest && (
+                {isQualitative ? (
+                  <div className="divide-y">
+                    {[...labs].reverse().map((l) => {
+                      const normal = qOpts
+                        ? isQualitativeNormal(qOpts, l.qualitativeValue)
+                        : null;
+                      const cls =
+                        normal === true
+                          ? "bg-ok-wash text-ok"
+                          : normal === false
+                            ? "bg-bad-wash text-bad"
+                            : "bg-muted text-muted-foreground";
+                      return (
+                        <div
+                          key={l.id}
+                          className="flex items-center justify-between py-2"
+                        >
+                          <span className="text-muted-foreground text-sm">
+                            {new Date(l.takenAt).toLocaleDateString()}
+                          </span>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                              cls,
+                            )}
+                          >
+                            {l.qualitativeValue ?? "—"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <MarkerTimelineChart
+                    points={points}
+                    bands={bands}
+                    refLow={refLow}
+                    refHigh={refHigh}
+                    unit={biomarker.unit}
+                    color={user.color ?? "var(--chart-1)"}
+                  />
+                )}
+                {!isQualitative && latest && (
                   <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
                     <p>
                       <span className="text-muted-foreground">

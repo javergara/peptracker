@@ -22,6 +22,7 @@ export const BIOMARKER_SYSTEMS = [
   "HEMATOLOGY",
   "VITAMIN",
   "INFLAMMATION",
+  "INFECTION",
   "OTHER",
 ] as const;
 export type BiomarkerSystem = (typeof BIOMARKER_SYSTEMS)[number];
@@ -36,12 +37,62 @@ export const SYSTEM_LABELS: Record<BiomarkerSystem, string> = {
   HEMATOLOGY: "Hematology",
   VITAMIN: "Vitamins",
   INFLAMMATION: "Inflammation",
+  INFECTION: "Infectious serology",
   OTHER: "Other",
 };
 
 // "high" = higher is worse, "low" = lower is worse, null/undefined = context-dependent.
 export const DIRECTIONS = ["high", "low"] as const;
 export type Direction = (typeof DIRECTIONS)[number];
+
+// ---------------------------------------------------------------------------
+// Value type — numeric markers (a measured number vs a reference range) vs
+// qualitative markers (a categorical result like reactive/non-reactive,
+// positive/negative — e.g. serologies). Qualitative markers carry no numeric
+// range; their result flags against `qualitativeOptions.normal` instead.
+// ---------------------------------------------------------------------------
+export const BIOMARKER_VALUE_TYPES = ["numeric", "qualitative"] as const;
+export type BiomarkerValueType = (typeof BIOMARKER_VALUE_TYPES)[number];
+
+export function asBiomarkerValueType(v: unknown): BiomarkerValueType {
+  return v === "qualitative" ? "qualitative" : "numeric";
+}
+
+/**
+ * The allowed categorical results for a qualitative marker plus which one is the
+ * expected/normal result. `abnormal` (optional) is the set that should flag; when
+ * omitted, "anything that isn't `normal`" is treated as abnormal.
+ */
+export const qualitativeOptionsSchema = z.object({
+  options: z.array(z.string()).min(1),
+  normal: z.string(),
+  abnormal: z.array(z.string()).optional(),
+});
+export type QualitativeOptions = z.infer<typeof qualitativeOptionsSchema>;
+
+export function asQualitativeOptions(
+  value: unknown,
+): QualitativeOptions | null {
+  const parsed = qualitativeOptionsSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * Whether a qualitative result is within the normal/expected category.
+ * Case-insensitive compare; returns null when the result isn't recognized.
+ */
+export function isQualitativeNormal(
+  options: QualitativeOptions,
+  result: string | null | undefined,
+): boolean | null {
+  if (!result) return null;
+  const r = result.trim().toLowerCase();
+  if (r === options.normal.trim().toLowerCase()) return true;
+  if (options.abnormal?.some((a) => a.trim().toLowerCase() === r)) return false;
+  // Known option that isn't the normal one → abnormal; unknown → indeterminate.
+  const known = options.options.some((o) => o.trim().toLowerCase() === r);
+  return known ? false : null;
+}
 
 // ---------------------------------------------------------------------------
 // Zod schemas for the Json columns
@@ -63,23 +114,38 @@ export const refRangeSchema = z.object({
 });
 export type RefRange = z.infer<typeof refRangeSchema>;
 
-/** Full shape of a researched biomarker JSON file (prisma/data/biomarkers/*.json). */
-export const biomarkerDataSchema = z.object({
-  slug: z.string(),
-  name: z.string(),
-  aliases: z.array(z.string()),
-  system: z.enum(BIOMARKER_SYSTEMS),
-  unit: z.string(),
-  summary: z.string(),
-  whatItMeans: z.string(),
-  raises: z.array(z.string()),
-  lowers: z.array(z.string()),
-  confounders: z.array(z.string()),
-  relatedPeptides: z.array(z.string()),
-  ranges: z.array(refRangeSchema),
-  references: z.array(referenceSchema),
-  direction: z.enum(DIRECTIONS).optional(),
-});
+/**
+ * Full shape of a researched biomarker JSON file (prisma/data/biomarkers/*.json).
+ * `valueType` defaults to "numeric" (existing files omit it). Qualitative markers
+ * set `valueType: "qualitative"` + `qualitativeOptions` and leave `ranges` empty
+ * (their unit may be an empty string).
+ */
+export const biomarkerDataSchema = z
+  .object({
+    slug: z.string(),
+    name: z.string(),
+    aliases: z.array(z.string()),
+    system: z.enum(BIOMARKER_SYSTEMS),
+    unit: z.string(),
+    summary: z.string(),
+    whatItMeans: z.string(),
+    raises: z.array(z.string()),
+    lowers: z.array(z.string()),
+    confounders: z.array(z.string()),
+    relatedPeptides: z.array(z.string()),
+    ranges: z.array(refRangeSchema),
+    references: z.array(referenceSchema),
+    direction: z.enum(DIRECTIONS).optional(),
+    valueType: z.enum(BIOMARKER_VALUE_TYPES).optional(),
+    qualitativeOptions: qualitativeOptionsSchema.optional(),
+  })
+  .refine(
+    (d) => d.valueType !== "qualitative" || d.qualitativeOptions != null,
+    {
+      message: "qualitative markers require qualitativeOptions",
+      path: ["qualitativeOptions"],
+    },
+  );
 export type BiomarkerData = z.infer<typeof biomarkerDataSchema>;
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,48 @@
+{
+  "slug": "hepatitis-c-antibody",
+  "name": "Hepatitis C antibody (anti-HCV)",
+  "aliases": [
+    "anti-VHC",
+    "HCV Ab",
+    "anticuerpos hepatitis C",
+    "hepatitis C antibody"
+  ],
+  "system": "INFECTION",
+  "unit": "",
+  "summary": "A qualitative blood screening test that detects antibodies the immune system makes after exposure to the hepatitis C virus (HCV). It indicates past or present exposure, not necessarily a current, active infection.",
+  "whatItMeans": "A non-reactive (negative) result generally means no HCV antibodies were detected and the person has likely not been infected. A reactive (positive) result means the person has been exposed to HCV at some point, but because antibodies persist for life after the virus is spontaneously cleared or successfully treated, a reactive antibody test alone cannot confirm an active infection. Guidance is to follow a reactive antibody result with an HCV RNA (nucleic acid) test to determine whether the virus is currently present. Antibodies can also take weeks to develop, so testing during the window period soon after exposure may be non-reactive despite recent infection.",
+  "raises": [],
+  "lowers": [],
+  "confounders": [
+    "Window period after exposure (antibodies may not yet be detectable, so a recent exposure can read non-reactive)",
+    "Antibodies persist for life after spontaneous clearance or successful treatment, so a reactive result can reflect past, resolved infection",
+    "Immunocompromised or immunosuppressed states may blunt or delay antibody formation",
+    "A reactive antibody result requires HCV RNA confirmation to distinguish current from past infection"
+  ],
+  "relatedPeptides": [],
+  "ranges": [],
+  "references": [
+    {
+      "title": "CDC — Testing for Hepatitis C",
+      "url": "https://www.cdc.gov/hepatitis-c/testing/index.html"
+    },
+    {
+      "title": "MedlinePlus — Hepatitis C",
+      "url": "https://medlineplus.gov/hepatitisc.html"
+    },
+    {
+      "title": "WHO — Hepatitis C fact sheet",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/hepatitis-c"
+    },
+    {
+      "title": "Mayo Clinic — Hepatitis C: Diagnosis & treatment",
+      "url": "https://www.mayoclinic.org/diseases-conditions/hepatitis-c/diagnosis-treatment/drc-20354284"
+    }
+  ],
+  "valueType": "qualitative",
+  "qualitativeOptions": {
+    "options": ["non-reactive", "reactive"],
+    "normal": "non-reactive",
+    "abnormal": ["reactive"]
+  }
+}

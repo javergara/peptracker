@@ -1,0 +1,56 @@
+{
+  "slug": "syphilis-vdrl",
+  "name": "Syphilis (VDRL/RPR)",
+  "aliases": [
+    "VDRL",
+    "RPR",
+    "sífilis",
+    "non-treponemal test",
+    "prueba no treponémica",
+    "Venereal Disease Research Laboratory",
+    "Rapid Plasma Reagin"
+  ],
+  "system": "INFECTION",
+  "unit": "",
+  "summary": "VDRL and RPR are non-treponemal blood tests used to screen for syphilis (infection with the bacterium Treponema pallidum). They detect reagin antibodies the immune system makes against fat-like (cardiolipin) material released from cells damaged during infection, rather than antibodies against the bacterium itself.",
+  "whatItMeans": "A non-reactive result means no reagin antibodies were detected and syphilis is unlikely, though very early (primary) or very late infection can still read non-reactive, so timing and exposure history matter. A reactive result is only a screen and is not a diagnosis: it must be confirmed with a treponemal test (such as FTA-ABS or TPPA), because non-treponemal tests can produce biological false positives from pregnancy, autoimmune disease, or other infections. When infection is confirmed, the test is repeated as a numeric titer (for example 1:8 or 1:32); a fourfold drop in titer generally indicates a good response to treatment, while a fourfold rise can signal reinfection or treatment failure. This is educational information, not a diagnosis, and results should always be interpreted by a clinician.",
+  "raises": [],
+  "lowers": [],
+  "confounders": [
+    "Biological false positives (pregnancy, autoimmune disease such as lupus or antiphospholipid syndrome, other infections, IV drug use, older age, recent vaccination)",
+    "Prozone effect: very high antibody titers can cause a falsely non-reactive or weakly reactive result unless the sample is diluted",
+    "Window period: early primary or late latent syphilis may read non-reactive despite infection",
+    "A treponemal confirmatory test is required before interpreting a reactive screen; VDRL and RPR titers are not interchangeable and should be trended on the same test",
+    "Assay method and each laboratory's cutoffs vary, so results and titers can differ between labs"
+  ],
+  "relatedPeptides": [],
+  "ranges": [],
+  "references": [
+    {
+      "title": "MedlinePlus: Syphilis Tests",
+      "url": "https://medlineplus.gov/lab-tests/syphilis-tests/"
+    },
+    {
+      "title": "MedlinePlus Medical Encyclopedia: RPR (rapid plasma reagin) test",
+      "url": "https://medlineplus.gov/ency/article/003533.htm"
+    },
+    {
+      "title": "MedlinePlus Medical Encyclopedia: VDRL test",
+      "url": "https://medlineplus.gov/ency/article/003515.htm"
+    },
+    {
+      "title": "Cleveland Clinic: Syphilis",
+      "url": "https://my.clevelandclinic.org/health/diseases/4622-syphilis"
+    },
+    {
+      "title": "CDC: Sexually Transmitted Infections Treatment Guidelines - Syphilis",
+      "url": "https://www.cdc.gov/std/treatment-guidelines/syphilis.htm"
+    }
+  ],
+  "valueType": "qualitative",
+  "qualitativeOptions": {
+    "options": ["non-reactive", "reactive"],
+    "normal": "non-reactive",
+    "abnormal": ["reactive"]
+  }
+}

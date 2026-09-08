@@ -1,9 +1,12 @@
+import Link from "next/link";
 import {
   Check,
   TriangleAlert,
   CircleAlert,
   FlaskConical,
   Bell,
+  FileUp,
+  ShieldCheck,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/common/page-header";
@@ -15,6 +18,7 @@ import { DeleteLabButton } from "@/components/labs/delete-lab-button";
 import { EditLabButton } from "@/components/labs/edit-lab-button";
 import { PanelEntryForm } from "@/components/labs/panel-entry-form";
 import { RecheckRow } from "@/components/labs/recheck-row";
+import { SerologyEntryForm } from "@/components/labs/serology-entry-form";
 import { MarkerTimelineChart } from "@/components/metrics/marker-timeline-chart";
 import { ActionForm, SubmitButton } from "@/components/common/action-form";
 import { Input } from "@/components/ui/input";
@@ -38,7 +42,12 @@ import {
   getInterventionBands,
 } from "@/lib/queries";
 import { formatDate, toDateInputValue } from "@/lib/dates";
-import { SYSTEM_LABELS, BIOMARKER_SYSTEMS } from "@/types/biomarker";
+import {
+  SYSTEM_LABELS,
+  BIOMARKER_SYSTEMS,
+  asQualitativeOptions,
+  isQualitativeNormal,
+} from "@/types/biomarker";
 import { SYSTEM_BADGE, LAB_STATUS_STYLE } from "@/lib/constants";
 import { labStatus, LAB_STATUS_LABEL } from "@/lib/labs";
 import { cn } from "@/lib/utils";
@@ -187,6 +196,36 @@ function RefRangeCaption({
 }
 
 // ---------------------------------------------------------------------------
+// QualitativeChip — categorical serology result (reactive / non-reactive).
+// Uses the clinical ok/bad tokens (labs are the sanctioned clinical surface).
+// ---------------------------------------------------------------------------
+function QualitativeChip({
+  result,
+  options,
+}: {
+  result: string;
+  options: ReturnType<typeof asQualitativeOptions>;
+}) {
+  const normal = options ? isQualitativeNormal(options, result) : null;
+  const cls =
+    normal === true
+      ? "bg-ok-wash text-ok"
+      : normal === false
+        ? "bg-bad-wash text-bad"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+        cls,
+      )}
+    >
+      {result}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 export default async function LabsPage() {
@@ -247,6 +286,15 @@ export default async function LabsPage() {
 
   const hasLabs = byKey.size > 0;
   const today = toDateInputValue(now);
+
+  // Qualitative (serology) markers for the categorical entry form.
+  const qualMarkers = biomarkers
+    .filter((b) => b.valueType === "qualitative")
+    .map((b) => {
+      const opts = asQualitativeOptions(b.qualitativeOptions);
+      return { slug: b.slug, name: b.name, options: opts?.options ?? [] };
+    })
+    .filter((m) => m.options.length > 0);
 
   // Reminder helpers
   const pendingReminders = reminders.filter((r) => !r.completedAt);
@@ -439,6 +487,65 @@ export default async function LabsPage() {
                     const latest = rows[rows.length - 1];
                     const bm = bmMap.get(key);
 
+                    // Qualitative (serology) marker — categorical results, no
+                    // numeric axis. Render dated result chips instead.
+                    if (latest.qualitativeValue != null) {
+                      const qOpts = bm
+                        ? asQualitativeOptions(bm.qualitativeOptions)
+                        : null;
+                      return (
+                        <div key={key} className="card-surface rounded-2xl">
+                          <div className="border-border border-b px-5 pt-4 pb-3">
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <div>
+                                <Eyebrow className="mb-1">
+                                  {SYSTEM_LABELS[sys]}
+                                </Eyebrow>
+                                <h3 className="text-base font-semibold tracking-tight">
+                                  {bm?.name ?? latest.marker}
+                                </h3>
+                              </div>
+                              <QualitativeChip
+                                result={latest.qualitativeValue}
+                                options={qOpts}
+                              />
+                            </div>
+                          </div>
+                          <div className="px-5 pt-2 pb-2">
+                            <div className="divide-y">
+                              {[...rows].reverse().map((r) => (
+                                <div
+                                  key={r.id}
+                                  className="flex items-center justify-between py-2"
+                                >
+                                  <div className="flex flex-wrap items-center gap-3">
+                                    <span className="text-muted-foreground text-xs">
+                                      {formatDate(r.takenAt, "MMM d, yyyy")}
+                                    </span>
+                                    <QualitativeChip
+                                      result={r.qualitativeValue ?? "—"}
+                                      options={qOpts}
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {r.notes ? (
+                                      <span
+                                        className="text-muted-foreground max-w-[180px] truncate text-xs"
+                                        title={r.notes}
+                                      >
+                                        {r.notes}
+                                      </span>
+                                    ) : null}
+                                    <DeleteLabButton id={r.id} />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     const points = rows.map((r) => ({
                       t: r.takenAt.getTime(),
                       value: r.value,
@@ -569,7 +676,16 @@ export default async function LabsPage() {
       {/* ENTRY SECTION                                                        */}
       {/* ------------------------------------------------------------------ */}
       <div className="mt-10 space-y-2">
-        <Eyebrow className="mb-3">Add results</Eyebrow>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <Eyebrow>Add results</Eyebrow>
+          <Link
+            href="/labs/import"
+            className="border-border bg-card hover:bg-accent inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+          >
+            <FileUp className="size-4" />
+            Import from PDF
+          </Link>
+        </div>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Log a panel */}
           <div className="card-surface rounded-2xl">
@@ -758,6 +874,28 @@ export default async function LabsPage() {
               </ActionForm>
             </div>
           </div>
+
+          {/* Add a serology (qualitative) result */}
+          {qualMarkers.length > 0 && (
+            <div className="card-surface rounded-2xl">
+              <div className="border-border border-b px-5 pt-4 pb-3">
+                <Eyebrow className="mb-1 flex items-center gap-1.5">
+                  <ShieldCheck className="size-3" />
+                  Serology
+                </Eyebrow>
+                <h2 className="text-base font-semibold tracking-tight">
+                  Add a serology result
+                </h2>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Infectious serologies are categorical (reactive /
+                  non-reactive), not a number.
+                </p>
+              </div>
+              <div className="px-5 py-4">
+                <SerologyEntryForm markers={qualMarkers} today={today} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

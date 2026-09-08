@@ -303,6 +303,8 @@ export default async function MetricsPage({
   }
   const lByMarker = new Map<string, typeof labs>();
   for (const l of labs) {
+    // Qualitative (serology) results have no numeric axis — skip them.
+    if (l.qualitativeValue != null) continue;
     const arr = lByMarker.get(l.marker) ?? [];
     arr.push(l);
     lByMarker.set(l.marker, arr);
