@@ -1,0 +1,54 @@
+{
+  "slug": "hepatitis-b-core-antibody",
+  "name": "Hepatitis B core antibody, total (anti-HBc)",
+  "aliases": [
+    "anti-HBc",
+    "hepatitis B core antibody",
+    "anti-HBc total",
+    "HBcAb total",
+    "anticuerpo core hepatitis B",
+    "core total"
+  ],
+  "system": "INFECTION",
+  "unit": "",
+  "summary": "Total anti-HBc detects antibodies (both IgM and IgG) the immune system makes against the hepatitis B virus (HBV) core antigen. Its presence is a durable marker of natural HBV exposure — past or present — and, unlike anti-HBs, it is not produced by hepatitis B vaccination.",
+  "whatItMeans": "A non-reactive (negative) result generally means no evidence of prior natural HBV infection. A reactive (positive) result indicates the person has been exposed to HBV at some point; because total anti-HBc (IgM + IgG) persists for life, it cannot by itself tell current from resolved infection and must be read alongside HBsAg and anti-HBs. Key patterns: reactive anti-HBc with reactive HBsAg suggests current infection (acute or chronic); reactive anti-HBc with reactive anti-HBs and negative HBsAg suggests past, resolved and immune infection; an isolated reactive anti-HBc (HBsAg and anti-HBs both negative) may reflect resolved infection with waning anti-HBs, a false positive, the window period, or occult infection, and often needs further testing. Crucially, because HBV vaccine contains only surface antigen, anti-HBc stays negative after vaccination — so it distinguishes natural exposure from vaccine-induced immunity (which shows only anti-HBs). This is educational information, not a diagnosis; results should be interpreted with a clinician using the full HBV panel.",
+  "raises": [],
+  "lowers": [],
+  "confounders": [
+    "Isolated anti-HBc (reactive anti-HBc with negative HBsAg and anti-HBs) has several causes — resolved infection with waning anti-HBs, false positive, window period, or occult infection — and usually needs additional testing",
+    "Window period soon after exposure: total anti-HBc may still be non-reactive despite recent infection (IgM anti-HBc rises first)",
+    "Assay differences and rare false-positive/false-negative results that require confirmatory testing",
+    "Immunocompromised or immunosuppressed states can blunt or delay antibody formation"
+  ],
+  "relatedPeptides": [],
+  "ranges": [],
+  "references": [
+    {
+      "title": "CDC — Interpretation of Hepatitis B Serologic Test Results",
+      "url": "https://www.cdc.gov/hepatitis/hbv/interpretationofhepbserologicresults.htm"
+    },
+    {
+      "title": "CDC — Hepatitis B: Testing and Diagnosis",
+      "url": "https://www.cdc.gov/hepatitis-b/testing/index.html"
+    },
+    {
+      "title": "WHO — Hepatitis B (Fact Sheet)",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/hepatitis-b"
+    },
+    {
+      "title": "MedlinePlus — Hepatitis B",
+      "url": "https://medlineplus.gov/hepatitisb.html"
+    },
+    {
+      "title": "Mayo Clinic — Hepatitis B: Diagnosis & Treatment",
+      "url": "https://www.mayoclinic.org/diseases-conditions/hepatitis-b/diagnosis-treatment/drc-20366821"
+    }
+  ],
+  "valueType": "qualitative",
+  "qualitativeOptions": {
+    "options": ["non-reactive", "reactive"],
+    "normal": "non-reactive",
+    "abnormal": ["reactive"]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "slug": "hepatitis-b-surface-antibody",
+  "name": "Hepatitis B surface antibody (anti-HBs)",
+  "aliases": [
+    "anti-HBs",
+    "HBsAb",
+    "hepatitis B surface antibody",
+    "hepatitis B surface antibody, quantitative",
+    "anticuerpos de superficie hepatitis B",
+    "anti-HBs cuantitativo"
+  ],
+  "system": "INFECTION",
+  "unit": "mIU/mL",
+  "summary": "Anti-HBs is the antibody the immune system makes against the hepatitis B surface antigen (HBsAg). Its presence at protective levels indicates immunity to hepatitis B, developed either after successful vaccination or after recovery from a past natural infection.",
+  "whatItMeans": "A quantitative anti-HBs result reflects how much protective antibody is present. A concentration of at least 10 mIU/mL is generally considered protective (seroprotection), while a result below 10 mIU/mL is interpreted as not protected / non-immune and may prompt (re)vaccination in a susceptible person. When paired with a negative HBsAg and negative total anti-HBc, protective anti-HBs typically indicates vaccine-induced immunity; anti-HBs together with positive anti-HBc points to immunity from a resolved past infection. Antibody levels can wane over time, yet many vaccine responders retain immune memory and stay protected even when levels fall below 10 mIU/mL. This is educational information, not a diagnosis.",
+  "raises": [
+    "Successful hepatitis B (HepB) vaccination series",
+    "Recovery from (resolved) natural hepatitis B infection",
+    "Booster or challenge dose of HepB vaccine in a prior responder",
+    "Recent hepatitis B immune globulin (HBIG) administration (passive antibody)"
+  ],
+  "lowers": [
+    "Waning of vaccine-induced antibody over the years",
+    "Never vaccinated / never infected (susceptible, non-immune)",
+    "Non-response or poor response to the vaccine series",
+    "Immunosuppression (e.g. dialysis, HIV, immunosuppressive therapy) blunting the antibody response",
+    "Older age or obesity reducing vaccine response"
+  ],
+  "confounders": [
+    "Assay-to-assay variability; results near the 10 mIU/mL cutoff can differ between labs",
+    "Recent HBIG or blood-product administration gives passively acquired anti-HBs that is not vaccine- or infection-derived",
+    "Timing matters: post-vaccination testing is standard at 1–2 months after the final dose",
+    "Very high or very low values may be reported as out-of-range rather than an exact number",
+    "A qualitative (positive/negative) result cannot distinguish borderline from robustly protective titers"
+  ],
+  "relatedPeptides": [],
+  "ranges": [
+    {
+      "low": 10,
+      "unit": "mIU/mL",
+      "note": "≥10 mIU/mL is the standard threshold for seroprotection/immunity (CDC/WHO). <10 mIU/mL is interpreted as not protected / non-immune (susceptible). Some labs report ~100+ mIU/mL as robust immunity. Cutoffs are assay-dependent; interpret with HBsAg and anti-HBc. Educational/typical values only."
+    }
+  ],
+  "references": [
+    {
+      "title": "Hepatitis B: Testing and Diagnosis | CDC (interpretation of anti-HBs)",
+      "url": "https://www.cdc.gov/hepatitis-b/hcp/diagnosis-testing/index.html"
+    },
+    {
+      "title": "Prevention of Hepatitis B Virus Infection in the United States: ACIP Recommendations (MMWR RR-67-1) — ≥10 mIU/mL seroprotection",
+      "url": "https://www.cdc.gov/mmwr/volumes/67/rr/rr6701a1.htm"
+    },
+    {
+      "title": "Hepatitis B - StatPearls (NCBI Bookshelf)",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK555945/"
+    },
+    {
+      "title": "Hepatitis B - Fact sheet | World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/hepatitis-b"
+    }
+  ],
+  "direction": "low"
+}
